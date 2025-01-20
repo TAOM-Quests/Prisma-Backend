@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Answer {
+    id Int @id @default(autoincrement())
+    single AnswerSingle? 
+    singleId Int 
+    multiple AnswerMultiple?
+    multipleId Int
+    connection AnswerConnection?
+    connectionId Int
+    boxSorting AnswerBoxSorting?
+    boxSortingId Int
+    free AnswerFree?
+    freeId Int
+    questions Question[]
+    questionIds Int[]
+}
+
+model AnswerSingle {
+    id Int @id @default(autoincrement())
+    answers String[]
+    correctAnswer Int
+    parentAnswer Answer @relation(fields: [parentAnswerId], references: [id])
+    parentAnswerId Int @unique
+}
+
+model AnswerMultiple {
+    id Int @id @default(autoincrement())
+    answers String[]
+    correctAnswers Int[]
+    parentAnswer Answer @relation(fields: [parentAnswerId], references: [id])
+    parentAnswerId Int @unique
+}
+
+model AnswerConnection {
+    id Int @id @default(autoincrement())
+    answers String[]
+    correctAnswer String[]
+    parentAnswer Answer @relation(fields: [parentAnswerId], references: [id])
+    parentAnswerId Int @unique
+}
+
+model AnswerBoxSorting {
+    id Int @id @default(autoincrement())
+    answers String[]
+    correctAnswer Json
+    parentAnswer Answer @relation(fields: [parentAnswerId], references: [id])
+    parentAnswerId Int @unique
+}
+
+model AnswerFree {
+    id Int @id @default(autoincrement())
+    correctAnswer String
+    parentAnswer Answer @relation(fields: [parentAnswerId], references: [id])
+    parentAnswerId Int @unique
+}
+
+model CompleteQuest {
+    id Int @id @default(autoincrement())
+    user User @relation(fields: [userId], references: [id])
+    userId Int
+    quest Quest @relation(fields: [questId], references: [id])
+    questId Int
+}
+
+model Department {
+    id Int @id @default(autoincrement())
+    name String
+    users User[]
+    userIds Int[]
+    questGroups QuestGroup[]
+    questGroupIds Int[]
+    questTags QuestTag[]
+    questTagIds Int[]
+    quests Quest[]
+    questsIds Int[]
+} 
+
+model Event {
+    id Int @id @default(autoincrement())
+    name String
+    description String
+    date DateTime
+    executors UserExecutorsOnEvents[]
+    executorsIds Int[]
+    participants UserParticipantsOnEvents[]
+    participantsIds Int[]
+}
+
+model Quest {
+    id Int @id @default(autoincrement())
+    version Int
+    department Department @relation(fields: [departmentId], references: [id])
+    departmentId Int
+    name String
+    group QuestGroup @relation(fields: [groupId], references: [id])
+    groupId Int
+    tags QuestTagsOnQuests[]
+    tagsIds Int[]
+    difficult QuestDifficult @relation(fields: [difficultId], references: [id])
+    difficultId Int
+    results QuestResult[]
+    resultIds Int[]
+    questions Question[]
+    questionsIds Int[]
+    completeQuests CompleteQuest[]
+    completeQuestsIds Int[]
+}
+
+model QuestDifficult {
+    id Int @id @default(autoincrement())
+    name String
+    quests Quest[]
+}
+
+model QuestGroup {
+    id Int @id @default(autoincrement())
+    name String
+    department Department @relation(fields: [departmentId], references: [id])
+    departmentId Int
+    quests Quest[]
+}
+
+model QuestResult {
+    id Int @id @default(autoincrement())
+    name String
+    description String
+    quest Quest @relation(fields: [questId], references: [id])
+    questId Int
+}
+
+model QuestTag {    
+    id Int @id @default(autoincrement())
+    name String
+    department Department @relation(fields: [departmentId], references: [id])
+    departmentId Int
+    quests QuestTagsOnQuests[]
+}
+
+model QuestTagsOnQuests {
+    tag QuestTag @relation(fields: [tagId], references: [id])
+    tagId Int
+    quest Quest @relation(fields: [questId], references: [id])
+    questId Int
+
+    @@id([questId, tagId])
+}
+
+model Question {
+    id Int @id @default(autoincrement())
+    quest Quest @relation(fields: [questId], references: [id])
+    questId Int
+    type QuestionType @relation(fields: [typeId], references: [id])
+    typeId Int
+    answer Answer @relation(fields: [answerId], references: [id])
+    answerId Int
+}
+
+model QuestionType {
+    id Int @id @default(autoincrement())
+    name String
+    questions Question[]
+}
+
+model User {
+    id Int @id @default(autoincrement())
+    name String
+    surname String
+    password String
+    role UserRole @relation(fields: [roleId], references: [id])
+    roleId Int
+    department Department @relation(fields: [departmentId], references: [id])
+    departmentId Int
+    completeQuests CompleteQuest[]
+    eventsWhereExecutor UserExecutorsOnEvents[]
+    eventsWhereExecutorIds Int[]
+    eventsWhereParticipant UserParticipantsOnEvents[]
+    eventsWhereParticipantIds Int[]
+}
+
+model UserExecutorsOnEvents {
+    executor User @relation(fields: [executorId], references: [id])
+    executorId Int
+    event Event @relation(fields: [eventId], references: [id])
+    eventId Int
+
+    @@id([eventId, executorId])
+}
+
+model UserParticipantsOnEvents {
+    participant User @relation(fields: [participantId], references: [id])
+    participantId Int
+    event Event @relation(fields: [eventId], references: [id])
+    eventId Int
+
+    @@id([eventId, participantId])
+}
+
+model UserRole {
+    id Int @id @default(autoincrement())
+    name String
+    users User[]
+}
