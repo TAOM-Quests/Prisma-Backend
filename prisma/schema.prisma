@@ -8,203 +8,204 @@ datasource db {
 }
 
 model Answer {
-    id Int @id @default(autoincrement())
-    single AnswerSingle? 
-    singleId Int 
-    multiple AnswerMultiple?
-    multipleId Int
-    connection AnswerConnection?
-    connectionId Int
-    boxSorting AnswerBoxSorting?
-    boxSortingId Int
-    free AnswerFree?
-    freeId Int
-    questions Question[]
-    questionIds Int[]
+  id           Int               @id @default(autoincrement())
+  singleId     Int
+  multipleId   Int
+  connectionId Int
+  boxSortingId Int
+  freeId       Int
+  questionIds  Int[]
+  boxSorting   AnswerBoxSorting?
+  connection   AnswerConnection?
+  free         AnswerFree?
+  multiple     AnswerMultiple?
+  single       AnswerSingle?
+  questions    Question[]
 }
 
 model AnswerSingle {
-    id Int @id @default(autoincrement())
-    answers String[]
-    correctAnswer Int
-    parentAnswer Answer @relation(fields: [parentAnswerId], references: [id])
-    parentAnswerId Int @unique
+  id             Int      @id @default(autoincrement())
+  answers        String[]
+  correctAnswer  Int
+  parentAnswerId Int      @unique
+  parentAnswer   Answer   @relation(fields: [parentAnswerId], references: [id])
 }
 
 model AnswerMultiple {
-    id Int @id @default(autoincrement())
-    answers String[]
-    correctAnswers Int[]
-    parentAnswer Answer @relation(fields: [parentAnswerId], references: [id])
-    parentAnswerId Int @unique
+  id             Int      @id @default(autoincrement())
+  answers        String[]
+  correctAnswers Int[]
+  parentAnswerId Int      @unique
+  parentAnswer   Answer   @relation(fields: [parentAnswerId], references: [id])
 }
 
 model AnswerConnection {
-    id Int @id @default(autoincrement())
-    answers String[]
-    correctAnswer String[]
-    parentAnswer Answer @relation(fields: [parentAnswerId], references: [id])
-    parentAnswerId Int @unique
+  id             Int      @id @default(autoincrement())
+  answers        String[]
+  correctAnswer  String[]
+  parentAnswerId Int      @unique
+  parentAnswer   Answer   @relation(fields: [parentAnswerId], references: [id])
 }
 
 model AnswerBoxSorting {
-    id Int @id @default(autoincrement())
-    answers String[]
-    correctAnswer Json
-    parentAnswer Answer @relation(fields: [parentAnswerId], references: [id])
-    parentAnswerId Int @unique
+  id             Int      @id @default(autoincrement())
+  answers        String[]
+  correctAnswer  Json
+  parentAnswerId Int      @unique
+  parentAnswer   Answer   @relation(fields: [parentAnswerId], references: [id])
 }
 
 model AnswerFree {
-    id Int @id @default(autoincrement())
-    correctAnswer String
-    parentAnswer Answer @relation(fields: [parentAnswerId], references: [id])
-    parentAnswerId Int @unique
+  id             Int    @id @default(autoincrement())
+  correctAnswer  String
+  parentAnswerId Int    @unique
+  parentAnswer   Answer @relation(fields: [parentAnswerId], references: [id])
 }
 
 model CompleteQuest {
-    id Int @id @default(autoincrement())
-    user User @relation(fields: [userId], references: [id])
-    userId Int
-    quest Quest @relation(fields: [questId], references: [id])
-    questId Int
+  id      Int   @id @default(autoincrement())
+  userId  Int
+  questId Int
+  quest   Quest @relation(fields: [questId], references: [id])
+  user    User  @relation(fields: [userId], references: [id])
 }
 
 model Department {
-    id Int @id @default(autoincrement())
-    name String
-    users User[]
-    userIds Int[]
-    questGroups QuestGroup[]
-    questGroupIds Int[]
-    questTags QuestTag[]
-    questTagIds Int[]
-    quests Quest[]
-    questsIds Int[]
-} 
+  id            Int          @id @default(autoincrement())
+  name          String
+  userIds       Int[]
+  questGroupIds Int[]
+  questTagIds   Int[]
+  questsIds     Int[]
+  quests        Quest[]
+  questGroups   QuestGroup[]
+  questTags     QuestTag[]
+  users         User[]
+}
 
 model Event {
-    id Int @id @default(autoincrement())
-    name String
-    description String
-    date DateTime
-    executors UserExecutorsOnEvents[]
-    executorsIds Int[]
-    participants UserParticipantsOnEvents[]
-    participantsIds Int[]
+  id              Int                        @id @default(autoincrement())
+  name            String
+  description     String
+  date            DateTime
+  executorsIds    Int[]
+  participantsIds Int[]
+  executors       UserExecutorsOnEvents[]
+  participants    UserParticipantsOnEvents[]
 }
 
 model Quest {
-    id Int @id @default(autoincrement())
-    version Int
-    department Department @relation(fields: [departmentId], references: [id])
-    departmentId Int
-    name String
-    group QuestGroup @relation(fields: [groupId], references: [id])
-    groupId Int
-    tags QuestTagsOnQuests[]
-    tagsIds Int[]
-    difficult QuestDifficult @relation(fields: [difficultId], references: [id])
-    difficultId Int
-    results QuestResult[]
-    resultIds Int[]
-    questions Question[]
-    questionsIds Int[]
-    completeQuests CompleteQuest[]
-    completeQuestsIds Int[]
+  id                Int                 @id @default(autoincrement())
+  version           Int
+  departmentId      Int
+  name              String
+  groupId           Int
+  tagsIds           Int[]
+  difficultId       Int
+  resultIds         Int[]
+  questionsIds      Int[]
+  completeQuestsIds Int[]
+  completeQuests    CompleteQuest[]
+  department        Department          @relation(fields: [departmentId], references: [id])
+  difficult         QuestDifficult      @relation(fields: [difficultId], references: [id])
+  group             QuestGroup          @relation(fields: [groupId], references: [id])
+  results           QuestResult[]
+  tags              QuestTagsOnQuests[]
+  questions         Question[]
 }
 
 model QuestDifficult {
-    id Int @id @default(autoincrement())
-    name String
-    quests Quest[]
+  id     Int     @id @default(autoincrement())
+  name   String
+  quests Quest[]
 }
 
 model QuestGroup {
-    id Int @id @default(autoincrement())
-    name String
-    department Department @relation(fields: [departmentId], references: [id])
-    departmentId Int
-    quests Quest[]
+  id           Int        @id @default(autoincrement())
+  name         String
+  departmentId Int
+  quests       Quest[]
+  department   Department @relation(fields: [departmentId], references: [id])
 }
 
 model QuestResult {
-    id Int @id @default(autoincrement())
-    name String
-    description String
-    quest Quest @relation(fields: [questId], references: [id])
-    questId Int
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  questId     Int
+  quest       Quest  @relation(fields: [questId], references: [id])
 }
 
-model QuestTag {    
-    id Int @id @default(autoincrement())
-    name String
-    department Department @relation(fields: [departmentId], references: [id])
-    departmentId Int
-    quests QuestTagsOnQuests[]
+model QuestTag {
+  id           Int                 @id @default(autoincrement())
+  name         String
+  departmentId Int
+  department   Department          @relation(fields: [departmentId], references: [id])
+  quests       QuestTagsOnQuests[]
 }
 
 model QuestTagsOnQuests {
-    tag QuestTag @relation(fields: [tagId], references: [id])
-    tagId Int
-    quest Quest @relation(fields: [questId], references: [id])
-    questId Int
+  tagId   Int
+  questId Int
+  quest   Quest    @relation(fields: [questId], references: [id])
+  tag     QuestTag @relation(fields: [tagId], references: [id])
 
-    @@id([questId, tagId])
+  @@id([questId, tagId])
 }
 
 model Question {
-    id Int @id @default(autoincrement())
-    quest Quest @relation(fields: [questId], references: [id])
-    questId Int
-    type QuestionType @relation(fields: [typeId], references: [id])
-    typeId Int
-    answer Answer @relation(fields: [answerId], references: [id])
-    answerId Int
+  id       Int          @id @default(autoincrement())
+  questId  Int
+  typeId   Int
+  answerId Int
+  answer   Answer       @relation(fields: [answerId], references: [id])
+  quest    Quest        @relation(fields: [questId], references: [id])
+  type     QuestionType @relation(fields: [typeId], references: [id])
 }
 
 model QuestionType {
-    id Int @id @default(autoincrement())
-    name String
-    questions Question[]
+  id        Int        @id @default(autoincrement())
+  name      String
+  questions Question[]
 }
 
 model User {
-    id Int @id @default(autoincrement())
-    name String
-    surname String
-    password String
-    role UserRole @relation(fields: [roleId], references: [id])
-    roleId Int
-    department Department @relation(fields: [departmentId], references: [id])
-    departmentId Int
-    completeQuests CompleteQuest[]
-    eventsWhereExecutor UserExecutorsOnEvents[]
-    eventsWhereExecutorIds Int[]
-    eventsWhereParticipant UserParticipantsOnEvents[]
-    eventsWhereParticipantIds Int[]
+  id                        Int                        @id @default(autoincrement())
+  name                      String
+  surname                   String
+  email                     String
+  password                  String
+  roleId                    Int
+  departmentId              Int
+  eventsWhereExecutorIds    Int[]
+  eventsWhereParticipantIds Int[]
+  completeQuests            CompleteQuest[]
+  department                Department                 @relation(fields: [departmentId], references: [id])
+  role                      UserRole                   @relation(fields: [roleId], references: [id])
+  eventsWhereExecutor       UserExecutorsOnEvents[]
+  eventsWhereParticipant    UserParticipantsOnEvents[]
 }
 
 model UserExecutorsOnEvents {
-    executor User @relation(fields: [executorId], references: [id])
-    executorId Int
-    event Event @relation(fields: [eventId], references: [id])
-    eventId Int
+  executorId Int
+  eventId    Int
+  event      Event @relation(fields: [eventId], references: [id])
+  executor   User  @relation(fields: [executorId], references: [id])
 
-    @@id([eventId, executorId])
+  @@id([eventId, executorId])
 }
 
 model UserParticipantsOnEvents {
-    participant User @relation(fields: [participantId], references: [id])
-    participantId Int
-    event Event @relation(fields: [eventId], references: [id])
-    eventId Int
+  participantId Int
+  eventId       Int
+  event         Event @relation(fields: [eventId], references: [id])
+  participant   User  @relation(fields: [participantId], references: [id])
 
-    @@id([eventId, participantId])
+  @@id([eventId, participantId])
 }
 
 model UserRole {
-    id Int @id @default(autoincrement())
-    name String
-    users User[]
+  id    Int    @id @default(autoincrement())
+  name  String
+  users User[]
 }
