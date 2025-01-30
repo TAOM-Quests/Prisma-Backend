@@ -1,3 +1,4 @@
-export interface GetUserProfileDto {
-    id: number
+export interface UserAuthDto {
+    email: string
+    password: string
 }

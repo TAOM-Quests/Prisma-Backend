@@ -172,16 +172,16 @@ model questions_types {
 
 model users {
   id                           Int                           @id @default(autoincrement())
-  name                         String
-  surname                      String
-  email                        String
+  name                         String?
+  surname                      String?
+  email                        String                        @unique
   password                     String
-  id_role                      Int
-  id_department                Int
+  id_role                      Int                           @default(1)
+  id_department                Int?
   events_where_executor_ids    Int[]
   events_where_participant_ids Int[]
   complete_quests              complete_quests[]
-  department                   departments                   @relation(fields: [id_department], references: [id])
+  department                   departments?                  @relation(fields: [id_department], references: [id])
   role                         user_roles                    @relation(fields: [id_role], references: [id])
   events_where_executor        user_executors_on_events[]
   events_where_participant     user_participants_on_events[]
