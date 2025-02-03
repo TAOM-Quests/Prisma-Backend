@@ -9,5 +9,6 @@
             "database": "tq-dev",
             "username": "postgres"
         }
-    ]
+    ],
+    "postman.settings.dotenv-detection-notification-visibility": false
 }

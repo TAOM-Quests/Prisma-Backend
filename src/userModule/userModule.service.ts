@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { CreateUserSchema, GetUserProfileSchema } from "./userModule.schema";
-import { UserAuthDto } from "./userModule.dto";
+import { CreateUserSchema, GetUserProfileSchema } from "./schema/userModule.schema";
+import { UserAuthDto } from "./dto/userModule.dto";
 import { genSaltSync, hashSync } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
