@@ -1,34 +1,51 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common'
 import { UserAuthDto } from './dto/userModule.dto'
 import {
-  CreateUserSchema,
+  AuthUserSchema,
   GetUserProfileSchema,
 } from './schema/userModule.schema'
 import { UserModuleService } from './userModule.service'
 import { ApiResponse, ApiTags } from '@nestjs/swagger'
-import { createUserSchemaExample } from './schema/userModule.schema.example'
+import { authUserSchemaExample, getUserProfileSchemaExample } from './schema/userModule.schema.example'
+import { PrismaService } from 'src/prisma/prisma.service'
+import { NotFoundError } from 'src/errors/notFound'
 
 @ApiTags('userModule')
 @Controller('userModule')
 export class UserModuleController {
   private readonly userModuleService: UserModuleService
 
+  constructor(
+    private prisma: PrismaService,
+  ) {}
+
   @ApiResponse({
     status: 200,
-    type: CreateUserSchema,
-    example: createUserSchemaExample,
+    type: AuthUserSchema,
+    example: authUserSchemaExample,
   })
   @Post('/users')
-  createUser(@Body() userAuth: UserAuthDto): Promise<CreateUserSchema> {
+  async createUser(@Body() userAuth: UserAuthDto): Promise<AuthUserSchema> {
+    return this.userModuleService.createUser(userAuth)
+  }
+
+  @ApiResponse({
+    status: 200,
+    type: AuthUserSchema,
+    example: authUserSchemaExample,
+  })
+  @Post('/user/auth')
+  async authUser(@Body() userAuth: UserAuthDto): Promise<AuthUserSchema> {
     return this.userModuleService.createUser(userAuth)
   }
 
   @ApiResponse({
     status: 200,
     type: GetUserProfileSchema,
+    example: getUserProfileSchemaExample,
   })
   @Get('user/:id/profile')
-  getUserProfile(@Param('id') id: number): Promise<GetUserProfileSchema> {
+  async getUserProfile(@Param('id') id: number): Promise<GetUserProfileSchema> {
     return this.userModuleService.getUserProfileById(id)
   }
 }

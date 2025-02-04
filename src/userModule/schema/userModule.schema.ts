@@ -2,7 +2,7 @@ import { Department } from 'src/models/department'
 import { QuestMinimize } from 'src/models/QuestMinimize'
 import { UserRole } from 'src/models/userRole'
 
-export class CreateUserSchema {
+export class AuthUserSchema {
   id: number
   email: string
   token: string
