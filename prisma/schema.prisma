@@ -65,9 +65,8 @@ model answers_free {
 
 model complete_quests {
   id       Int    @id @default(autoincrement())
+  quest_data Json
   id_user  Int
-  id_quest Int
-  quest    quests @relation(fields: [id_quest], references: [id])
   user     users  @relation(fields: [id_user], references: [id])
 }
 
@@ -89,15 +88,36 @@ model events {
   name             String
   description      String
   date             DateTime
+  seats_number Int
+  places Json[]
+  id_inspector Int
+  id_status Int
+  id_type Int
+  id_image_file Int
   executors_ids    Int[]
   participants_ids Int[]
+  inspector users @relation(fields: [id_inspector], references: [id])
+  status event_statuses @relation(fields: [id_status], references: [id])
+  type event_types @relation(fields: [id_type], references: [id])
+  image shared_files @relation(fields: [id_image_file], references: [id])
   executors        user_executors_on_events[]
   participants     user_participants_on_events[]
 }
 
+model event_statuses {
+  id               Int                           @id @default(autoincrement())
+  name String
+  events events[]
+}
+
+model event_types {
+  id               Int                           @id @default(autoincrement())
+  name String
+  events events[]
+}
+
 model quests {
   id                  Int                    @id @default(autoincrement())
-  version             Int
   id_department       Int
   name                String
   id_group            Int
@@ -106,7 +126,6 @@ model quests {
   result_ids          Int[]
   questions_ids       Int[]
   complete_quests_ids Int[]
-  complete_quests     complete_quests[]
   department          departments            @relation(fields: [id_department], references: [id])
   difficult           quest_difficulties     @relation(fields: [id_difficult], references: [id])
   group               quest_groups           @relation(fields: [id_group], references: [id])
@@ -170,22 +189,41 @@ model questions_types {
   questions questions[]
 }
 
+model shared_files {
+  id               Int                           @id @default(autoincrement())
+  name String
+  extension String
+  size String
+  path String
+  events events[]
+  users users[]
+}
+
 model users {
   id                           Int                           @id @default(autoincrement())
-  name                         String?
-  surname                      String?
   email                        String                        @unique
   password                     String
   token                        String
+  first_name                         String?
+  last_name                      String?
+  patronymic String
+  birth_date DateTime
+  sex user_sex
+  phone_number String
   id_role                      Int                           @default(1)
   id_department                Int?
+  id_position Int
+  id_image_file Int
   events_where_executor_ids    Int[]
   events_where_participant_ids Int[]
   complete_quests              complete_quests[]
   department                   departments?                  @relation(fields: [id_department], references: [id])
   role                         user_roles                    @relation(fields: [id_role], references: [id])
+  position user_positions @relation(fields: [id_position], references: [id])
+  image shared_files @relation(fields: [id_image_file], references: [id])
   events_where_executor        user_executors_on_events[]
   events_where_participant     user_participants_on_events[]
+  events_where_inspector  events[]
 }
 
 model user_executors_on_events {
@@ -206,8 +244,21 @@ model user_participants_on_events {
   @@id([id_event, id_participant])
 }
 
+model user_positions {
+  id    Int     @id @default(autoincrement())
+  name  String
+  description String
+  users users[]
+}
+
 model user_roles {
   id    Int     @id @default(autoincrement())
   name  String
+  description String
   users users[]
+}
+
+enum user_sex {
+  MALE
+  FEMALE
 }
