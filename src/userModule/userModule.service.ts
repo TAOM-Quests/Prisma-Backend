@@ -79,8 +79,8 @@ export class UserModuleService {
 
     return {
       id: foundUser.id,
-      name: foundUser.name,
-      surname: foundUser.surname,
+      name: foundUser.first_name,
+      surname: foundUser.last_name,
       email: foundUser.email,
       department: {
         id: foundDepartment.id,

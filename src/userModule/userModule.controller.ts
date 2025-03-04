@@ -7,16 +7,12 @@ import {
 import { UserModuleService } from './userModule.service'
 import { ApiResponse, ApiTags } from '@nestjs/swagger'
 import { authUserSchemaExample, getUserProfileSchemaExample } from './schema/userModule.schema.example'
-import { PrismaService } from 'src/prisma/prisma.service'
-import { NotFoundError } from 'src/errors/notFound'
 
 @ApiTags('userModule')
 @Controller('userModule')
 export class UserModuleController {
-  private readonly userModuleService: UserModuleService
-
   constructor(
-    private prisma: PrismaService,
+    private userModuleService: UserModuleService
   ) {}
 
   @ApiResponse({
