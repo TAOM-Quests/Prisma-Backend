@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "users" ALTER COLUMN "birth_date" DROP NOT NULL,
+ALTER COLUMN "patronymic" DROP NOT NULL,
+ALTER COLUMN "phone_number" DROP NOT NULL,
+ALTER COLUMN "sex" DROP NOT NULL;
