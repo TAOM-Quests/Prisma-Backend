@@ -26,6 +26,16 @@ export class UserModuleService {
       sun: userAuth.email
     })
 
+    const foundUser = await this.prisma.users.findUnique({
+      where: {
+        email: userAuth.email,
+      },
+    })
+
+    if (foundUser) {
+      throw new BadRequestError(`User with email ${userAuth.email} already exist`)
+    }
+
     const createdUser = await this.prisma.users.create({
       data: {
         email: userAuth.email,
@@ -33,7 +43,6 @@ export class UserModuleService {
         token
       },
     })
-
 
     return {
       id: createdUser.id,
@@ -53,7 +62,7 @@ export class UserModuleService {
       throw new NotFoundError(`User with  email ${userAuth.email} not found`)
     }
 
-    if (compare(foundUser.password, userAuth.password)) {
+    if (await compare(foundUser.password, userAuth.password)) {
       return foundUser as AuthUserSchema
     } else {
       throw new BadRequestError(`Password not compare for user (${foundUser.id})`)
