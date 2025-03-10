@@ -36,7 +36,7 @@ export class UserModuleController {
   })
   @Post('/user/auth')
   async authUser(@Body() userAuth: UserAuthDto): Promise<AuthUserSchema> {
-    return this.userModuleService.createUser(userAuth)
+    return this.userModuleService.authUser(userAuth)
   }
 
   @ApiResponse({
