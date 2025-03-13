@@ -9,6 +9,7 @@ import { genSaltSync, hashSync, compare } from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { NotFoundError } from 'src/errors/notFound'
 import { BadRequestError } from 'src/errors/badRequest'
+import { UserRole } from 'src/models/userRole'
 
 @Injectable()
 export class UserModuleService {
@@ -53,7 +54,10 @@ export class UserModuleService {
       id: createdUser.id,
       email: createdUser.email,
       token,
-      role
+      role: {
+        id: role.id,
+        name: role.name
+      }
     }
   }
 
@@ -79,7 +83,10 @@ export class UserModuleService {
         id: foundUser.id,
         email: foundUser.email,
         token: foundUser.token,
-        role
+        role: {
+          id: role.id,
+          name: role.name
+        }
       }
     } else {
       throw new BadRequestError(`Password not compare for user (${foundUser.id})`)
