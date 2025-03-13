@@ -43,11 +43,17 @@ export class UserModuleService {
         token
       },
     })
+    const role = await this.prisma.user_roles.findUnique({
+      where: {
+        id: createdUser.id_role
+      }
+    })
 
     return {
       id: createdUser.id,
       email: createdUser.email,
       token,
+      role
     }
   }
 
@@ -62,8 +68,19 @@ export class UserModuleService {
       throw new NotFoundError(`User with  email ${userAuth.email} not found`)
     }
 
-    if (await compare(foundUser.password, userAuth.password)) {
-      return foundUser as AuthUserSchema
+    if (await compare(userAuth.password, foundUser.password)) {    
+      const role = await this.prisma.user_roles.findUnique({
+        where: {
+          id: foundUser.id_role
+        }
+      })
+
+      return {
+        id: foundUser.id,
+        email: foundUser.email,
+        token: foundUser.token,
+        role
+      }
     } else {
       throw new BadRequestError(`Password not compare for user (${foundUser.id})`)
     }    
