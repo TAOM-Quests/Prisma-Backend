@@ -6,6 +6,7 @@ export class AuthUserSchema {
   id: number
   email: string
   token: string
+  role: UserRole
 }
 
 export class GetUserProfileSchema {
