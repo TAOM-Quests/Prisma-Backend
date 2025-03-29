@@ -203,7 +203,7 @@ model users {
   id                           Int                           @id @default(autoincrement())
   email                        String                        @unique
   password                     String
-  token                        String
+  token                        String                        @unique
   first_name                   String?
   last_name                    String?
   patronymic                   String?
@@ -218,8 +218,8 @@ model users {
   events_where_participant_ids Int[]
   role                         user_roles                    @relation(fields: [id_role], references: [id])
   department                   departments?                  @relation(fields: [id_department], references: [id])
-  position                     user_positions?                @relation(fields: [id_position], references: [id])
-  image                        shared_files?                  @relation(fields: [id_image_file], references: [id])
+  position                     user_positions?               @relation(fields: [id_position], references: [id])
+  image                        shared_files?                 @relation(fields: [id_image_file], references: [id])
   complete_quests              complete_quests[]
   events_where_executor        user_executors_on_events[]
   events_where_participant     user_participants_on_events[]
