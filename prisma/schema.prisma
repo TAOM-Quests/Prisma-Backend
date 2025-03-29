@@ -210,13 +210,13 @@ model users {
   birth_date                   DateTime?
   sex                          user_sex?
   phone_number                 String?
-  id_role                      Int                           @default(1)
+  id_role                      Int?
   id_department                Int?
   id_position                  Int?
   id_image_file                Int?
   events_where_executor_ids    Int[]
   events_where_participant_ids Int[]
-  role                         user_roles                    @relation(fields: [id_role], references: [id])
+  role                         user_roles?                   @relation(fields: [id_role], references: [id])
   department                   departments?                  @relation(fields: [id_department], references: [id])
   position                     user_positions?               @relation(fields: [id_position], references: [id])
   image                        shared_files?                 @relation(fields: [id_image_file], references: [id])
