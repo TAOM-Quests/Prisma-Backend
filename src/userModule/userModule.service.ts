@@ -61,7 +61,7 @@ export class UserModuleService {
     }
   }
 
-  async authUser(userAuth: UserAuthDto): Promise<AuthUserSchema> {
+  async authUserByEmailAndPassword(userAuth: UserAuthDto): Promise<AuthUserSchema> {
     const foundUser = await this.prisma.users.findUnique({
       where: {
         email: userAuth.email,
@@ -69,7 +69,7 @@ export class UserModuleService {
     })
 
     if (!foundUser) {
-      throw new NotFoundError(`User with  email ${userAuth.email} not found`)
+      throw new NotFoundError(`User with email ${userAuth.email} not found`)
     }
 
     if (await compare(userAuth.password, foundUser.password)) {    
@@ -91,6 +91,34 @@ export class UserModuleService {
     } else {
       throw new BadRequestError(`Password not compare for user (${foundUser.id})`)
     }    
+  }
+
+  async authUserByToken(token: string): Promise<AuthUserSchema> {
+    const foundUser = await this.prisma.users.findUnique({
+      where: {
+        token,
+      },
+    })
+
+    if (!foundUser) {
+      throw new NotFoundError(`User with token ${token} not found`)
+    }
+
+    const role = await this.prisma.user_roles.findUnique({
+      where: {
+        id: foundUser.id_role
+      }
+    })
+
+    return {
+      id: foundUser.id,
+      email: foundUser.email,
+      token: foundUser.token,
+      role: {
+        id: role.id,
+        name: role.name
+      }
+    }
   }
 
   async getUserProfileById(id: number): Promise<GetUserProfileSchema> {

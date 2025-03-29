@@ -31,8 +31,10 @@ export class UserModuleController {
     example: authUserSchemaExample,
   })
   @Post('/user/auth')
-  async authUser(@Body() userAuth: UserAuthDto): Promise<AuthUserSchema> {
-    return this.userModuleService.authUser(userAuth)
+  async authUser(@Body() userAuth: UserAuthDto | string): Promise<AuthUserSchema> {
+    return typeof userAuth === 'string'
+      ? this.userModuleService.authUserByToken(userAuth)
+      : this.userModuleService.authUserByEmailAndPassword(userAuth)
   }
 
   @ApiResponse({
