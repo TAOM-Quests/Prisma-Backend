@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { UserAuthDto } from './dto/userModule.dto'
 import {
   AuthUserSchema,
@@ -30,11 +30,19 @@ export class UserModuleController {
     type: AuthUserSchema,
     example: authUserSchemaExample,
   })
+  @Get('/user/auth')
+  async authUserByToken(@Query('token') token: string): Promise<AuthUserSchema> {
+      return this.userModuleService.authUserByToken(token)
+  }
+
+  @ApiResponse({
+    status: 200,
+    type: AuthUserSchema,
+    example: authUserSchemaExample,
+  })
   @Post('/user/auth')
-  async authUser(@Body() userAuth: UserAuthDto | string): Promise<AuthUserSchema> {
-    return typeof userAuth === 'string'
-      ? this.userModuleService.authUserByToken(userAuth)
-      : this.userModuleService.authUserByEmailAndPassword(userAuth)
+  async authUserByEmailAndPassword(@Body() userAuth: UserAuthDto): Promise<AuthUserSchema> {
+      return this.userModuleService.authUserByEmailAndPassword(userAuth)
   }
 
   @ApiResponse({
