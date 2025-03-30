@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsEmail } from 'class-validator'
 
-type USER_SEX = 'MALE' | 'FEMALE'
+type USER_SEX = 'Мужской' | 'Женский'
 
 export class UserAuthDto {
   @ApiProperty({
@@ -50,7 +50,7 @@ export class UpdateProfileDto {
   birthDate: Date
   
   @ApiProperty({
-    example: 'MALE',
+    example: 'Мужской',
     required: false,
   })
   sex: USER_SEX

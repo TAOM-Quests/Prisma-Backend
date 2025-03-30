@@ -10,6 +10,12 @@ import { genSaltSync, hashSync, compare } from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { NotFoundError } from 'src/errors/notFound'
 import { BadRequestError } from 'src/errors/badRequest'
+import { user_sex } from '@prisma/client'
+
+const USER_SEX = {
+  MALE: 'Мужской',
+  FEMALE: 'Женский',
+}
 
 @Injectable()
 export class UserModuleService {
@@ -120,7 +126,7 @@ export class UserModuleService {
       lastName: foundUser.last_name,
       patronymic: foundUser.patronymic,
       birthDate: foundUser.birth_date,
-      sex: foundUser.sex,
+      sex: USER_SEX[foundUser.sex],
       phoneNumber: foundUser.phone_number,
       completeQuests: [],
     }
@@ -167,13 +173,19 @@ export class UserModuleService {
       throw new NotFoundError(`User with id ${id} not found`)
     }
 
+    const userSex = Object.keys(USER_SEX).find(sex => USER_SEX[sex] === updateProfile.sex)
+
+    if (!userSex) {
+      throw new BadRequestError(`Sex ${updateProfile.sex} not found`)
+    }
+
     const updatedUser = await this.prisma.users.update({
       data: {
         first_name: updateProfile.firstName,
         last_name: updateProfile.lastName,
         patronymic: updateProfile.patronymic,
         birth_date: updateProfile.birthDate,
-        sex: updateProfile.sex,
+        sex: userSex as user_sex,
         phone_number: updateProfile.phoneNumber,
       },
       where: {
