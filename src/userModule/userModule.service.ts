@@ -44,26 +44,15 @@ export class UserModuleService {
         token
       },
     })
-    const role = await this.prisma.user_roles.findUnique({
-      where: {
-        id: createdUser.id_role
-      }
-    })
 
     return {
       id: createdUser.id,
       email: createdUser.email,
       token,
-      role: {
-        id: role.id,
-        name: role.name
-      }
     }
   }
   
   async authUserByToken(token: string): Promise<AuthUserSchema> {
-    console.log("TOKEN", token);
-
     const foundUser = await this.prisma.users.findUnique({
       where: {
         token,
@@ -74,21 +63,17 @@ export class UserModuleService {
       throw new NotFoundError(`User with token ${token} not found`)
     }
 
-    const role = await this.prisma.user_roles.findUnique({
-      where: {
-        id: foundUser.id_role
-      }
-    })
-
-    return {
+    const authUser: AuthUserSchema = {
       id: foundUser.id,
       email: foundUser.email,
       token: foundUser.token,
-      role: {
-        id: role.id,
-        name: role.name
-      }
     }
+
+    if (foundUser.id_role) {
+      this.setRole(authUser, foundUser.id_role)
+    }
+
+    return authUser
   }
 
   async authUserByEmailAndPassword(userAuth: UserAuthDto): Promise<AuthUserSchema> {
@@ -103,20 +88,18 @@ export class UserModuleService {
     }
 
     if (await compare(userAuth.password, foundUser.password)) {    
-      const role = await this.prisma.user_roles.findUnique({
-        where: {
-          id: foundUser.id_role
+      if (foundUser.id_role) {
+        const authUser: AuthUserSchema = {
+          id: foundUser.id,
+          email: foundUser.email,
+          token: foundUser.token,
         }
-      })
-
-      return {
-        id: foundUser.id,
-        email: foundUser.email,
-        token: foundUser.token,
-        role: {
-          id: role.id,
-          name: role.name
+    
+        if (foundUser.id_role) {
+          this.setRole(authUser, foundUser.id_role)
         }
+    
+        return authUser
       }
     } else {
       throw new BadRequestError(`Password not compare for user (${foundUser.id})`)
@@ -134,13 +117,8 @@ export class UserModuleService {
         id: foundUser.id_department,
       },
     })
-    const foundUserRole = await this.prisma.user_roles.findUnique({
-      where: {
-        id: foundUser.id_role,
-      },
-    })
 
-    return {
+    const profile: GetUserProfileSchema = {
       id: foundUser.id,
       name: foundUser.first_name,
       surname: foundUser.last_name,
@@ -149,11 +127,26 @@ export class UserModuleService {
         id: foundDepartment.id,
         name: foundDepartment.name,
       },
-      role: {
-        id: foundUserRole.id,
-        name: foundUserRole.name,
-      },
       completeQuests: [],
+    }
+
+    if (foundUser.id_role) {
+      this.setRole(profile, foundUser.id_role)
+    }
+
+    return profile
+  }
+
+  private async setRole(entity, roleId) {
+    const role = await this.prisma.user_roles.findUnique({
+      where: {
+        id: roleId,
+      },
+    })
+
+    entity.role = {
+      id: role.id,
+      name: role.name,
     }
   }
 }

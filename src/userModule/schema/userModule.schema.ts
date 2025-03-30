@@ -6,7 +6,7 @@ export class AuthUserSchema {
   id: number
   email: string
   token: string
-  role: UserRole
+  role?: UserRole
 }
 
 export class GetUserProfileSchema {
@@ -14,7 +14,7 @@ export class GetUserProfileSchema {
   name: string
   surname: string
   email: string
-  department: Department
-  role: UserRole
   completeQuests: QuestMinimize[]
+  role?: UserRole
+  department?: Department
 }

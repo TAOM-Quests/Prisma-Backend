@@ -65,8 +65,8 @@ model answers_free {
 
 model complete_quests {
   id         Int   @id @default(autoincrement())
-  quest_data Json
   id_user    Int
+  quest_data Json
   user       users @relation(fields: [id_user], references: [id])
 }
 
@@ -77,9 +77,9 @@ model departments {
   quest_groups_ids Int[]
   quest_tags_ids   Int[]
   quests_ids       Int[]
-  quests           quests[]
   quest_groups     quest_groups[]
   quest_tags       quest_tags[]
+  quests           quests[]
   users            users[]
 }
 
@@ -88,18 +88,18 @@ model events {
   name             String
   description      String
   date             DateTime
-  seats_number     Int
-  places           Json[]
+  executors_ids    Int[]
+  participants_ids Int[]
+  id_image_file    Int
   id_inspector     Int
   id_status        Int
   id_type          Int
-  id_image_file    Int
-  executors_ids    Int[]
-  participants_ids Int[]
+  places           Json[]
+  seats_number     Int
+  image            shared_files                  @relation(fields: [id_image_file], references: [id])
   inspector        users                         @relation(fields: [id_inspector], references: [id])
   status           event_statuses                @relation(fields: [id_status], references: [id])
   type             event_types                   @relation(fields: [id_type], references: [id])
-  image            shared_files                  @relation(fields: [id_image_file], references: [id])
   executors        user_executors_on_events[]
   participants     user_participants_on_events[]
 }
@@ -126,12 +126,12 @@ model quests {
   result_ids          Int[]
   questions_ids       Int[]
   complete_quests_ids Int[]
-  department          departments            @relation(fields: [id_department], references: [id])
-  difficult           quest_difficulties     @relation(fields: [id_difficult], references: [id])
-  group               quest_groups           @relation(fields: [id_group], references: [id])
   results             quest_results[]
   tags                quest_tags_on_quests[]
   questions           questions[]
+  department          departments            @relation(fields: [id_department], references: [id])
+  difficult           quest_difficulties     @relation(fields: [id_difficult], references: [id])
+  group               quest_groups           @relation(fields: [id_group], references: [id])
 }
 
 model quest_difficulties {
@@ -144,8 +144,8 @@ model quest_groups {
   id            Int         @id @default(autoincrement())
   name          String
   id_department Int
-  quests        quests[]
   department    departments @relation(fields: [id_department], references: [id])
+  quests        quests[]
 }
 
 model quest_results {
@@ -203,27 +203,27 @@ model users {
   id                           Int                           @id @default(autoincrement())
   email                        String                        @unique
   password                     String
-  token                        String                        @unique
-  first_name                   String?
-  last_name                    String?
-  patronymic                   String?
-  birth_date                   DateTime?
-  sex                          user_sex?
-  phone_number                 String?
   id_role                      Int?
   id_department                Int?
-  id_position                  Int?
-  id_image_file                Int?
   events_where_executor_ids    Int[]
   events_where_participant_ids Int[]
-  role                         user_roles?                   @relation(fields: [id_role], references: [id])
-  department                   departments?                  @relation(fields: [id_department], references: [id])
-  position                     user_positions?               @relation(fields: [id_position], references: [id])
-  image                        shared_files?                 @relation(fields: [id_image_file], references: [id])
+  token                        String                        @unique
+  birth_date                   DateTime?
+  first_name                   String?
+  id_image_file                Int?
+  id_position                  Int?
+  last_name                    String?
+  patronymic                   String?
+  phone_number                 String?
+  sex                          user_sex?
   complete_quests              complete_quests[]
+  events_where_inspector       events[]
   events_where_executor        user_executors_on_events[]
   events_where_participant     user_participants_on_events[]
-  events_where_inspector       events[]
+  department                   departments?                  @relation(fields: [id_department], references: [id])
+  image                        shared_files?                 @relation(fields: [id_image_file], references: [id])
+  position                     user_positions?               @relation(fields: [id_position], references: [id])
+  role                         user_roles?                   @relation(fields: [id_role], references: [id])
 }
 
 model user_executors_on_events {
