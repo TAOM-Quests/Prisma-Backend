@@ -1,4 +1,4 @@
-import { GetUserProfileSchema } from "./userModule.schema"
+import { GetUserProfileSchema, UpdateUserProfileSchema } from "./userModule.schema"
 
 export const authUserSchemaExample = {
   id: 10,
@@ -48,4 +48,15 @@ export const getUserProfileSchemaExample: GetUserProfileSchema = {
       },
     },
   ],
+}
+
+export const updateUserProfileSchemaExample: UpdateUserProfileSchema = {
+  id: 10,
+  email: 'roman.nichi.o@gmail.com',
+  firstName: 'Roman',
+  lastName: 'Nichi',
+  patronymic: 'Olegovich',
+  birthDate: new Date('2003-06-28T00:00:00.000Z'),
+  sex: 'Male',
+  phoneNumber: '8(999)999-99-99',
 }

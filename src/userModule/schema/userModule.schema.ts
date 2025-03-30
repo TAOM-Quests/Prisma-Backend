@@ -24,3 +24,14 @@ export class GetUserProfileSchema {
   position?: UserPosition
   department?: Department
 }
+
+export class UpdateUserProfileSchema {
+  id: number
+  email: string
+  firstName: string
+  lastName: string
+  patronymic: string
+  birthDate: Date
+  sex: string
+  phoneNumber: string
+}

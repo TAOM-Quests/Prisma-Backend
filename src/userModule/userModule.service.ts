@@ -3,8 +3,9 @@ import { PrismaService } from 'src/prisma/prisma.service'
 import {
   AuthUserSchema,
   GetUserProfileSchema,
+  UpdateUserProfileSchema,
 } from './schema/userModule.schema'
-import { UserAuthDto } from './dto/userModule.dto'
+import { UpdateProfileDto, UserAuthDto } from './dto/userModule.dto'
 import { genSaltSync, hashSync, compare } from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { NotFoundError } from 'src/errors/notFound'
@@ -150,6 +151,46 @@ export class UserModuleService {
     }
 
     return profile
+  }
+
+  async updateUserProfile(
+    id: number,
+    updateProfile: UpdateProfileDto
+  ): Promise<UpdateUserProfileSchema> {
+    const foundUser = await this.prisma.users.findUniqueOrThrow({
+      where: {
+        id,
+      },
+    })
+
+    if (!foundUser) {
+      throw new NotFoundError(`User with id ${id} not found`)
+    }
+
+    const updatedUser = await this.prisma.users.update({
+      data: {
+        first_name: updateProfile.firstName,
+        last_name: updateProfile.lastName,
+        patronymic: updateProfile.patronymic,
+        birth_date: updateProfile.birthDate,
+        sex: updateProfile.sex,
+        phone_number: updateProfile.phoneNumber,
+      },
+      where: {
+        id,
+      }
+    })
+
+    return {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      firstName: updatedUser.first_name,
+      lastName: updatedUser.last_name,
+      patronymic: updatedUser.patronymic,
+      birthDate: updatedUser.birth_date,
+      sex: updatedUser.sex,
+      phoneNumber: updatedUser.phone_number,
+    }
   }
 
   private async setRole(entity, roleId) {
