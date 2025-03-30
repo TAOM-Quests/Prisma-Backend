@@ -3,13 +3,19 @@ import { PrismaService } from 'src/prisma/prisma.service'
 import {
   AuthUserSchema,
   GetUserProfileSchema,
+  UpdateUserProfileSchema,
 } from './schema/userModule.schema'
-import { UserAuthDto } from './dto/userModule.dto'
+import { UpdateProfileDto, UserAuthDto } from './dto/userModule.dto'
 import { genSaltSync, hashSync, compare } from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { NotFoundError } from 'src/errors/notFound'
 import { BadRequestError } from 'src/errors/badRequest'
-import { UserRole } from 'src/models/userRole'
+import { user_sex } from '@prisma/client'
+
+const USER_SEX = {
+  MALE: 'Мужской',
+  FEMALE: 'Женский',
+}
 
 @Injectable()
 export class UserModuleService {
@@ -87,20 +93,18 @@ export class UserModuleService {
       throw new NotFoundError(`User with email ${userAuth.email} not found`)
     }
 
-    if (await compare(userAuth.password, foundUser.password)) {    
-      if (foundUser.id_role) {
-        const authUser: AuthUserSchema = {
-          id: foundUser.id,
-          email: foundUser.email,
-          token: foundUser.token,
-        }
-    
-        if (foundUser.id_role) {
-          this.setRole(authUser, foundUser.id_role)
-        }
-    
-        return authUser
+    if (await compare(userAuth.password, foundUser.password)) {
+      const authUser: AuthUserSchema = {
+        id: foundUser.id,
+        email: foundUser.email,
+        token: foundUser.token,
       }
+  
+      if (foundUser.id_role) {
+        this.setRole(authUser, foundUser.id_role)
+      }
+  
+      return authUser
     } else {
       throw new BadRequestError(`Password not compare for user (${foundUser.id})`)
     }    
@@ -112,29 +116,93 @@ export class UserModuleService {
         id,
       },
     })
-    const foundDepartment = await this.prisma.departments.findUnique({
-      where: {
-        id: foundUser.id_department,
-      },
-    })
+
+    const isEmployee = !!foundUser.id_role
 
     const profile: GetUserProfileSchema = {
       id: foundUser.id,
-      name: foundUser.first_name,
-      surname: foundUser.last_name,
       email: foundUser.email,
-      department: {
-        id: foundDepartment.id,
-        name: foundDepartment.name,
-      },
+      firstName: foundUser.first_name,
+      lastName: foundUser.last_name,
+      patronymic: foundUser.patronymic,
+      birthDate: foundUser.birth_date,
+      sex: USER_SEX[foundUser.sex],
+      phoneNumber: foundUser.phone_number,
       completeQuests: [],
     }
 
-    if (foundUser.id_role) {
+    if (isEmployee) {
       this.setRole(profile, foundUser.id_role)
+
+      const foundDepartment = await this.prisma.departments.findUnique({
+        where: {
+          id: foundUser.id_department,
+        },
+      })
+      const foundPosition = await this.prisma.user_positions.findUnique({
+        where: {
+          id: foundUser.id_position,
+        },
+      })
+
+      profile.department = {
+        id: foundDepartment.id,
+        name: foundDepartment.name,
+      }
+
+      profile.position = {
+        id: foundPosition.id,
+        name: foundPosition.name,
+      }
     }
 
     return profile
+  }
+
+  async updateUserProfile(
+    id: number,
+    updateProfile: UpdateProfileDto
+  ): Promise<UpdateUserProfileSchema> {
+    const foundUser = await this.prisma.users.findUniqueOrThrow({
+      where: {
+        id,
+      },
+    })
+
+    if (!foundUser) {
+      throw new NotFoundError(`User with id ${id} not found`)
+    }
+
+    const userSex = Object.keys(USER_SEX).find(sex => USER_SEX[sex] === updateProfile.sex)
+
+    if (!userSex) {
+      throw new BadRequestError(`Sex ${updateProfile.sex} not found`)
+    }
+
+    const updatedUser = await this.prisma.users.update({
+      data: {
+        first_name: updateProfile.firstName,
+        last_name: updateProfile.lastName,
+        patronymic: updateProfile.patronymic,
+        birth_date: updateProfile.birthDate,
+        sex: userSex as user_sex,
+        phone_number: updateProfile.phoneNumber,
+      },
+      where: {
+        id,
+      }
+    })
+
+    return {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      firstName: updatedUser.first_name,
+      lastName: updatedUser.last_name,
+      patronymic: updatedUser.patronymic,
+      birthDate: updatedUser.birth_date,
+      sex: updatedUser.sex,
+      phoneNumber: updatedUser.phone_number,
+    }
   }
 
   private async setRole(entity, roleId) {

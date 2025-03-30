@@ -1,12 +1,13 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
-import { UserAuthDto } from './dto/userModule.dto'
+import { UpdateProfileDto, UserAuthDto } from './dto/userModule.dto'
 import {
   AuthUserSchema,
   GetUserProfileSchema,
+  UpdateUserProfileSchema,
 } from './schema/userModule.schema'
 import { UserModuleService } from './userModule.service'
 import { ApiResponse, ApiTags } from '@nestjs/swagger'
-import { authUserSchemaExample, getUserProfileSchemaExample } from './schema/userModule.schema.example'
+import { authUserSchemaExample, getUserProfileSchemaExample, updateUserProfileSchemaExample } from './schema/userModule.schema.example'
 
 @ApiTags('userModule')
 @Controller('userModule')
@@ -50,8 +51,21 @@ export class UserModuleController {
     type: GetUserProfileSchema,
     example: getUserProfileSchemaExample,
   })
-  @Get('user/:id/profile')
+  @Get('users/:id/profile')
   async getUserProfile(@Param('id') id: string): Promise<GetUserProfileSchema> {
     return this.userModuleService.getUserProfileById(+id)
+  }
+
+  @ApiResponse({
+    status: 200,
+    type: UpdateUserProfileSchema,
+    example: updateUserProfileSchemaExample,
+  })
+  @Post('users/:id/profile')
+  async updateUserProfile(
+    @Param('id') id: string,
+    @Body() updateProfile: UpdateProfileDto
+  ): Promise<UpdateUserProfileSchema> {
+    return this.userModuleService.updateUserProfile(+id, updateProfile)
   }
 }
