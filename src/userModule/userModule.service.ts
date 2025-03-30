@@ -9,7 +9,6 @@ import { genSaltSync, hashSync, compare } from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { NotFoundError } from 'src/errors/notFound'
 import { BadRequestError } from 'src/errors/badRequest'
-import { UserRole } from 'src/models/userRole'
 
 @Injectable()
 export class UserModuleService {
@@ -87,20 +86,18 @@ export class UserModuleService {
       throw new NotFoundError(`User with email ${userAuth.email} not found`)
     }
 
-    if (await compare(userAuth.password, foundUser.password)) {    
-      if (foundUser.id_role) {
-        const authUser: AuthUserSchema = {
-          id: foundUser.id,
-          email: foundUser.email,
-          token: foundUser.token,
-        }
-    
-        if (foundUser.id_role) {
-          this.setRole(authUser, foundUser.id_role)
-        }
-    
-        return authUser
+    if (await compare(userAuth.password, foundUser.password)) {
+      const authUser: AuthUserSchema = {
+        id: foundUser.id,
+        email: foundUser.email,
+        token: foundUser.token,
       }
+  
+      if (foundUser.id_role) {
+        this.setRole(authUser, foundUser.id_role)
+      }
+  
+      return authUser
     } else {
       throw new BadRequestError(`Password not compare for user (${foundUser.id})`)
     }    
@@ -112,26 +109,44 @@ export class UserModuleService {
         id,
       },
     })
-    const foundDepartment = await this.prisma.departments.findUnique({
-      where: {
-        id: foundUser.id_department,
-      },
-    })
+
+    const isEmployee = !!foundUser.id_role
 
     const profile: GetUserProfileSchema = {
       id: foundUser.id,
-      name: foundUser.first_name,
-      surname: foundUser.last_name,
       email: foundUser.email,
-      department: {
-        id: foundDepartment.id,
-        name: foundDepartment.name,
-      },
+      firstName: foundUser.first_name,
+      lastName: foundUser.last_name,
+      patronymic: foundUser.patronymic,
+      birthDate: foundUser.birth_date,
+      sex: foundUser.sex,
+      phoneNumber: foundUser.phone_number,
       completeQuests: [],
     }
 
-    if (foundUser.id_role) {
+    if (isEmployee) {
       this.setRole(profile, foundUser.id_role)
+
+      const foundDepartment = await this.prisma.departments.findUnique({
+        where: {
+          id: foundUser.id_department,
+        },
+      })
+      const foundPosition = await this.prisma.user_positions.findUnique({
+        where: {
+          id: foundUser.id_position,
+        },
+      })
+
+      profile.department = {
+        id: foundDepartment.id,
+        name: foundDepartment.name,
+      }
+
+      profile.position = {
+        id: foundPosition.id,
+        name: foundPosition.name,
+      }
     }
 
     return profile

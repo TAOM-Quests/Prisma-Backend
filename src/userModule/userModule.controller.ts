@@ -50,7 +50,7 @@ export class UserModuleController {
     type: GetUserProfileSchema,
     example: getUserProfileSchemaExample,
   })
-  @Get('user/:id/profile')
+  @Get('users/:id/profile')
   async getUserProfile(@Param('id') id: string): Promise<GetUserProfileSchema> {
     return this.userModuleService.getUserProfileById(+id)
   }

@@ -1,5 +1,6 @@
 import { Department } from 'src/models/department'
 import { QuestMinimize } from 'src/models/QuestMinimize'
+import { UserPosition } from 'src/models/userPosition'
 import { UserRole } from 'src/models/userRole'
 
 export class AuthUserSchema {
@@ -11,10 +12,15 @@ export class AuthUserSchema {
 
 export class GetUserProfileSchema {
   id: number
-  name: string
-  surname: string
   email: string
+  firstName: string
+  lastName: string
+  patronymic: string
+  birthDate: Date
+  sex: string
+  phoneNumber: string
   completeQuests: QuestMinimize[]
   role?: UserRole
+  position?: UserPosition
   department?: Department
 }
