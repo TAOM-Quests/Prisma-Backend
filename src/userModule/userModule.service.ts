@@ -10,7 +10,7 @@ import { genSaltSync, hashSync, compare } from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { NotFoundError } from 'src/errors/notFound'
 import { BadRequestError } from 'src/errors/badRequest'
-import { user_sex } from '@prisma/client'
+import { Prisma, user_sex } from '@prisma/client'
 
 const USER_SEX = {
   MALE: 'Мужской',
@@ -163,7 +163,7 @@ export class UserModuleService {
     id: number,
     updateProfile: UpdateProfileDto
   ): Promise<UpdateUserProfileSchema> {
-    const foundUser = await this.prisma.users.findUniqueOrThrow({
+    const foundUser = await this.prisma.users.findUnique({
       where: {
         id,
       },
@@ -171,22 +171,11 @@ export class UserModuleService {
 
     if (!foundUser) {
       throw new NotFoundError(`User with id ${id} not found`)
-    }
-
-    const userSex = Object.keys(USER_SEX).find(sex => USER_SEX[sex] === updateProfile.sex)
-
-    if (!userSex) {
-      throw new BadRequestError(`Sex ${updateProfile.sex} not found`)
-    }
+    }    
 
     const updatedUser = await this.prisma.users.update({
       data: {
-        first_name: updateProfile.firstName,
-        last_name: updateProfile.lastName,
-        patronymic: updateProfile.patronymic,
-        birth_date: updateProfile.birthDate,
-        sex: userSex as user_sex,
-        phone_number: updateProfile.phoneNumber,
+        ...this.requestUpdateProfileToDbFields(updateProfile)
       },
       where: {
         id,
@@ -216,5 +205,42 @@ export class UserModuleService {
       id: role.id,
       name: role.name,
     }
+  }
+
+  private requestUpdateProfileToDbFields(
+    updateProfile: UpdateProfileDto
+  ): Prisma.usersUpdateInput {
+    const result: Prisma.usersUpdateInput = {}
+
+    const userSex = Object.keys(USER_SEX)
+      .find(sex => USER_SEX[sex] === updateProfile.sex)
+
+    if (updateProfile.sex && !userSex) {
+      throw new BadRequestError(`Sex ${updateProfile.sex} not found`)
+    }
+
+    if (updateProfile.email) {
+      result.email = updateProfile.email
+    }
+    if (updateProfile.firstName) {
+      result.first_name = updateProfile.firstName
+    }
+    if (updateProfile.lastName) {
+      result.last_name = updateProfile.lastName
+    }
+    if (updateProfile.patronymic) {
+      result.patronymic = updateProfile.patronymic
+    }
+    if (updateProfile.birthDate) {
+      result.birth_date = updateProfile.birthDate
+    }
+    if (updateProfile.sex) { 
+      result.sex = userSex as user_sex
+    }
+    if (updateProfile.phoneNumber) {
+      result.phone_number = updateProfile.phoneNumber
+    }
+
+    return result
   }
 }
