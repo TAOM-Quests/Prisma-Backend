@@ -85,21 +85,21 @@ model departments {
 
 model events {
   id               Int                           @id @default(autoincrement())
-  name             String
-  description      String
-  date             DateTime
+  id_status        Int                           @default(1)
+  date             DateTime?
+  name             String?
+  description      String?
+  seats_number     Int?
+  id_type          Int?
+  id_inspector     Int?
+  id_image_file    Int?
+  places           Json[]
   executors_ids    Int[]
   participants_ids Int[]
-  id_image_file    Int
-  id_inspector     Int
-  id_status        Int
-  id_type          Int
-  places           Json[]
-  seats_number     Int
-  image            shared_files                  @relation(fields: [id_image_file], references: [id])
-  inspector        users                         @relation(fields: [id_inspector], references: [id])
   status           event_statuses                @relation(fields: [id_status], references: [id])
-  type             event_types                   @relation(fields: [id_type], references: [id])
+  type             event_types?                  @relation(fields: [id_type], references: [id])
+  image            shared_files?                 @relation(fields: [id_image_file], references: [id])
+  inspector        users?                        @relation(fields: [id_inspector], references: [id])
   executors        user_executors_on_events[]
   participants     user_participants_on_events[]
 }
