@@ -7,6 +7,7 @@ import { Executor, Inspector, Participant } from "src/models/users";
 import { EventType } from "src/models/eventType";
 import { EventStatus } from "src/models/eventStatus";
 import { Department } from "src/models/department";
+import { NotFoundError } from "src/errors/notFound";
 
 @Injectable()
 export class EventModuleService {
@@ -32,15 +33,43 @@ export class EventModuleService {
         const eventWithAdditionalData = await this.getEventMinimizeWithAdditionalData(event)
 
         return {
-          id: event.id,
-          name: event.name,
-          date: event.date,
-          places: event.places,
+          id: eventWithAdditionalData.id,
+          name: eventWithAdditionalData.name,
+          date: eventWithAdditionalData.date,
+          places: eventWithAdditionalData.places,
           type: eventWithAdditionalData.type,
           status: eventWithAdditionalData.status
         }
       })
     )
+  }
+
+  async getEventById(id: number): Promise<GetEventSchema> {
+    const foundEvent = await this.prisma.events.findUnique({
+      where: {
+        id
+      }
+    })
+
+    if (!foundEvent) {
+      throw new NotFoundError(`Event with id ${id} not found`)
+    }
+
+    const eventWithAdditionalData = await this.getEventWithAdditionalData(foundEvent)
+
+    return {
+      id: eventWithAdditionalData.id,
+      name: eventWithAdditionalData.name,
+      description: eventWithAdditionalData.description,
+      date: eventWithAdditionalData.date,
+      seatsNumber: eventWithAdditionalData.seatsNumber,
+      inspector: eventWithAdditionalData.inspector,
+      executors: eventWithAdditionalData.executors,
+      participants: eventWithAdditionalData.participants,
+      places: eventWithAdditionalData.places,
+      type: eventWithAdditionalData.type,
+      status: eventWithAdditionalData.status
+    }
   }
 
   private async getEventMinimizeWithAdditionalData(event): Promise<GetEventMinimizeSchema> {
@@ -51,14 +80,13 @@ export class EventModuleService {
   }
 
   private async getEventWithAdditionalData(event): Promise<GetEventSchema> {
-    const executors = await this.getExecutors(event)
-    const participants = await this.getParticipants(event)
-    const inspector = await this.getInspector(event)
-    const type = await this.getType(event)
-    const status = await this.getStatus(event)
-    const department = await this.getDepartment(event)
+    if (event.executors_ids.length) event.executors = await this.getExecutors(event)
+    if (event.participants_ids.length) event.participants = await this.getParticipants(event)
+    if (event.id_inspector) event.inspector = await this.getInspector(event)
+    if (event.id_type) event.type = await this.getType(event)
+    if (event.id_status) event.status = await this.getStatus(event)
 
-    return {...event, executors, participants, inspector, type, status, department}
+    return event
   }
 
   private async getExecutors(event): Promise<Executor[]> {

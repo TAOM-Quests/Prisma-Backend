@@ -65,9 +65,5 @@ export const getEventSchemaExample: GetEventSchema = {
   status: {
     id: 1,
     name: 'Planned'
-  },
-  department: {
-    id: 1,
-    name: 'IT'
   }
 }

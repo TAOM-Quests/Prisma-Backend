@@ -26,5 +26,4 @@ export class GetEventSchema {
   places: (PlaceOffline | PlaceOnline)[]
   type: EventType
   status: EventStatus
-  department: Department
 }
