@@ -1,8 +1,8 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import { ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { GetEventSchema } from "./schema/eventModule.schema";
-import { GetEventsParams } from "./dto/eventModule.dto";
-import { getEventSchemaExample } from "./schema/eventModule.schema.example";
+import { GetEventMinimizeSchema } from "./schema/eventModule.schema";
+import { GetEventsMinimizeQuery } from "./dto/eventModule.dto";
+import { getEventsMinimizeSchemaExample } from "./schema/eventModule.schema.example";
 import { EventModuleService } from "./eventModule.service";
 
 @ApiTags('eventModule')
@@ -14,8 +14,8 @@ export class EventModuleController {
 
   @ApiResponse({
     status: 200,
-    type: GetEventSchema,
-    example: getEventSchemaExample
+    type: GetEventMinimizeSchema,
+    example: getEventsMinimizeSchemaExample
   })
   @ApiQuery({name: 'department', type: 'number', required: false})
   @ApiQuery({name: 'participant', type: 'number', required: false})
@@ -24,7 +24,7 @@ export class EventModuleController {
   @ApiQuery({name: 'executor', type: 'number', required: false})
   @Get('/events')
   async getEvents(@Query() getEventsParams) {
-    const params: GetEventsParams = {
+    const params: GetEventsMinimizeQuery = {
      department: +getEventsParams.department,
      date: getEventsParams.date && new Date(getEventsParams.date),
      executor: +getEventsParams.executor,

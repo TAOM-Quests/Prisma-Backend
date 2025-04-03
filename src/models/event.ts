@@ -5,7 +5,7 @@ export interface Event {
   date: Date
   seatsNumber: number
   inspectorComments: string[]
-  places: Place[]
+  places: (PlaceOnline | PlaceOffline)[]
   schedule: ScheduleItem[]
   executorsIds: number[]
   participantsIds: number[]
@@ -15,7 +15,7 @@ export interface Event {
   departmentId: number
 }
 
-export interface Place {
+interface Place {
   isOnline: boolean
 }
 

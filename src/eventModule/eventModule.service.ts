@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { GetEventsParams } from "./dto/eventModule.dto";
-import { GetEventSchema } from "./schema/eventModule.schema";
+import { GetEventsMinimizeQuery } from "./dto/eventModule.dto";
+import { GetEventMinimizeSchema, GetEventSchema } from "./schema/eventModule.schema";
 import { Prisma } from "@prisma/client";
 import { Executor, Inspector, Participant } from "src/models/users";
 import { EventType } from "src/models/eventType";
@@ -14,7 +14,7 @@ export class EventModuleService {
     private prisma: PrismaService
   ) {}
 
-  async getEvents(getEventsParams: GetEventsParams): Promise<GetEventSchema[]> {
+  async getEvents(getEventsParams: GetEventsMinimizeQuery): Promise<GetEventMinimizeSchema[]> {
     const where: Prisma.eventsWhereInput = {};
 
     if (getEventsParams.department) where.id_department = getEventsParams.department
@@ -28,8 +28,26 @@ export class EventModuleService {
     })
 
     return await Promise.all(
-      foundEvents.map(async event => await this.getEventWithAdditionalData(event))
+      foundEvents.map(async event => {
+        const eventWithAdditionalData = await this.getEventMinimizeWithAdditionalData(event)
+
+        return {
+          id: event.id,
+          name: event.name,
+          date: event.date,
+          places: event.places,
+          type: eventWithAdditionalData.type,
+          status: eventWithAdditionalData.status
+        }
+      })
     )
+  }
+
+  private async getEventMinimizeWithAdditionalData(event): Promise<GetEventMinimizeSchema> {
+    const type = await this.getType(event)
+    const status = await this.getStatus(event)
+
+    return {...event, type, status}
   }
 
   private async getEventWithAdditionalData(event): Promise<GetEventSchema> {
