@@ -73,10 +73,10 @@ export class EventModuleService {
   }
 
   private async getEventMinimizeWithAdditionalData(event): Promise<GetEventMinimizeSchema> {
-    const type = await this.getType(event)
-    const status = await this.getStatus(event)
+    if (event.id_type) event.type = await this.getType(event)
+    if (event.id_status) event.status = await this.getStatus(event)
 
-    return {...event, type, status}
+    return event
   }
 
   private async getEventWithAdditionalData(event): Promise<GetEventSchema> {
