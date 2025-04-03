@@ -81,11 +81,14 @@ model departments {
   quest_tags       quest_tags[]
   quests           quests[]
   users            users[]
+
+  events events[]
 }
 
 model events {
   id               Int                           @id @default(autoincrement())
   id_status        Int                           @default(1)
+  id_department    Int                           
   date             DateTime?
   name             String?
   description      String?
@@ -94,9 +97,11 @@ model events {
   id_inspector     Int?
   id_image_file    Int?
   places           Json[]
+  schedule         Json[]
   executors_ids    Int[]
   participants_ids Int[]
   status           event_statuses                @relation(fields: [id_status], references: [id])
+  department       departments                   @relation(fields: [id_department], references: [id])
   type             event_types?                  @relation(fields: [id_type], references: [id])
   image            shared_files?                 @relation(fields: [id_image_file], references: [id])
   inspector        users?                        @relation(fields: [id_inspector], references: [id])

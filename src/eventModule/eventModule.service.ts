@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { GetEventsMinimizeQuery } from "./dto/eventModule.dto";
+import { GetEventsMinimizeQuery, CreateEventDto } from "./dto/eventModule.dto";
 import { GetEventMinimizeSchema, GetEventSchema } from "./schema/eventModule.schema";
 import { Prisma } from "@prisma/client";
 import { Executor, Inspector, Participant } from "src/models/users";
@@ -68,7 +68,8 @@ export class EventModuleService {
       participants: eventWithAdditionalData.participants,
       places: eventWithAdditionalData.places,
       type: eventWithAdditionalData.type,
-      status: eventWithAdditionalData.status
+      status: eventWithAdditionalData.status,
+      schedule: eventWithAdditionalData.schedule
     }
   }
 
@@ -87,6 +88,95 @@ export class EventModuleService {
     if (event.id_status) event.status = await this.getStatus(event)
 
     return event
+  }
+
+  async createEvent(event: CreateEventDto): Promise<GetEventSchema> {
+    const foundDepartment = await this.prisma.departments.findUnique({
+      where: {
+        id: event.departmentId
+      }
+    })
+
+    if (!foundDepartment) {
+      throw new NotFoundError(`Department with id ${event.departmentId} not found`)
+    }
+
+    const createData: Prisma.eventsCreateInput = {
+      department: {
+        connect: {id: event.departmentId}
+      }
+    }
+    const createdEvent = await this.prisma.events.create({data: createData})
+    const updateData: Prisma.eventsUpdateInput = {}
+
+    if (event.name) updateData.name = event.name
+    if (event.description) updateData.description = event.description
+    if (event.date) updateData.date = event.date
+    if (event.seatsNumber) updateData.seats_number = event.seatsNumber
+    if (event.places) updateData.places = { set: event.places}
+    if (event.schedule) updateData.schedule = { set: event.schedule }
+    if (event.executorsIds) updateData.executors = {
+      connect: await Promise.all(event.executorsIds.map(async executorId => {
+        const foundExecutor = await this.prisma.users.findUnique({
+          where: {
+            id: executorId
+          }
+        })
+
+        if (!foundExecutor) {
+          throw new NotFoundError(`Executor with id ${executorId} not found`)
+        }
+
+        return {id_event_id_executor: { id_event: createdEvent.id, id_executor: executorId }}
+      }))
+    }
+    if (event.statusId) {
+      const foundStatus = await this.prisma.event_statuses.findUnique({
+        where: {
+          id: event.statusId
+        }
+      })
+
+      if (!foundStatus) {
+        throw new NotFoundError(`Status with id ${event.statusId} not found`)
+      }
+
+      updateData.status = { connect: { id: event.statusId } }
+    }
+    if (event.typeId) {
+      const foundType = await this.prisma.event_types.findUnique({
+        where: {
+          id: event.typeId
+        }
+      })
+
+      if (!foundType) {
+        throw new NotFoundError(`Type with id ${event.typeId} not found`)
+      }
+
+      updateData.type = { connect: { id: event.typeId } }
+    }
+
+    const updatedEvent = await this.prisma.events.update({
+      where: { id: createdEvent.id },
+      data: updateData
+    })
+    const eventWithAdditionalData = await this.getEventWithAdditionalData(updatedEvent)
+
+    return {
+      id: eventWithAdditionalData.id,
+      name: eventWithAdditionalData.name,
+      description: eventWithAdditionalData.description,
+      date: eventWithAdditionalData.date,
+      seatsNumber: eventWithAdditionalData.seatsNumber,
+      inspector: eventWithAdditionalData.inspector,
+      executors: eventWithAdditionalData.executors,
+      participants: eventWithAdditionalData.participants,
+      places: eventWithAdditionalData.places,
+      schedule: eventWithAdditionalData.schedule,
+      type: eventWithAdditionalData.type,
+      status: eventWithAdditionalData.status
+    }
   }
 
   private async getExecutors(event): Promise<Executor[]> {

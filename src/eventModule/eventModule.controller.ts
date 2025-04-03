@@ -1,7 +1,7 @@
-import { Controller, Get, Param, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { GetEventMinimizeSchema, GetEventSchema } from "./schema/eventModule.schema";
-import { GetEventsMinimizeQuery } from "./dto/eventModule.dto";
+import { CreateEventDto, GetEventsMinimizeQuery } from "./dto/eventModule.dto";
 import { getEventSchemaExample, getEventsMinimizeSchemaExample } from "./schema/eventModule.schema.example";
 import { EventModuleService } from "./eventModule.service";
 
@@ -43,5 +43,15 @@ export class EventModuleController {
   @Get('/events/:id')
   async getEventById(@Param('id') id: string): Promise<GetEventSchema> {
     return this.eventModuleService.getEventById(+id)
+  }
+
+  @ApiResponse({
+    status: 200,
+    type: GetEventSchema,
+    example: getEventSchemaExample
+  })
+  @Post('/events')
+  async createEvent(@Body() event: CreateEventDto): Promise<GetEventSchema> {
+    return this.eventModuleService.createEvent(event)
   }
 }

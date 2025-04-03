@@ -1,6 +1,5 @@
 import { JsonArray } from "@prisma/client/runtime/library"
-import { Department } from "src/models/department"
-import { PlaceOffline, PlaceOnline } from "src/models/event"
+import { PlaceOffline, PlaceOnline, ScheduleItem } from "src/models/event"
 import { EventStatus } from "src/models/eventStatus"
 import { EventType } from "src/models/eventType"
 import { Executor, Inspector, Participant } from "src/models/users"
@@ -24,6 +23,20 @@ export class GetEventSchema {
   executors: Executor[]
   participants: Participant[]
   places: (PlaceOffline | PlaceOnline)[]
+  schedule: ScheduleItem[]
   type: EventType
   status: EventStatus
+}
+
+export class PostEventSchema {
+  name: string
+  description: string
+  date: Date
+  seatsNumber: number
+  places: (PlaceOnline | PlaceOffline)[]
+  schedule: ScheduleItem[]
+  executorsIds: number[]
+  statusId: number
+  type: number
+  departmentId: number
 }
