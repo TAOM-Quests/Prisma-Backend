@@ -164,3 +164,17 @@ export class UpdateEventDto {
   })
   typeId?: number
 }
+
+export class UpdateEventParticipantsDto {
+  @ApiProperty({
+    example: [1, 2],
+    required: false
+  })
+  add?: number[]
+
+  @ApiProperty({
+    example: [3, 4],
+    required: false
+  })
+  remove?: number[]
+}

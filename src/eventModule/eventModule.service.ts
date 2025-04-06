@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { GetEventsMinimizeQuery, CreateEventDto, UpdateEventDto } from "./dto/eventModule.dto";
+import { GetEventsMinimizeQuery, CreateEventDto, UpdateEventDto, UpdateEventParticipantsDto } from "./dto/eventModule.dto";
 import { GetEventMinimizeSchema, GetEventSchema } from "./schema/eventModule.schema";
 import { Prisma } from "@prisma/client";
 import { Executor, Inspector, Participant } from "src/models/users";
@@ -79,9 +79,41 @@ export class EventModuleService {
         id: event.departmentId
       }
     })
+    const foundStatus = event.statusId
+      ? await this.prisma.event_statuses.findUnique({
+        where: {
+          id: event.statusId
+        }
+      })
+      : null
+    const foundType = event.typeId
+      ? await this.prisma.event_types.findUnique({
+        where: {
+          id: event.typeId
+        }
+      })
+      : null
 
     if (!foundDepartment) {
       throw new NotFoundError(`Department with id ${event.departmentId} not found`)
+    }
+    if (event.statusId && !foundStatus) {
+      throw new NotFoundError(`Status with id ${event.statusId} not found`)
+    }
+    if (event.typeId && !foundType) {
+      throw new NotFoundError(`Type with id ${event.typeId} not found`)
+    }
+
+    for (let executorId of event.executorsIds) {
+      const foundExecutor = await this.prisma.users.findUnique({
+        where: {
+          id: executorId
+        }
+      })
+
+      if (!foundExecutor) {
+        throw new NotFoundError(`Executor with id ${executorId} not found`) 
+      }
     }
 
     const createData: Prisma.eventsCreateInput = {
@@ -98,46 +130,11 @@ export class EventModuleService {
     if (event.seatsNumber) updateData.seats_number = event.seatsNumber
     if (event.places) updateData.places = { set: event.places}
     if (event.schedule) updateData.schedule = { set: event.schedule }
-    if (event.executorsIds) updateData.executors = {
-      connect: await Promise.all(event.executorsIds.map(async executorId => {
-        const foundExecutor = await this.prisma.users.findUnique({
-          where: {
-            id: executorId
-          }
-        })
+    if (event.statusId) updateData.status = { connect: { id: event.statusId } }
+    if (event.typeId) updateData.type = { connect: { id: event.typeId } }
 
-        if (!foundExecutor) {
-          throw new NotFoundError(`Executor with id ${executorId} not found`)
-        }
-
-        return {id_event_id_executor: { id_event: createdEvent.id, id_executor: executorId }}
-      }))
-    }
-    if (event.statusId) {
-      const foundStatus = await this.prisma.event_statuses.findUnique({
-        where: {
-          id: event.statusId
-        }
-      })
-
-      if (!foundStatus) {
-        throw new NotFoundError(`Status with id ${event.statusId} not found`)
-      }
-
-      updateData.status = { connect: { id: event.statusId } }
-    }
-    if (event.typeId) {
-      const foundType = await this.prisma.event_types.findUnique({
-        where: {
-          id: event.typeId
-        }
-      })
-
-      if (!foundType) {
-        throw new NotFoundError(`Type with id ${event.typeId} not found`)
-      }
-
-      updateData.type = { connect: { id: event.typeId } }
+    for (let executorId of event.executorsIds) {
+      await this.addExecutorToEvent(createdEvent.id, executorId)
     }
 
     const updatedEvent = await this.prisma.events.update({
@@ -173,6 +170,40 @@ export class EventModuleService {
       throw new NotFoundError(`Event with id ${id} not found`)
     }
 
+    const foundStatus = updateEvent.statusId
+      ? await this.prisma.event_statuses.findUnique({
+        where: {
+          id: updateEvent.statusId
+        }
+      })
+      : null
+    const foundType = updateEvent.typeId
+      ? await this.prisma.event_types.findUnique({
+        where: {
+          id: updateEvent.typeId
+        }
+      })
+      : null
+
+    if (updateEvent.statusId && !foundStatus) {
+      throw new NotFoundError(`Status with id ${updateEvent.statusId} not found`)
+    }
+    if (updateEvent.typeId && !foundType) {
+      throw new NotFoundError(`Type with id ${updateEvent.typeId} not found`)
+    }
+
+    for (let executorId of updateEvent.executorsIds) {
+      const foundExecutor = await this.prisma.users.findUnique({
+        where: {
+          id: executorId
+        }
+      })
+
+      if (!foundExecutor) {
+        throw new NotFoundError(`Executor with id ${executorId} not found`) 
+      }
+    }
+
     const updateData: Prisma.eventsUpdateInput = {}
 
     if (updateEvent.name) updateData.name = updateEvent.name
@@ -181,44 +212,15 @@ export class EventModuleService {
     if (updateEvent.seatsNumber) updateData.seats_number = updateEvent.seatsNumber
     if (updateEvent.places) updateData.places = { set: updateEvent.places}
     if (updateEvent.schedule) updateData.schedule = { set: updateEvent.schedule }
-    if (updateEvent.executorsIds) updateData.executors = {
-      connect: await Promise.all(updateEvent.executorsIds.map(async executorId => {
-        const foundExecutor = await this.prisma.users.findUnique({
-          where: {
-            id: executorId
-          }
-        })
+    if (updateEvent.statusId) updateData.status = { connect: { id: updateEvent.statusId } }
+    if (updateEvent.typeId) updateData.type = { connect: { id: updateEvent.typeId } }
 
-        if (!foundExecutor) {
-          throw new NotFoundError(`Executor with id ${executorId} not found`)
-        }
-
-        return {id_event_id_executor: { id_event: event.id, id_executor: executorId }}
-      }))
+    for (let executorId of event.executors_ids) {
+      await this.removeExecutorFromEvent(id, executorId)
     }
-    if (updateEvent.statusId) {
-      const foundStatus = await this.prisma.event_statuses.findUnique({
-        where: {
-          id: updateEvent.statusId
-        }
-      })
 
-      if (!foundStatus) {
-        throw new NotFoundError(`Status with id ${updateEvent.statusId} not found`)
-      }
-
-      updateData.status = { connect: { id: updateEvent.statusId } }
-    }
-    if (updateEvent.typeId) {
-      const foundType = await this.prisma.event_types.findUnique({
-        where: {
-          id: updateEvent.typeId
-        }
-      })
-
-      if (!foundType) {
-        throw new NotFoundError(`Type with id ${updateEvent.typeId} not found`)
-      }
+    for (let executorId of updateEvent.executorsIds) {
+      await this.addExecutorToEvent(id, executorId)
     }
 
     const updatedEvent = await this.prisma.events.update({
@@ -240,6 +242,26 @@ export class EventModuleService {
       schedule: eventWithAdditionalData.schedule,
       type: eventWithAdditionalData.type,
       status: eventWithAdditionalData.status
+    }
+  }
+
+  async addOrRemoveParticipants(id: number, updateParticipants: UpdateEventParticipantsDto): Promise<void> {
+    const event = await this.prisma.events.findUnique({
+      where: {
+        id
+      }
+    })
+
+    if (!event) {
+      throw new NotFoundError(`Event with id ${id} not found`)
+    }
+    
+    for (let participantId of updateParticipants.add || []) {
+      await this.addParticipantToEvent(event.id, participantId)
+    }
+
+    for (let participantId of updateParticipants.remove || []) {
+      await this.removeParticipantFromEvent(event.id, participantId)
     }
   }
 
@@ -356,5 +378,147 @@ export class EventModuleService {
       id: foundDepartment.id,
       name: foundDepartment.name
     }
+  }
+
+  private async addExecutorToEvent(eventId: number, executorId: number) {
+    const foundEvent = await this.prisma.events.findUnique({
+      where: {
+        id: eventId
+      }
+    })
+    const foundExecutor = await this.prisma.users.findUnique({
+      where: {
+        id: executorId
+      }
+    })
+
+    await this.prisma.users.update({
+      where: { id: executorId },
+      data: {
+        events_where_executor_ids: foundExecutor.events_where_executor_ids.concat(eventId),
+        events_where_executor: {
+          connectOrCreate: { 
+            where: { id_event_id_executor: { id_event: eventId, id_executor: executorId } },
+            create: { event: { connect: { id: eventId } } }
+          }
+        }
+      }
+    })
+
+    await this.prisma.events.update({
+      where: { id: eventId },
+      data: {
+        executors_ids: foundEvent.executors_ids.concat(executorId),
+        executors: {
+          connect: { 
+            id_event_id_executor: { id_event: eventId, id_executor: executorId }
+          }
+        }
+      }
+    })
+  }
+
+  private async removeExecutorFromEvent(eventId: number, executorId: number) {
+    const foundEvent = await this.prisma.events.findUnique({
+      where: {
+        id: eventId
+      }
+    })
+    const foundExecutor = await this.prisma.users.findUnique({
+      where: {
+        id: executorId
+      }
+    })
+
+    await this.prisma.user_executors_on_events.delete({
+      where: {
+        id_event_id_executor: { id_event: eventId, id_executor: executorId }
+      }
+    })
+
+    await this.prisma.users.update({
+      where: { id: executorId },
+      data: {
+        events_where_executor_ids: foundExecutor.events_where_executor_ids.filter(id => id !== eventId)
+      }
+    })
+
+    await this.prisma.events.update({
+      where: { id: eventId },
+      data: {
+        executors_ids: foundEvent.executors_ids.filter(id => id !== executorId)
+      }
+    })
+  }
+
+  private async addParticipantToEvent(eventId: number, participantId: number) {
+    const foundEvent = await this.prisma.events.findUnique({
+      where: {
+        id: eventId
+      }
+    })
+    const foundParticipant = await this.prisma.users.findUnique({
+      where: {
+        id: participantId
+      }
+    })
+
+    await this.prisma.users.update({
+      where: { id: participantId },
+      data: {
+        events_where_participant_ids: foundParticipant.events_where_participant_ids.concat(eventId),
+        events_where_participant: {
+          connectOrCreate: { 
+            where: { id_event_id_participant: { id_event: eventId, id_participant: participantId } },
+            create: { event: { connect: { id: eventId } } }
+          }
+        }
+      }
+    })
+
+    await this.prisma.events.update({
+      where: { id: eventId },
+      data: {
+        participants_ids: foundEvent.participants_ids.concat(participantId),
+        participants: {
+          connect: { 
+            id_event_id_participant: { id_event: eventId, id_participant: participantId }
+          }
+        }
+      }
+    })
+  }
+
+  private async removeParticipantFromEvent(eventId: number, participantId: number) {
+    const foundEvent = await this.prisma.events.findUnique({
+      where: {
+        id: eventId
+      }
+    })
+    const foundParticipant = await this.prisma.users.findUnique({
+      where: {
+        id: participantId
+      }
+    })
+
+    await this.prisma.user_participants_on_events.delete({
+      where: {
+        id_event_id_participant: { id_event: eventId, id_participant: participantId }
+      }
+    })
+
+    await this.prisma.users.update({
+      where: { id: participantId },
+      data: {
+        events_where_participant_ids: foundParticipant.events_where_participant_ids.filter(id => id !== eventId)
+      }
+    })
+
+    await this.prisma.events.update({
+      where: { id: eventId },
+      data: {
+        participants_ids: foundEvent.participants_ids.filter(id => id !== participantId)
+      }
+    })
   }
 }
