@@ -18,6 +18,7 @@ export class EventModuleService {
   async getEvents(getEventsParams: GetEventsMinimizeQuery): Promise<GetEventMinimizeSchema[]> {
     const where: Prisma.eventsWhereInput = {};
 
+    if (getEventsParams.name) where.name = {contains: getEventsParams.name}
     if (getEventsParams.department) where.id_department = getEventsParams.department
     if (getEventsParams.date) where.date = getEventsParams.date
     if (getEventsParams.executor) where.executors_ids = {has: getEventsParams.executor}

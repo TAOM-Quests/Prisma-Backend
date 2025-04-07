@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger"
 import { JsonArray } from "@prisma/client/runtime/library"
 
 export interface GetEventsMinimizeQuery {
+  name?: string
   department?: number
   date?: Date
   executor?: number

@@ -25,11 +25,12 @@ export class EventModuleController {
   @Get('/events')
   async getEvents(@Query() getEventsParams): Promise<GetEventMinimizeSchema[]> {
     const params: GetEventsMinimizeQuery = {
-     department: +getEventsParams.department,
-     date: getEventsParams.date && new Date(getEventsParams.date),
-     executor: +getEventsParams.executor,
-     participant: +getEventsParams.participant,
-     type: +getEventsParams.type
+      name: getEventsParams.name,
+      department: +getEventsParams.department,
+      date: getEventsParams.date && new Date(getEventsParams.date),
+      executor: +getEventsParams.executor,
+      participant: +getEventsParams.participant,
+      type: +getEventsParams.type
     }
 
     return this.eventModuleService.getEvents(params)
