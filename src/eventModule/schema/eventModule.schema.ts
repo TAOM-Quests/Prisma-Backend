@@ -40,3 +40,13 @@ export class PostEventSchema {
   type: number
   departmentId: number
 }
+
+export class GetEventTypeSchema {
+  id: number
+  name: string
+}
+
+export class GetEventStatusSchema {
+  id: number
+  name: string
+}

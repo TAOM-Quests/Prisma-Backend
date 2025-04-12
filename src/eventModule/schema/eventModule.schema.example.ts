@@ -71,3 +71,14 @@ export const getEventSchemaExample: GetEventSchema = {
     name: 'Planned'
   }
 }
+
+export const getEventTypeSchemaExample = [
+  {
+    id: 1,
+    name: 'Championship'
+  },
+  {
+    id: 2,
+    name: 'Practice'
+  }
+]
