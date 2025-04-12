@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Query } from "@nestjs/common";
 import { ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { GetEventMinimizeSchema, GetEventSchema, GetEventStatusSchema, GetEventTypeSchema } from "./schema/eventModule.schema";
 import { CreateEventDto, GetEventsMinimizeQuery, UpdateEventDto, UpdateEventParticipantsDto } from "./dto/eventModule.dto";
@@ -67,6 +67,12 @@ export class EventModuleController {
     @Body() updateEvent: UpdateEventDto
   ): Promise<GetEventSchema> {
     return this.eventModuleService.updateEvent(+id, updateEvent)
+  }
+
+  @ApiResponse({status: 200})
+  @Delete('/events/:id')
+  async deleteEvent(@Param('id') id: string): Promise<void> {
+    return this.eventModuleService.deleteEvent(+id)
   }
 
   @ApiResponse({status: 200})

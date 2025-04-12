@@ -246,6 +246,30 @@ export class EventModuleService {
     }
   }
 
+  async deleteEvent(id: number): Promise<void> {
+    const event = await this.prisma.events.findUnique({
+      where: {
+        id
+      }
+    })
+
+    if (!event) {
+      throw new NotFoundError(`Event with id ${id} not found`)
+    }
+
+    for (let executorId of event.executors_ids) {
+      await this.removeExecutorFromEvent(id, executorId)
+    }
+    for (let participantId of event.participants_ids) {
+      await this.removeParticipantFromEvent(id, participantId)
+    }
+    await this.prisma.events.delete({
+      where: {
+        id
+      }
+    })
+  }
+
   async addOrRemoveParticipants(id: number, updateParticipants: UpdateEventParticipantsDto): Promise<void> {
     const event = await this.prisma.events.findUnique({
       where: {
@@ -527,6 +551,7 @@ export class EventModuleService {
     await this.prisma.users.update({
       where: { id: participantId },
       data: {
+        events_where_participant: {disconnect: { id_event_id_participant: { id_event: eventId, id_participant: participantId } }},
         events_where_participant_ids: foundParticipant.events_where_participant_ids.filter(id => id !== eventId)
       }
     })
@@ -534,6 +559,7 @@ export class EventModuleService {
     await this.prisma.events.update({
       where: { id: eventId },
       data: {
+        participants: {disconnect: { id_event_id_participant: { id_event: eventId, id_participant: participantId } }},
         participants_ids: foundEvent.participants_ids.filter(id => id !== participantId)
       }
     })
