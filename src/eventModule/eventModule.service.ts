@@ -332,16 +332,18 @@ export class EventModuleService {
           id: executorId
         }
       })
-      const foundExecutorPosition = await this.prisma.user_positions.findUnique({
-        where: {
-          id: foundExecutor.id_position
-        }
-      })
+      const foundExecutorPosition = foundExecutor.id_position
+        ? await this.prisma.user_positions.findUnique({
+            where: {
+              id: foundExecutor.id_position
+            }
+          })
+        : null
 
       executors.push({
         id: foundExecutor.id,
         name: foundExecutor.first_name + ' ' + foundExecutor.last_name,
-        position: foundExecutorPosition.name
+        position: foundExecutorPosition?.name
       })
     }
 
@@ -551,7 +553,6 @@ export class EventModuleService {
     await this.prisma.users.update({
       where: { id: participantId },
       data: {
-        events_where_participant: {disconnect: { id_event_id_participant: { id_event: eventId, id_participant: participantId } }},
         events_where_participant_ids: foundParticipant.events_where_participant_ids.filter(id => id !== eventId)
       }
     })
@@ -559,7 +560,6 @@ export class EventModuleService {
     await this.prisma.events.update({
       where: { id: eventId },
       data: {
-        participants: {disconnect: { id_event_id_participant: { id_event: eventId, id_participant: participantId } }},
         participants_ids: foundEvent.participants_ids.filter(id => id !== participantId)
       }
     })
