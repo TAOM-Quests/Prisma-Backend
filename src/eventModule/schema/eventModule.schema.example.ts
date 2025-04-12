@@ -82,3 +82,14 @@ export const getEventTypeSchemaExample = [
     name: 'Practice'
   }
 ]
+
+export const getEventStatusSchemaExample = [
+  {
+    id: 1,
+    name: 'Planned'
+  },
+  {
+    id: 2,
+    name: 'Canceled'
+  }
+]

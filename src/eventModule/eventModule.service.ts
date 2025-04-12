@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { GetEventsMinimizeQuery, CreateEventDto, UpdateEventDto, UpdateEventParticipantsDto } from "./dto/eventModule.dto";
-import { GetEventMinimizeSchema, GetEventSchema, GetEventTypeSchema } from "./schema/eventModule.schema";
+import { GetEventMinimizeSchema, GetEventSchema, GetEventStatusSchema, GetEventTypeSchema } from "./schema/eventModule.schema";
 import { Prisma } from "@prisma/client";
 import { Executor, Inspector, Participant } from "src/models/users";
 import { EventType } from "src/models/eventType";
@@ -271,6 +271,14 @@ export class EventModuleService {
     return types.map((type) => ({
       id: type.id,
       name: type.name
+    }))
+  }
+
+  async getStatuses(): Promise<GetEventStatusSchema[]> {
+    const statuses = await this.prisma.event_statuses.findMany()
+    return statuses.map((status) => ({
+      id: status.id,
+      name: status.name
     }))
   }
 
