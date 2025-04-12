@@ -1,14 +1,16 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient()
+const USER_ROLES: Prisma.user_rolesCreateManyInput[] = [{ id: 1, name: 'Администратор' }]
 
-export async function main(): Promise<void> {
+export const userRoles = async (): Promise<void> => {
   await prisma.$transaction(async tx => {
-    await tx.user_roles.createMany({
-      data: [
-        { id: 1, name: 'Пользователь' },
-        { id: 2, name: 'Администратор' }
-      ]
-    })
+    for (let role of USER_ROLES) {
+      await tx.user_roles.upsert({
+        where: { id: role.id },
+        update: role,
+        create: role
+      })
+    }
   })
 }
