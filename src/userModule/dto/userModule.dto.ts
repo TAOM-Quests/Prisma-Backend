@@ -60,4 +60,10 @@ export class UpdateProfileDto {
     required: false,
   })
   phoneNumber: string
+
+  @ApiProperty({
+    example: 'Nichi_Ro',
+    required: false,
+  })
+  telegram: string
 }

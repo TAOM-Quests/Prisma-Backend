@@ -13,25 +13,26 @@ export class AuthUserSchema {
 export class GetUserProfileSchema {
   id: number
   email: string
-  firstName: string
-  lastName: string
-  patronymic: string
-  birthDate: Date
-  sex: string
-  phoneNumber: string
-  completeQuests: QuestMinimize[]
+  sex?: string
   role?: UserRole
-  position?: UserPosition
+  birthDate?: Date
+  lastName?: string
+  telegram?: string
+  firstName?: string
+  patronymic?: string
+  phoneNumber?: string
   department?: Department
+  position?: UserPosition
 }
 
 export class UpdateUserProfileSchema {
   id: number
-  email: string
-  firstName: string
-  lastName: string
-  patronymic: string
-  birthDate: Date
-  sex: string
-  phoneNumber: string
+  sex?: string
+  email?: string
+  birthDate?: Date
+  lastName?: string
+  telegram?: string
+  firstName?: string
+  patronymic?: string
+  phoneNumber?: string
 }
