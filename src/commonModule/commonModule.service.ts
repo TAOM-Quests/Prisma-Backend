@@ -2,9 +2,9 @@ import { Injectable, StreamableFile } from "@nestjs/common";
 import { createReadStream } from "fs";
 import { join } from "path";
 import * as mime from 'mime-types'
-import { stat } from "fs/promises";
 import { GetFileStatsSchema } from "./schema/commonModule.schema";
 import { PrismaService } from "src/prisma/prisma.service";
+import { NotFoundError } from "src/errors/notFound";
 
 @Injectable()
 export class CommonModuleService {
@@ -14,6 +14,8 @@ export class CommonModuleService {
     const file = createReadStream(join(process.cwd(), `public/${fileName}`))
     const stream = new StreamableFile(file)
     const sharedFile = await this.prisma.shared_files.findUnique({ where: { name: fileName } })
+    
+    if (!sharedFile) throw new NotFoundError('File not found')
 
     stream.options.type = mime.lookup(sharedFile.extension)
     stream.options.disposition = `attachment; filename="${encodeURIComponent(`${sharedFile.original_name}.${sharedFile.extension}`)}"`
@@ -23,6 +25,8 @@ export class CommonModuleService {
 
   async getFileStats(fileName: string): Promise<GetFileStatsSchema> {
     const file = await this.prisma.shared_files.findUnique({ where: { name: fileName } })
+
+    if (!file) throw new NotFoundError('File not found')
 
     return {
       id: file.id,
