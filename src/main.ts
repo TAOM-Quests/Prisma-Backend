@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
+import { notifier } from './services/notifier/notifier'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -10,6 +11,8 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1')
   app.enableCors()
   addSwagger(app)
+
+  notifier()
 
   await app.listen(process.env.PORT ?? 3000)
 }

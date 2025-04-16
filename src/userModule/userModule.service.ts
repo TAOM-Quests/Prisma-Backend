@@ -159,7 +159,7 @@ export class UserModuleService {
       birthDate: foundUser.birth_date,
       sex: USER_SEX[foundUser.sex],
       phoneNumber: foundUser.phone_number,
-      completeQuests: [],
+      telegram: foundUser.telegram
     }
 
     if (isEmployee) {
@@ -222,6 +222,7 @@ export class UserModuleService {
       birthDate: updatedUser.birth_date,
       sex: updatedUser.sex,
       phoneNumber: updatedUser.phone_number,
+      telegram: updatedUser.telegram
     }
   }
 
@@ -270,6 +271,9 @@ export class UserModuleService {
     }
     if (updateProfile.phoneNumber) {
       result.phone_number = updateProfile.phoneNumber
+    }
+    if (updateProfile.telegram) {
+      result.telegram = updateProfile.telegram
     }
 
     return result

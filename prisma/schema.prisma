@@ -88,7 +88,7 @@ model departments {
 model events {
   id               Int                           @id @default(autoincrement())
   id_status        Int                           @default(1)
-  id_department    Int                           
+  id_department    Int
   date             DateTime?
   name             String?
   description      String?
@@ -220,6 +220,8 @@ model users {
   last_name                    String?
   patronymic                   String?
   phone_number                 String?
+  telegram                     String?                       @unique
+  telegram_chat_id             Int?
   sex                          user_sex?
   complete_quests              complete_quests[]
   events_where_inspector       events[]
