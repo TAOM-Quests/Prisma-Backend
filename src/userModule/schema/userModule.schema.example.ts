@@ -27,27 +27,7 @@ export const getUserProfileSchemaExample: GetUserProfileSchema = {
     id: 0,
     name: 'Admin',
     description: 'Director of department'
-  },
-  completeQuests: [
-    {
-      id: 10,
-      name: 'Python start',
-      group: {
-        id: 10,
-        name: 'Python',
-      },
-      tags: [
-        {
-          id: 10,
-          name: 'Start',
-        },
-      ],
-      difficult: {
-        id: 2,
-        name: 'Medium',
-      },
-    },
-  ],
+  }
 }
 
 export const updateUserProfileSchemaExample: UpdateUserProfileSchema = {
