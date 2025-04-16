@@ -1,5 +1,11 @@
 import { GetUserProfileSchema, UpdateUserProfileSchema } from "./userModule.schema"
 
+export const getUsersSchemaExample = {
+  id: 10,
+  name: 'Roman Nichi',
+  position: 'President of Academy',
+}
+
 export const authUserSchemaExample = {
   id: 10,
   email: 'test@gmail.com',
@@ -27,27 +33,7 @@ export const getUserProfileSchemaExample: GetUserProfileSchema = {
     id: 0,
     name: 'Admin',
     description: 'Director of department'
-  },
-  completeQuests: [
-    {
-      id: 10,
-      name: 'Python start',
-      group: {
-        id: 10,
-        name: 'Python',
-      },
-      tags: [
-        {
-          id: 10,
-          name: 'Start',
-        },
-      ],
-      difficult: {
-        id: 2,
-        name: 'Medium',
-      },
-    },
-  ],
+  }
 }
 
 export const updateUserProfileSchemaExample: UpdateUserProfileSchema = {

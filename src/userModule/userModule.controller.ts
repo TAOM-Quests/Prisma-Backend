@@ -1,20 +1,30 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
-import { UpdateProfileDto, UserAuthDto } from './dto/userModule.dto'
+import { GetUsersQuery, UpdateProfileDto, UserAuthDto } from './dto/userModule.dto'
 import {
   AuthUserSchema,
   GetUserProfileSchema,
+  GetUsersSchema,
   UpdateUserProfileSchema,
 } from './schema/userModule.schema'
 import { UserModuleService } from './userModule.service'
 import { ApiResponse, ApiTags } from '@nestjs/swagger'
-import { authUserSchemaExample, getUserProfileSchemaExample, updateUserProfileSchemaExample } from './schema/userModule.schema.example'
-
+import { authUserSchemaExample, getUserProfileSchemaExample, getUsersSchemaExample, updateUserProfileSchemaExample } from './schema/userModule.schema.example'
 @ApiTags('userModule')
 @Controller('userModule')
 export class UserModuleController {
   constructor(
     private userModuleService: UserModuleService
   ) {}
+
+@ApiResponse({
+    status: 200,
+    type: GetUsersSchema,
+    example: getUsersSchemaExample,
+  })
+  @Get('/users')
+  async getUsers(@Query() query: GetUsersQuery): Promise<GetUsersSchema[]> {
+    return this.userModuleService.getUsers(query)
+  }
 
   @ApiResponse({
     status: 200,

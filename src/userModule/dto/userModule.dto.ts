@@ -3,6 +3,13 @@ import { IsEmail } from 'class-validator'
 
 type USER_SEX = 'Мужской' | 'Женский'
 
+export class GetUsersQuery {
+  roleId?: number
+  isAdmin?: boolean
+  positionId?: number
+  isEmployee?: boolean
+}
+
 export class UserAuthDto {
   @ApiProperty({
     example: 'test@gmail.com',
