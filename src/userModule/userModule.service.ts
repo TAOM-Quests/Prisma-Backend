@@ -3,9 +3,10 @@ import { PrismaService } from 'src/prisma/prisma.service'
 import {
   AuthUserSchema,
   GetUserProfileSchema,
+  GetUsersSchema,
   UpdateUserProfileSchema,
 } from './schema/userModule.schema'
-import { UpdateProfileDto, UserAuthDto } from './dto/userModule.dto'
+import { GetUsersQuery, UpdateProfileDto, UserAuthDto } from './dto/userModule.dto'
 import { genSaltSync, hashSync, compare } from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { NotFoundError } from 'src/errors/notFound'
@@ -23,6 +24,36 @@ export class UserModuleService {
     private prisma: PrismaService,
     private jwt: JwtService,
   ) {}
+
+  async getUsers(getUsers: GetUsersQuery): Promise<GetUsersSchema[]> {
+    const where: Prisma.usersWhereInput = {}
+
+    if (getUsers.roleId) where.id_role = getUsers.roleId
+    if (getUsers.positionId) where.id_position = getUsers.positionId
+    if (getUsers.isAdmin) where.id_role = 1
+    if (getUsers.isEmployee) where.id_role = { not: null }
+
+    const users = await this.prisma.users.findMany({ where })
+
+    return Promise.all(users.map(async (user) => {
+      const resultUser: GetUsersSchema = { 
+        id: user.id,
+        name: (user.first_name + ' ' + user.last_name).trim()
+      }
+
+      if (user.id_position) {
+        const foundPosition = await this.prisma.user_positions.findUniqueOrThrow({
+          where: {
+            id: user.id_position
+          }
+        })
+
+        resultUser.position = foundPosition.name
+      }
+
+      return resultUser
+    }))
+  }
 
   async createUser(userAuth: UserAuthDto): Promise<AuthUserSchema> {
     const saltRounds = 10
@@ -76,7 +107,7 @@ export class UserModuleService {
     }
 
     if (foundUser.id_role) {
-      this.setRole(authUser, foundUser.id_role)
+      authUser.isEmployee = true
     }
 
     return authUser
@@ -101,7 +132,7 @@ export class UserModuleService {
       }
   
       if (foundUser.id_role) {
-        this.setRole(authUser, foundUser.id_role)
+        authUser.isEmployee = true
       }
   
       return authUser

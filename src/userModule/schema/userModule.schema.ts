@@ -3,11 +3,18 @@ import { QuestMinimize } from 'src/models/QuestMinimize'
 import { UserPosition } from 'src/models/userPosition'
 import { UserRole } from 'src/models/userRole'
 
+export class GetUsersSchema {
+  id: number
+  name: string
+  position?: string
+}
+
 export class AuthUserSchema {
   id: number
   email: string
   token: string
-  role?: UserRole
+  isAdmin?: boolean
+  isEmployee?: boolean
 }
 
 export class GetUserProfileSchema {
