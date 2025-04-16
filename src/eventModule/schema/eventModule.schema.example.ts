@@ -23,7 +23,8 @@ export const getEventsMinimizeSchemaExample: GetEventMinimizeSchema[] = [{
   status: {
     id: 1,
     name: 'Planned'
-  }
+  },
+  imagePath: 'TAOM SKILLS.png'
 }]
 
 export const getEventSchemaExample: GetEventSchema = {
@@ -69,7 +70,8 @@ export const getEventSchemaExample: GetEventSchema = {
   status: {
     id: 1,
     name: 'Planned'
-  }
+  },
+  imagePath: 'TAOM SKILLS.png'
 }
 
 export const getEventTypeSchemaExample = [

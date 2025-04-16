@@ -39,7 +39,8 @@ export class EventModuleService {
           date: eventWithAdditionalData.date,
           places: eventWithAdditionalData.places,
           type: eventWithAdditionalData.type,
-          status: eventWithAdditionalData.status
+          status: eventWithAdditionalData.status,
+          imagePath: eventWithAdditionalData.imagePath
         }
       })
     )
@@ -70,7 +71,8 @@ export class EventModuleService {
       places: eventWithAdditionalData.places,
       type: eventWithAdditionalData.type,
       status: eventWithAdditionalData.status,
-      schedule: eventWithAdditionalData.schedule
+      schedule: eventWithAdditionalData.schedule,
+      imagePath: eventWithAdditionalData.imagePath
     }
   }
 
@@ -156,7 +158,8 @@ export class EventModuleService {
       places: eventWithAdditionalData.places,
       schedule: eventWithAdditionalData.schedule,
       type: eventWithAdditionalData.type,
-      status: eventWithAdditionalData.status
+      status: eventWithAdditionalData.status,
+      imagePath: eventWithAdditionalData.imagePath
     }
   }
 
@@ -242,7 +245,8 @@ export class EventModuleService {
       places: eventWithAdditionalData.places,
       schedule: eventWithAdditionalData.schedule,
       type: eventWithAdditionalData.type,
-      status: eventWithAdditionalData.status
+      status: eventWithAdditionalData.status,
+      imagePath: eventWithAdditionalData.imagePath
     }
   }
 
@@ -309,6 +313,7 @@ export class EventModuleService {
   private async getEventMinimizeWithAdditionalData(event): Promise<GetEventMinimizeSchema> {
     if (event.id_type) event.type = await this.getType(event)
     if (event.id_status) event.status = await this.getStatus(event)
+    if (event.id_image_file) event.imagePath = await this.getImagePath(event)
 
     return event
   }
@@ -319,6 +324,7 @@ export class EventModuleService {
     if (event.id_inspector) event.inspector = await this.getInspector(event)
     if (event.id_type) event.type = await this.getType(event)
     if (event.id_status) event.status = await this.getStatus(event)
+    if (event.id_image_file) event.imagePath = await this.getImagePath(event)
 
     return event
   }
@@ -421,6 +427,16 @@ export class EventModuleService {
       id: foundDepartment.id,
       name: foundDepartment.name
     }
+  }
+
+  private async getImagePath(event): Promise<string> {
+    const foundFile = await this.prisma.shared_files.findUnique({
+      where: {
+        id: event.id_image
+      }
+    })
+
+    return foundFile.path
   }
 
   private async addExecutorToEvent(eventId: number, executorId: number) {

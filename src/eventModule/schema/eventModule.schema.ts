@@ -11,6 +11,7 @@ export class GetEventMinimizeSchema {
   places: JsonArray
   status: EventStatus
   type: EventType
+  imagePath: string
 }
 
 export class GetEventSchema {
@@ -26,6 +27,7 @@ export class GetEventSchema {
   schedule: ScheduleItem[]
   type: EventType
   status: EventStatus
+  imagePath: string
 }
 
 export class PostEventSchema {
