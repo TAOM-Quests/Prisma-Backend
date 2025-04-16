@@ -3,6 +3,7 @@ import { CommonModuleController } from "./commonModule.controller";
 import { CommonModuleService } from "./commonModule.service";
 import { MulterModule } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
+import { PrismaService } from "src/prisma/prisma.service";
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import { diskStorage } from "multer";
     }),
   ],
   controllers: [CommonModuleController],
-  providers: [CommonModuleService],
+  providers: [CommonModuleService, PrismaService],
 })
 export class CommonModule {}

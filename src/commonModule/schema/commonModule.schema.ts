@@ -1,4 +1,7 @@
-export class UploadFileSchema {
+export class GetFileStatsSchema {
+  id: number
   name: string
-  originalname: string
+  size: number
+  extension: string
+  originalName: string
 }

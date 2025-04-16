@@ -2,8 +2,8 @@ import { Controller, Get, Post, Query, StreamableFile, UploadedFile, UseIntercep
 import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CommonModuleService } from "./commonModule.service";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { UploadFileSchema } from "./schema/commonModule.schema";
-import { uploadFileSchemaExample } from "./schema/commonModule.schema.example";
+import { GetFileStatsSchema } from "./schema/commonModule.schema";
+import { getFileStatsSchemaExample } from "./schema/commonModule.schema.example";
 
 @ApiTags('commonModule')
 @Controller('commonModule')
@@ -15,6 +15,11 @@ export class CommonModuleController {
   @Get('file')
   async getFile(@Query('fileName') fileName: string): Promise<StreamableFile> {
     return this.commonModuleService.getFile(fileName)
+  }
+
+  @Get('file/stats')
+  async getFileStats(@Query('fileName') fileName: string): Promise<GetFileStatsSchema> {
+    return this.commonModuleService.getFileStats(fileName)
   }
 
   @ApiConsumes('multipart/form-data')
@@ -29,15 +34,11 @@ export class CommonModuleController {
       },
     },
   })
-  @ApiResponse({ type: UploadFileSchema, example: uploadFileSchemaExample })
+  @ApiResponse({ type: GetFileStatsSchema, example: getFileStatsSchemaExample })
   @Post('file')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File): Promise<UploadFileSchema> {
-    console.log('FILE UPLOADED', file.originalname)
-
-    return {
-      name: file.filename,
-      originalname: file.originalname,
-    }
+  async uploadFile(@UploadedFile() file: Express.Multer.File): Promise<GetFileStatsSchema> {
+    await this.commonModuleService.uploadFile(file)
+    return this.commonModuleService.getFileStats(file.filename)
   }
 }

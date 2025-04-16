@@ -195,13 +195,14 @@ model questions_types {
 }
 
 model shared_files {
-  id        Int      @id @default(autoincrement())
-  name      String
-  extension String
-  size      String
-  path      String
-  events    events[]
-  users     users[]
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  original_name String
+  extension     String
+  size          Int
+  path          String
+  events        events[]
+  users         users[]
 }
 
 model users {
