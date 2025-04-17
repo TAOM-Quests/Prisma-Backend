@@ -1,10 +1,12 @@
-import { Injectable, StreamableFile } from "@nestjs/common";
+import { Injectable, Req, StreamableFile } from "@nestjs/common";
 import { createReadStream } from "fs";
 import { join } from "path";
 import * as mime from 'mime-types'
 import { GetFileStatsSchema } from "./schema/commonModule.schema";
 import { PrismaService } from "src/prisma/prisma.service";
 import { NotFoundError } from "src/errors/notFound";
+
+const BASE_FILE_URL = `https://${process.env.HOSTNAME ?? 'localhost:' + process.env.PORT ?? 3000}/commonModule/file`
 
 @Injectable()
 export class CommonModuleService {
@@ -33,7 +35,8 @@ export class CommonModuleService {
       name: file.name,
       size: file.size,
       extension: fileName.split('.')[fileName.split('.').length - 1],
-      originalName: file.original_name
+      originalName: file.original_name,
+      url: `${BASE_FILE_URL}?fileName=${file.name}`
     }
   }
 

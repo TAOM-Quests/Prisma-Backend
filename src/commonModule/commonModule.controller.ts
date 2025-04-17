@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, StreamableFile, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { Controller, Get, Post, Query, Req, StreamableFile, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CommonModuleService } from "./commonModule.service";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -18,7 +18,7 @@ export class CommonModuleController {
   }
 
   @Get('file/stats')
-  async getFileStats(@Query('fileName') fileName: string): Promise<GetFileStatsSchema> {
+  async getFileStats(@Query('fileName') fileName: string, @Req() req: Request): Promise<GetFileStatsSchema> {
     return this.commonModuleService.getFileStats(fileName)
   }
 

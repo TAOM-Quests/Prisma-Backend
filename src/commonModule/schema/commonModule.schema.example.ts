@@ -5,5 +5,6 @@ export const getFileStatsSchemaExample: GetFileStatsSchema = {
   size: 1024,
   extension: 'png',
   id: 1,
-  originalName: "test"
+  originalName: 'test',
+  url: 'https://localhost:3000/commonModule/file?fileName=1744810610173-320802287.png'
 }
