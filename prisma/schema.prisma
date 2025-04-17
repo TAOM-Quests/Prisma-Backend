@@ -98,6 +98,7 @@ model events {
   id_image_file    Int?
   places           Json[]
   schedule         Json[]
+  files_ids        Int[]
   executors_ids    Int[]
   participants_ids Int[]
   status           event_statuses                @relation(fields: [id_status], references: [id])
@@ -105,6 +106,7 @@ model events {
   type             event_types?                  @relation(fields: [id_type], references: [id])
   image            shared_files?                 @relation(fields: [id_image_file], references: [id])
   inspector        users?                        @relation(fields: [id_inspector], references: [id])
+  files            shared_files_on_events[]
   executors        user_executors_on_events[]
   participants     user_participants_on_events[]
 }
@@ -195,14 +197,24 @@ model questions_types {
 }
 
 model shared_files {
-  id            Int      @id @default(autoincrement())
-  name          String   @unique
-  original_name String
-  extension     String
-  size          Int
-  path          String
-  events        events[]
-  users         users[]
+  id                 Int                      @id @default(autoincrement())
+  name               String                   @unique
+  original_name      String
+  extension          String
+  size               Int
+  path               String
+  users              users[]
+  events_where_image events[]
+  events_where_file  shared_files_on_events[]
+}
+
+model shared_files_on_events {
+  id_event Int
+  id_file  Int
+  event    events       @relation(fields: [id_event], references: [id])
+  file     shared_files @relation(fields: [id_file], references: [id])
+
+  @@id([id_event, id_file])
 }
 
 model users {

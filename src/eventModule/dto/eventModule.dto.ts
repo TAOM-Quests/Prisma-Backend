@@ -91,6 +91,12 @@ export class CreateEventDto {
     required: false
   })
   typeId?: number
+
+  @ApiProperty({
+    example: [1, 2],
+    required: false
+  })
+  filesIds?: number[]
 }
 
 export class UpdateEventDto {  
@@ -164,6 +170,12 @@ export class UpdateEventDto {
     required: false
   })
   typeId?: number
+
+  @ApiProperty({
+    example: [1, 2],
+    required: false
+  })
+  filesIds?: number[]
 }
 
 export class UpdateEventParticipantsDto {

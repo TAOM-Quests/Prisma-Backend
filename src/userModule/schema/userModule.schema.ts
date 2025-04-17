@@ -16,6 +16,7 @@ export class AuthUserSchema {
   token: string
   isAdmin?: boolean
   isEmployee?: boolean
+  departmentId?: number
 }
 
 export class GetUserProfileSchema {
