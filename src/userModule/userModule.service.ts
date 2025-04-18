@@ -14,8 +14,8 @@ import { BadRequestError } from 'src/errors/badRequest'
 import { Prisma, user_sex } from '@prisma/client'
 
 const USER_SEX = {
-  MALE: 'Мужской',
-  FEMALE: 'Женский',
+  MALE: 'Мужской',
+  FEMALE: 'Женский',
 }
 
 @Injectable()
@@ -59,9 +59,9 @@ export class UserModuleService {
     const saltRounds = 10
     const salt = genSaltSync(saltRounds)
     const hashedPassword = hashSync(userAuth.password, salt)
-    
+
     const token = await this.jwt.signAsync({
-      sun: userAuth.email
+      sun: userAuth.email,
     })
 
     const foundUser = await this.prisma.users.findUnique({
@@ -71,14 +71,16 @@ export class UserModuleService {
     })
 
     if (foundUser) {
-      throw new BadRequestError(`User with email ${userAuth.email} already exist`)
+      throw new BadRequestError(
+        `User with email ${userAuth.email} already exist`,
+      )
     }
 
     const createdUser = await this.prisma.users.create({
       data: {
         email: userAuth.email,
         password: hashedPassword,
-        token
+        token,
       },
     })
 
@@ -88,7 +90,7 @@ export class UserModuleService {
       token,
     }
   }
-  
+
   async authUserByToken(token: string): Promise<AuthUserSchema> {
     const foundUser = await this.prisma.users.findUnique({
       where: {
@@ -113,7 +115,9 @@ export class UserModuleService {
     return authUser
   }
 
-  async authUserByEmailAndPassword(userAuth: UserAuthDto): Promise<AuthUserSchema> {
+  async authUserByEmailAndPassword(
+    userAuth: UserAuthDto,
+  ): Promise<AuthUserSchema> {
     const foundUser = await this.prisma.users.findUnique({
       where: {
         email: userAuth.email,
@@ -130,15 +134,17 @@ export class UserModuleService {
         email: foundUser.email,
         token: foundUser.token,
       }
-  
+
       if (foundUser.id_role) {
         authUser.isEmployee = true
       }
-  
+
       return authUser
     } else {
-      throw new BadRequestError(`Password not compare for user (${foundUser.id})`)
-    }    
+      throw new BadRequestError(
+        `Password not compare for user (${foundUser.id})`,
+      )
+    }
   }
 
   async getUserProfileById(id: number): Promise<GetUserProfileSchema> {
@@ -192,7 +198,7 @@ export class UserModuleService {
 
   async updateUserProfile(
     id: number,
-    updateProfile: UpdateProfileDto
+    updateProfile: UpdateProfileDto,
   ): Promise<UpdateUserProfileSchema> {
     const foundUser = await this.prisma.users.findUnique({
       where: {
@@ -202,15 +208,15 @@ export class UserModuleService {
 
     if (!foundUser) {
       throw new NotFoundError(`User with id ${id} not found`)
-    }    
+    }
 
     const updatedUser = await this.prisma.users.update({
       data: {
-        ...this.requestUpdateProfileToDbFields(updateProfile)
+        ...this.requestUpdateProfileToDbFields(updateProfile),
       },
       where: {
         id,
-      }
+      },
     })
 
     return {
@@ -240,12 +246,13 @@ export class UserModuleService {
   }
 
   private requestUpdateProfileToDbFields(
-    updateProfile: UpdateProfileDto
+    updateProfile: UpdateProfileDto,
   ): Prisma.usersUpdateInput {
     const result: Prisma.usersUpdateInput = {}
 
-    const userSex = Object.keys(USER_SEX)
-      .find(sex => USER_SEX[sex] === updateProfile.sex)
+    const userSex = Object.keys(USER_SEX).find(
+      (sex) => USER_SEX[sex] === updateProfile.sex,
+    )
 
     if (updateProfile.sex && !userSex) {
       throw new BadRequestError(`Sex ${updateProfile.sex} not found`)
@@ -266,7 +273,7 @@ export class UserModuleService {
     if (updateProfile.birthDate) {
       result.birth_date = updateProfile.birthDate
     }
-    if (updateProfile.sex) { 
+    if (updateProfile.sex) {
       result.sex = userSex as user_sex
     }
     if (updateProfile.phoneNumber) {
