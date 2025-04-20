@@ -1,11 +1,11 @@
-export class GetQuestsQuery {
+export class GetQuestsMinimizeQuery {
   ids?: number[]
   departmentsIds?: number[]
   tagsIds?: number[]
   executorsIds?: number[]
 }
 
-export class GetCompleteQuestsQuery {
+export class GetCompleteQuestsMinimizeQuery {
   ids?: number[]
   departmentsIds?: number[]
   tagsIds?: number[]

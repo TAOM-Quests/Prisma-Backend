@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { GetCompleteQuestsQuery, GetQuestsQuery } from "./dto/questModule.dto";
+import { GetCompleteQuestsMinimizeQuery, GetQuestsMinimizeQuery } from "./dto/questModule.dto";
 import { Prisma } from "@prisma/client";
-import { GetQuestSchema } from "./schema/questModule.schema";
+import { GetQuestMinimizeSchema, GetQuestSchema } from "./schema/questModule.schema";
 import { QuestQuestion } from "src/models/questQuestion";
 import { QuestAnswer } from "src/models/questAnswer";
 
@@ -12,7 +12,7 @@ export class QuestModuleService {
     private prisma: PrismaService
   ) {}
 
-  async getQuests(getQuestsQuery: GetQuestsQuery): Promise<GetQuestSchema[]> {
+  async getQuests(getQuestsQuery: GetQuestsMinimizeQuery): Promise<GetQuestMinimizeSchema[]> {
     const where: Prisma.questsWhereInput = {}
 
     if (getQuestsQuery.ids) where.id = { in: getQuestsQuery.ids }
@@ -21,18 +21,18 @@ export class QuestModuleService {
     if (getQuestsQuery.departmentsIds) where.id_department = { in: getQuestsQuery.departmentsIds }
 
     const foundQuests = await this.prisma.quests.findMany({ where })
-    const quests: GetQuestSchema[] = []
+    const quests: GetQuestMinimizeSchema[] = []
     
     for (let foundQuest of foundQuests) {
-      const executor = await this.prisma.users.findUnique({ where: { id: foundQuest.id_executor } })
-      const executorPosition = await this.prisma.user_positions.findUnique({ where: { id: executor.id_position } })
-      const quest: GetQuestSchema = {
+      // const executor = await this.prisma.users.findUnique({ where: { id: foundQuest.id_executor } })
+      // const executorPosition = await this.prisma.user_positions.findUnique({ where: { id: executor.id_position } })
+      const quest: GetQuestMinimizeSchema = {
         id: foundQuest.id,
-        executor: {
-          id: executor.id,
-          name: executor.first_name + ' ' + executor.last_name,
-          position: executorPosition.name
-        }
+        // executor: {
+        //   id: executor.id,
+        //   name: executor.first_name + ' ' + executor.last_name,
+        //   position: executorPosition.name
+        // }
       }
 
       if (foundQuest.name) quest.name = foundQuest.name
@@ -48,10 +48,10 @@ export class QuestModuleService {
         const difficult = await this.prisma.quest_difficulties.findUnique({ where: { id: foundQuest.id_difficult } })
         quest.difficult = { id: difficult.id, name: difficult.name }
       }
-      if (foundQuest.questions_ids) {
-        const questions = await this.getQuestQuestions(foundQuest.id)
-        quest.questions = questions
-      }
+      // if (foundQuest.questions_ids) {
+      //   const questions = await this.getQuestQuestions(foundQuest.id)
+      //   quest.questions = questions
+      // }
 
       quests.push(quest)
     }
@@ -59,8 +59,8 @@ export class QuestModuleService {
     return quests
   }
 
-  async getCompleteQuests(getQuestsQuery: GetCompleteQuestsQuery) {
-    
+  async getCompleteQuests(getQuestsQuery: GetCompleteQuestsMinimizeQuery): Promise<GetQuestMinimizeSchema[]> {
+
   }
 
   private async getQuestQuestions(questId: number): Promise<QuestQuestion[]> {

@@ -1,8 +1,8 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import { QuestModuleService } from "./questModule.service";
 import { ApiResponse } from "@nestjs/swagger";
-import { GetQuestSchema } from "./schema/questModule.schema";
-import { getQuestSchemaExample } from "./schema/questModule.schema.example";
+import { GetQuestMinimizeSchema, GetQuestSchema } from "./schema/questModule.schema";
+import { getQuestSchemaMinimizeExample } from "./schema/questModule.schema.example";
 
 @Controller('questModule')
 export class QuestModuleController {
@@ -12,8 +12,8 @@ export class QuestModuleController {
 
   @ApiResponse({
     status: 200,
-    type: GetQuestSchema,
-    example: getQuestSchemaExample
+    type: GetQuestMinimizeSchema,
+    example: getQuestSchemaMinimizeExample
   })
   @Get('quests')
   async getQuests(
@@ -23,7 +23,7 @@ export class QuestModuleController {
     @Query('executor') executorsIds: string[],
     @Query('isComplete') isComplete: boolean,
     @Query('completeBy') completeByUserId: string
-  ) {
+  ): Promise<GetQuestMinimizeSchema[]> {
     return isComplete
       ? this.questModuleService.getCompleteQuests({
         ids: ids.map(id => +id),
@@ -39,4 +39,6 @@ export class QuestModuleController {
         executorsIds: executorsIds.map(id => +id)
       })
   }
+
+
 }
