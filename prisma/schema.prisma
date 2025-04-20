@@ -126,10 +126,11 @@ model event_types {
 model quests {
   id                  Int                    @id @default(autoincrement())
   id_department       Int
-  name                String
-  id_group            Int
+  name                String?
+  id_group            Int?
+  id_executor         Int
   tags_ids            Int[]
-  id_difficult        Int
+  id_difficult        Int?
   result_ids          Int[]
   questions_ids       Int[]
   complete_quests_ids Int[]
@@ -137,8 +138,9 @@ model quests {
   tags                quest_tags_on_quests[]
   questions           questions[]
   department          departments            @relation(fields: [id_department], references: [id])
-  difficult           quest_difficulties     @relation(fields: [id_difficult], references: [id])
-  group               quest_groups           @relation(fields: [id_group], references: [id])
+  difficult           quest_difficulties?    @relation(fields: [id_difficult], references: [id])
+  group               quest_groups?          @relation(fields: [id_group], references: [id])
+  executor            users                  @relation(fields: [id_executor], references: [id])
 }
 
 model quest_difficulties {
@@ -244,6 +246,7 @@ model users {
   image                        shared_files?                 @relation(fields: [id_image_file], references: [id])
   position                     user_positions?               @relation(fields: [id_position], references: [id])
   role                         user_roles?                   @relation(fields: [id_role], references: [id])
+  quests                       quests[]
 }
 
 model user_executors_on_events {
