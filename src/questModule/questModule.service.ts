@@ -1,11 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { GetCompleteQuestsMinimizeQuery, GetQuestsMinimizeQuery, PostQuestDto } from "./dto/questModule.dto";
+import { GetCompleteQuestsMinimizeQuery, GetQuestsMinimizeQuery, PostQuestDto, PostQuestionDto } from "./dto/questModule.dto";
 import { Prisma } from "@prisma/client";
-import { GetQuestMinimizeSchema, GetQuestSchema } from "./schema/questModule.schema";
+import { GetQuestionSchema, GetQuestMinimizeSchema, GetQuestSchema } from "./schema/questModule.schema";
 import { QuestQuestion } from "src/models/questQuestion";
 import { QuestAnswer } from "src/models/questAnswer";
 import { NotFoundError } from "src/errors/notFound";
+import { JsonValue } from "@prisma/client/runtime/library";
 
 @Injectable()
 export class QuestModuleService {
@@ -49,9 +50,9 @@ export class QuestModuleService {
     return quests
   }
 
-  async getCompleteQuests(getQuestsQuery: GetCompleteQuestsMinimizeQuery): Promise<GetQuestMinimizeSchema[]> {
+  // async getCompleteQuests(getQuestsQuery: GetCompleteQuestsMinimizeQuery): Promise<GetQuestMinimizeSchema[]> {
 
-  }
+  // }
 
   async getQuest(id: number): Promise<GetQuestSchema> {
     const foundQuest = await this.prisma.quests.findUnique({ where: { id } })
@@ -105,7 +106,7 @@ export class QuestModuleService {
       throw new NotFoundError(`Department with id ${quest.departmentId} not found`)
     }
 
-    for (let tagId of quest.tagsIds) {
+    for (let tagId of quest.tagsIds ?? []) {
       const tag = await this.prisma.quest_tags.findUnique({ where: { id: tagId } })
 
       if (!tag) {
@@ -113,7 +114,7 @@ export class QuestModuleService {
       }
     }
 
-    for (let questionId of quest.questionsIds) {
+    for (let questionId of quest.questionsIds ?? []) {
       const question = await this.prisma.questions.findUnique({ where: { id: questionId } })
 
       if (!question) {
@@ -133,7 +134,7 @@ export class QuestModuleService {
       }
     })
 
-    for (let tagId of quest.tagsIds) {
+    for (let tagId of quest.tagsIds ?? []) {
       this.prisma.quest_tags.update({
         data: {
           quests: {
@@ -145,6 +146,66 @@ export class QuestModuleService {
     }
 
     return this.getQuest(createdQuest.id)
+  }
+
+  async createQuestion(question: PostQuestionDto): Promise<GetQuestionSchema> {
+    const createQuestionData: Prisma.questionsCreateInput = {
+      quest: { connect: { id: question.questId } }
+    }
+
+    if (question.text) createQuestionData.text = question.text
+    if (question.typeId) {
+      createQuestionData.type = { connect: { id: question.typeId } }
+
+      const createAnswerData: Prisma.answersCreateInput = {}
+
+      //Single
+      if (question.typeId === 1) {
+        createAnswerData.single = { create: {
+          answers: question.answers,
+          correct_answers: question.correctAnswer as number
+        } }
+      }
+      //Multiple
+      if (question.typeId === 2) {
+        createAnswerData.multiple = { create: {
+          answers: question.answers,
+          correct_answers: question.correctAnswer as number[]
+        } }
+      }
+      //Connection
+      if (question.typeId === 3) {
+        createAnswerData.connection = { create: {
+          answers: question.answers,
+          correct_answers: question.correctAnswer as string[]
+        } }
+      }
+      //BoxSorting
+      if (question.typeId === 4) {
+        createAnswerData.box_sorting = { create: {
+          answers: question.answers,
+          correct_answers: question.correctAnswer 
+        } }
+      }
+      //Free
+      if (question.typeId === 5) {
+        createAnswerData.free = { create: {
+          correct_answers: question.correctAnswer as string
+        } }
+      }
+
+      createQuestionData.answer = { create: createAnswerData }
+    }
+    
+    console.log('CREATE QUESTION', createQuestionData)
+
+    const createdQuestion = await this.prisma.questions.create({
+      data: createQuestionData
+    })
+
+    return {
+      id: createdQuestion.id,
+    }
   }
 
   private async getQuestQuestions(questId: number): Promise<QuestQuestion[]> {

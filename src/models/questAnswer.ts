@@ -1,8 +1,10 @@
 export interface QuestAnswer {
   id: number
   answers?: string[]
-  correctAnswer?: SingleCorrectAnswer | MultipleCorrectAnswer | ConnectionCorrectAnswer | FreeCorrectAnswer
+  correctAnswer?: CorrectAnswer
 }
+
+export type CorrectAnswer = SingleCorrectAnswer | MultipleCorrectAnswer | ConnectionCorrectAnswer | FreeCorrectAnswer
 
 type SingleCorrectAnswer = number
 type MultipleCorrectAnswer = number[]

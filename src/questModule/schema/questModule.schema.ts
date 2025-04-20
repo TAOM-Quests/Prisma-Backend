@@ -21,3 +21,7 @@ export class GetQuestSchema {
   difficult?: QuestDifficult
   questions?: QuestQuestion[]
 }
+
+export class GetQuestionSchema {
+  id: number
+}
