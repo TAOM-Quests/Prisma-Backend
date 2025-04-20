@@ -23,6 +23,14 @@ export const getEventsMinimizeSchemaExample: GetEventMinimizeSchema[] = [{
   status: {
     id: 1,
     name: 'Planned'
+  },
+  image: {
+    id: 1,
+    name: 'TAOM SKILLS',
+    size: 1234,
+    extension: 'png',
+    originalName: 'TAOM SKILLS',
+    url: 'https://localhost:3000/eventModule/file?fileName=TAOM SKILLS.png'
   }
 }]
 
@@ -69,7 +77,23 @@ export const getEventSchemaExample: GetEventSchema = {
   status: {
     id: 1,
     name: 'Planned'
-  }
+  },
+  image: {
+    id: 1,
+    name: 'TAOM SKILLS',
+    size: 1234,
+    extension: 'png',
+    originalName: 'TAOM SKILLS',
+    url: 'https://localhost:3000/eventModule/file?fileName=TAOM SKILLS.png'
+  },
+  files: [{
+    id: 1,
+    name: 'TAOM SKILLS',
+    size: 1234,
+    extension: 'pdf',
+    originalName: 'TAOM SKILLS',
+    url: 'https://localhost:3000/eventModule/file?fileName=TAOM SKILLS.pdf'
+  }]
 }
 
 export const getEventTypeSchemaExample = [

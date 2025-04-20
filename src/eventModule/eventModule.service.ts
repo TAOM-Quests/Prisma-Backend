@@ -8,11 +8,14 @@ import { EventType } from "src/models/eventType";
 import { EventStatus } from "src/models/eventStatus";
 import { Department } from "src/models/department";
 import { NotFoundError } from "src/errors/notFound";
+import { CommonModuleService } from "src/commonModule/commonModule.service";
+import { GetFileStatsSchema } from "src/commonModule/schema/commonModule.schema";
 
 @Injectable()
 export class EventModuleService {
   constructor(
-    private prisma: PrismaService
+    private prisma: PrismaService,
+    private commonModuleService: CommonModuleService
   ) {}
 
   async getEvents(getEventsParams: GetEventsMinimizeQuery): Promise<GetEventMinimizeSchema[]> {
@@ -39,7 +42,8 @@ export class EventModuleService {
           date: eventWithAdditionalData.date,
           places: eventWithAdditionalData.places,
           type: eventWithAdditionalData.type,
-          status: eventWithAdditionalData.status
+          status: eventWithAdditionalData.status,
+          image: eventWithAdditionalData.image
         }
       })
     )
@@ -70,7 +74,9 @@ export class EventModuleService {
       places: eventWithAdditionalData.places,
       type: eventWithAdditionalData.type,
       status: eventWithAdditionalData.status,
-      schedule: eventWithAdditionalData.schedule
+      schedule: eventWithAdditionalData.schedule,
+      image: eventWithAdditionalData.image,
+      files: eventWithAdditionalData.files
     }
   }
 
@@ -105,7 +111,7 @@ export class EventModuleService {
       throw new NotFoundError(`Type with id ${event.typeId} not found`)
     }
 
-    for (let executorId of event.executorsIds) {
+    for (let executorId of event.executorsIds || []) {
       const foundExecutor = await this.prisma.users.findUnique({
         where: {
           id: executorId
@@ -114,6 +120,18 @@ export class EventModuleService {
 
       if (!foundExecutor) {
         throw new NotFoundError(`Executor with id ${executorId} not found`) 
+      }
+    }
+
+    for (let fileId of event.filesIds || []) {
+      const foundFile = await this.prisma.shared_files.findUnique({
+        where: {
+          id: fileId
+        }
+      })
+
+      if (!foundFile) {
+        throw new NotFoundError(`File with id ${fileId} not found`)
       }
     }
 
@@ -134,8 +152,12 @@ export class EventModuleService {
     if (event.statusId) updateData.status = { connect: { id: event.statusId } }
     if (event.typeId) updateData.type = { connect: { id: event.typeId } }
 
-    for (let executorId of event.executorsIds) {
+    for (let executorId of event.executorsIds || []) {
       await this.addExecutorToEvent(createdEvent.id, executorId)
+    }
+
+    for (let fileId of event.filesIds || []) {
+      await this.addFileToEvent(createdEvent.id, fileId)
     }
 
     const updatedEvent = await this.prisma.events.update({
@@ -156,7 +178,9 @@ export class EventModuleService {
       places: eventWithAdditionalData.places,
       schedule: eventWithAdditionalData.schedule,
       type: eventWithAdditionalData.type,
-      status: eventWithAdditionalData.status
+      status: eventWithAdditionalData.status,
+      image: eventWithAdditionalData.image,
+      files: eventWithAdditionalData.files
     }
   }
 
@@ -205,6 +229,18 @@ export class EventModuleService {
       }
     }
 
+    for (let fileId of updateEvent.filesIds) {
+      const foundFile = await this.prisma.shared_files.findUnique({
+        where: {
+          id: fileId
+        }
+      })
+
+      if (!foundFile) {
+        throw new NotFoundError(`File with id ${fileId} not found`)
+      }
+    }
+
     const updateData: Prisma.eventsUpdateInput = {}
 
     if (updateEvent.name) updateData.name = updateEvent.name
@@ -222,6 +258,14 @@ export class EventModuleService {
 
     for (let executorId of updateEvent.executorsIds) {
       await this.addExecutorToEvent(id, executorId)
+    }
+
+    for (let fileId of event.files_ids) {
+      await this.removeFileFromEvent(id, fileId)
+    }
+
+    for (let fileId of updateEvent.filesIds) {
+      await this.addFileToEvent(id, fileId)
     }
 
     const updatedEvent = await this.prisma.events.update({
@@ -242,7 +286,9 @@ export class EventModuleService {
       places: eventWithAdditionalData.places,
       schedule: eventWithAdditionalData.schedule,
       type: eventWithAdditionalData.type,
-      status: eventWithAdditionalData.status
+      status: eventWithAdditionalData.status,
+      image: eventWithAdditionalData.image,
+      files: eventWithAdditionalData.files
     }
   }
 
@@ -263,6 +309,10 @@ export class EventModuleService {
     for (let participantId of event.participants_ids) {
       await this.removeParticipantFromEvent(id, participantId)
     }
+    for (let fileId of event.files_ids) {
+      await this.removeFileFromEvent(id, fileId)
+    }
+
     await this.prisma.events.delete({
       where: {
         id
@@ -309,6 +359,7 @@ export class EventModuleService {
   private async getEventMinimizeWithAdditionalData(event): Promise<GetEventMinimizeSchema> {
     if (event.id_type) event.type = await this.getType(event)
     if (event.id_status) event.status = await this.getStatus(event)
+    if (event.id_image_file) event.image = await this.getimage(event)
 
     return event
   }
@@ -319,6 +370,8 @@ export class EventModuleService {
     if (event.id_inspector) event.inspector = await this.getInspector(event)
     if (event.id_type) event.type = await this.getType(event)
     if (event.id_status) event.status = await this.getStatus(event)
+    if (event.id_image_file) event.image = await this.getimage(event)
+    if (event.files_ids.length) event.files = await this.getFiles(event)
 
     return event
   }
@@ -421,6 +474,28 @@ export class EventModuleService {
       id: foundDepartment.id,
       name: foundDepartment.name
     }
+  }
+
+  private async getimage(event): Promise<GetFileStatsSchema> {
+    const foundFile = await this.prisma.shared_files.findUnique({
+      where: {
+        id: event.id_image
+      }
+    })
+
+    return await this.commonModuleService.getFileStats(foundFile.name)
+  }
+
+  private async getFiles(event): Promise<GetFileStatsSchema[]> {
+    const files = await this.prisma.shared_files.findMany({
+      where: {
+        id: {
+          in: event.files_ids
+        }
+      }
+    })
+
+    return Promise.all(files.map(async file => await this.commonModuleService.getFileStats(file.name)))
   }
 
   private async addExecutorToEvent(eventId: number, executorId: number) {
@@ -561,6 +636,58 @@ export class EventModuleService {
       where: { id: eventId },
       data: {
         participants_ids: foundEvent.participants_ids.filter(id => id !== participantId)
+      }
+    })
+  }
+
+  private async addFileToEvent(eventId: number, fileId: number) {
+    const foundEvent = await this.prisma.events.findUnique({
+      where: {
+        id: eventId
+      }
+    })
+
+    await this.prisma.events.update({
+      where: { id: eventId },
+      data: {
+        files_ids: foundEvent.files_ids.concat(fileId),
+        files: {
+          connect: { 
+            id_event_id_file: { id_event: eventId, id_file: fileId }
+          }
+        }
+      }
+    })
+
+    await this.prisma.shared_files.update({
+      where: { id: fileId },
+      data: {
+        events_where_file: {
+          connect: { 
+            id_event_id_file: { id_event: eventId, id_file: fileId }
+          }
+        }
+      }
+    })
+  }
+      
+  private async removeFileFromEvent(eventId: number, fileId: number) {
+    const foundEvent = await this.prisma.events.findUnique({
+      where: {
+        id: eventId
+      }
+    })
+
+    await this.prisma.shared_files_on_events.delete({
+      where: {
+        id_event_id_file: { id_event: eventId, id_file: fileId }
+      }
+    })
+
+    await this.prisma.events.update({
+      where: { id: eventId },
+      data: {
+        files_ids: foundEvent.files_ids.filter(id => id !== fileId)
       }
     })
   }

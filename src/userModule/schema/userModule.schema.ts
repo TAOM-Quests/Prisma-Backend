@@ -1,5 +1,5 @@
+import { GetFileStatsSchema } from 'src/commonModule/schema/commonModule.schema'
 import { Department } from 'src/models/department'
-import { QuestMinimize } from 'src/models/QuestMinimize'
 import { UserPosition } from 'src/models/userPosition'
 import { UserRole } from 'src/models/userRole'
 
@@ -7,6 +7,7 @@ export class GetUsersSchema {
   id: number
   name: string
   position?: string
+  avatar?: GetFileStatsSchema
 }
 
 export class AuthUserSchema {
@@ -15,6 +16,7 @@ export class AuthUserSchema {
   token: string
   isAdmin?: boolean
   isEmployee?: boolean
+  departmentId?: number
 }
 
 export class GetUserProfileSchema {

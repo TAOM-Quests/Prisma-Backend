@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt'
 import { NotFoundError } from 'src/errors/notFound'
 import { BadRequestError } from 'src/errors/badRequest'
 import { Prisma, user_sex } from '@prisma/client'
+import { CommonModuleService } from 'src/commonModule/commonModule.service'
 
 const USER_SEX = {
   MALE: 'Мужской',
@@ -21,6 +22,7 @@ const USER_SEX = {
 @Injectable()
 export class UserModuleService {
   constructor(
+    private commonModuleService: CommonModuleService,
     private prisma: PrismaService,
     private jwt: JwtService,
   ) {}
@@ -49,6 +51,16 @@ export class UserModuleService {
         })
 
         resultUser.position = foundPosition.name
+      }
+
+      if (user.id_image_file) {
+        const foundFile = await this.prisma.shared_files.findUniqueOrThrow({
+          where: {
+            id: user.id_image_file
+          }
+        })
+
+        resultUser.avatar = await this.commonModuleService.getFileStats(foundFile.name)
       }
 
       return resultUser
@@ -110,6 +122,7 @@ export class UserModuleService {
 
     if (foundUser.id_role) {
       authUser.isEmployee = true
+      authUser.departmentId = foundUser.id_department
     }
 
     return authUser
@@ -137,6 +150,7 @@ export class UserModuleService {
 
       if (foundUser.id_role) {
         authUser.isEmployee = true
+        authUser.departmentId = foundUser.id_department
       }
 
       return authUser
