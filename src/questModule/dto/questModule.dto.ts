@@ -35,8 +35,16 @@ export class PostQuestDto {
   @ApiProperty({ example: 1, required: false })
   difficultId?: number
 
-  @ApiProperty({ example: [1, 2], required: false })
-  questionsIds?: number[] 
+  @ApiProperty({ example: [
+    {
+      questId: 1,
+      text: 'Question 1',
+      typeId: 1,
+      answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
+      correctAnswer: 1
+    }
+  ], required: false })
+  questions?: PostQuestionDto[] 
 }
 
 export class PostQuestionDto {
@@ -68,4 +76,13 @@ export class SaveQuestDto {
   difficultId?: number
   departmentId?: number
   questionsIds?: number[]
+}
+
+export class SaveQuestionDto {
+  id?: number
+  text?: string
+  typeId?: number
+  questId?: number
+  answers?: string[]
+  correctAnswer?: CorrectAnswer
 }

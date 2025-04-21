@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { GetQuestsMinimizeQuery, PostQuestDto, PostQuestionDto, SaveQuestDto } from "./dto/questModule.dto";
+import { GetQuestsMinimizeQuery, PostQuestDto, PostQuestionDto, SaveQuestDto, SaveQuestionDto } from "./dto/questModule.dto";
 import { Prisma } from "@prisma/client";
-import { GetQuestionSchema, GetQuestMinimizeSchema, GetQuestSchema } from "./schema/questModule.schema";
+import { GetQuestMinimizeSchema, GetQuestQuestionSchema, GetQuestSchema } from "./schema/questModule.schema";
 import { QuestQuestion } from "src/models/questQuestion";
 import { QuestAnswer } from "src/models/questAnswer";
 import { NotFoundError } from "src/errors/notFound";
@@ -162,7 +162,7 @@ export class QuestModuleService {
     return this.getQuest(savedQuest.id)
   }
 
-  async createQuestion(question: PostQuestionDto): Promise<GetQuestionSchema> {
+  async createQuestion(question: PostQuestionDto): Promise<GetQuestQuestionSchema> {
     const createQuestionData: Prisma.questionsCreateInput = {
       quest: { connect: { id: question.questId } }
     }
@@ -171,101 +171,230 @@ export class QuestModuleService {
     if (question.typeId) {
       createQuestionData.type = { connect: { id: question.typeId } }
 
-      const createAnswerData: Prisma.answersCreateInput = {}
+      const updateAnswerData: Prisma.answersCreateInput = {}
 
       //Single
       if (question.typeId === 1) {
-        createAnswerData.single = { create: {
+        updateAnswerData.single = { create: {
           answers: question.answers,
           correct_answers: question.correctAnswer as number
         } }
       }
       //Multiple
       if (question.typeId === 2) {
-        createAnswerData.multiple = { create: {
+        updateAnswerData.multiple = { create: {
           answers: question.answers,
           correct_answers: question.correctAnswer as number[]
         } }
       }
       //Connection
       if (question.typeId === 3) {
-        createAnswerData.connection = { create: {
+        updateAnswerData.connection = { create: {
           answers: question.answers,
           correct_answers: question.correctAnswer as string[]
         } }
       }
       //BoxSorting
       if (question.typeId === 4) {
-        createAnswerData.box_sorting = { create: {
+        updateAnswerData.box_sorting = { create: {
           answers: question.answers,
           correct_answers: question.correctAnswer 
         } }
       }
       //Free
       if (question.typeId === 5) {
-        createAnswerData.free = { create: {
+        updateAnswerData.free = { create: {
           correct_answers: question.correctAnswer as string
         } }
       }
 
-      createQuestionData.answer = { create: createAnswerData }
+      createQuestionData.answer = { create: updateAnswerData }
     }
-    
-    console.log('CREATE QUESTION', createQuestionData)
 
     const createdQuestion = await this.prisma.questions.create({
       data: createQuestionData
     })
 
-    return {
-      id: createdQuestion.id,
+    return this.getQuestionById(createdQuestion.id)
+  }
+
+  private async updateQuestion(question: SaveQuestionDto, id?: number): Promise<GetQuestQuestionSchema> {
+    const foundQuestion = await this.prisma.questions.findUnique({ where: { id } })
+    const foundAnswer = await this.prisma.answers.findUnique({ where: { id: foundQuestion.id_answer } })
+
+    if (!foundQuestion) {
+      throw new NotFoundError(`Question with id ${id} not found`)
     }
+
+    if (!foundAnswer) {
+      throw new NotFoundError(`Answer with id ${foundQuestion.id_answer} not found`)
+    }
+
+    if (question.typeId !== foundQuestion.id_type) {
+      await this.prisma.answers.update({
+        where: { id: foundAnswer.id },
+        data: {
+          id_single: null,
+          id_multiple: null,
+          id_connection: null,
+          id_box_sorting: null,
+          id_free: null,
+        }
+      })
+    }
+    
+    const updateQuestionData: Prisma.questionsUpdateInput = {}
+
+    if (question.text) updateQuestionData.text = question.text
+    if (question.typeId) {
+      updateQuestionData.type = { connect: { id: question.typeId } }
+
+      const updateAnswerData: Prisma.answersCreateInput = {}
+
+      //Single
+      if (question.typeId === 1) {
+        if (foundAnswer.id_single) {
+          await this.prisma.answers_single.update({
+            where: { id: foundAnswer.id_single },
+            data: {
+              answers: question.answers,
+              correct_answers: question.correctAnswer as number
+            }
+          })
+        } else {
+          updateAnswerData.single = { create: {
+          answers: question.answers,
+          correct_answers: question.correctAnswer as number
+          } }
+        }        
+      }
+      //Multiple
+      if (question.typeId === 2) {
+        if (foundAnswer.id_multiple) {
+          await this.prisma.answers_multiple.update({
+            where: { id: foundAnswer.id_multiple },
+            data: {
+              answers: question.answers,
+              correct_answers: question.correctAnswer as number[]
+            }
+          })
+        } else {
+          updateAnswerData.multiple = { create: {
+            answers: question.answers,
+            correct_answers: question.correctAnswer as number[]
+          } }
+        }
+      }
+      //Connection
+      if (question.typeId === 3) {
+        if (foundAnswer.id_connection) {
+          await this.prisma.answers_connection.update({
+            where: { id: foundAnswer.id_connection },
+            data: {
+              answers: question.answers,
+              correct_answers: question.correctAnswer as string[]
+            }
+          })
+        } else {
+          updateAnswerData.connection = { create: {
+            answers: question.answers,
+            correct_answers: question.correctAnswer as string[]
+          } }
+        }
+      }
+      //BoxSorting
+      if (question.typeId === 4) {
+        if (foundAnswer.id_box_sorting) {
+          await this.prisma.answers_box_sorting.update({
+            where: { id: foundAnswer.id_box_sorting },
+            data: {
+              answers: question.answers,
+              correct_answers: question.correctAnswer
+            }
+          })
+        } else {
+          updateAnswerData.box_sorting = { create: {
+            answers: question.answers,
+            correct_answers: question.correctAnswer 
+          } }
+        } 
+      }
+      //Free
+      if (question.typeId === 5) {
+        if (foundAnswer.id_free) {
+          await this.prisma.answers_free.update({
+            where: { id: foundAnswer.id_free },
+            data: {
+              correct_answers: question.correctAnswer as string
+            }
+          })
+        } else {
+          updateAnswerData.free = { create: {
+            correct_answers: question.correctAnswer as string
+          } }
+        }
+      }
+
+      updateQuestionData.answer = { create: updateAnswerData }
+    }
+
+    await this.prisma.questions.update({
+      where: { id },
+      data: updateQuestionData
+    })
+
+    return this.getQuestionById(id)
   }
 
   private async getQuestQuestions(questId: number): Promise<QuestQuestion[]> {
-    const questQuestions: QuestQuestion[] = [];
     const questions = await this.prisma.questions.findMany({ where: { quest: { id: questId } } })
 
-    for (let question of questions) {
-      const questQuestion: QuestQuestion = {
-        id: question.id,
-      }
+    return Promise.all(questions.map(async question => await this.getQuestionById(question.id)))
+  }
 
-      const answer = await this.prisma.answers.findUnique({ where: { id: question.id_answer } })
+  private async getQuestionById(id: number): Promise<GetQuestQuestionSchema> {
+    const question = await this.prisma.questions.findUnique({ where: { id } })
 
-      if (answer.id_single) {
-        const singleAnswer = await this.prisma.answers_single.findUnique({ where: { id: answer.id_single } })
-        const questionAnswer: QuestAnswer = questQuestion.answer = {
-          id: answer.id,
-        }
-
-        questionAnswer.answers = singleAnswer.answers
-        questionAnswer.correctAnswer = singleAnswer.correct_answers
-      }
-
-      if (answer.id_multiple) {
-        const multipleAnswer = await this.prisma.answers_multiple.findUnique({ where: { id: answer.id_multiple } })
-        const questionAnswer: QuestAnswer = questQuestion.answer = {
-          id: answer.id,
-        }
-
-        questionAnswer.answers = multipleAnswer.answers
-        questionAnswer.correctAnswer = multipleAnswer.correct_answers
-      }
-
-      if (answer.id_connection) {
-        const connectionAnswer = await this.prisma.answers_connection.findUnique({ where: { id: answer.id_connection } })
-        const questionAnswer: QuestAnswer = questQuestion.answer = {
-          id: answer.id,
-        }
-
-        questionAnswer.answers = connectionAnswer.answers
-        questionAnswer.correctAnswer = connectionAnswer.correct_answers
-      }
-
-      questQuestions.push(questQuestion)
+    if (!question) {
+      throw new NotFoundError(`Question with id ${id} not found`)
     }
 
-    return questQuestions
+    const questQuestion: QuestQuestion = {
+      id
+    }
+
+    const answer = await this.prisma.answers.findUnique({ where: { id: question.id_answer } })
+
+    if (answer.id_single) {
+      const singleAnswer = await this.prisma.answers_single.findUnique({ where: { id: answer.id_single } })
+      const questionAnswer: QuestAnswer = questQuestion.answer = {
+        id: answer.id,
+      }
+
+      questionAnswer.answers = singleAnswer.answers
+      questionAnswer.correctAnswer = singleAnswer.correct_answers
+    }
+
+    if (answer.id_multiple) {
+      const multipleAnswer = await this.prisma.answers_multiple.findUnique({ where: { id: answer.id_multiple } })
+      const questionAnswer: QuestAnswer = questQuestion.answer = {
+        id: answer.id,
+      }
+
+      questionAnswer.answers = multipleAnswer.answers
+      questionAnswer.correctAnswer = multipleAnswer.correct_answers
+    }
+
+    if (answer.id_connection) {
+      const connectionAnswer = await this.prisma.answers_connection.findUnique({ where: { id: answer.id_connection } })
+      const questionAnswer: QuestAnswer = questQuestion.answer = {
+        id: answer.id,
+      }
+
+      questionAnswer.answers = connectionAnswer.answers
+      questionAnswer.correctAnswer = connectionAnswer.correct_answers
+    }
+
+    return questQuestion
   }
 }
