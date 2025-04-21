@@ -34,6 +34,12 @@ export class CreateEventDto {
   description?: string
 
   @ApiProperty({
+    example: 1,
+    required: false
+  })
+  imageId?: number
+
+  @ApiProperty({
     example: new Date('03-04-2025'),
     required: false
   })
@@ -111,6 +117,12 @@ export class UpdateEventDto {
     required: false
   })
   description?: string
+
+  @ApiProperty({
+    example: 1,
+    required: false
+  })
+  imageId?: number
 
   @ApiProperty({
     example: new Date('03-04-2025'),
