@@ -19,16 +19,15 @@ interface Place {
   isOnline: boolean
 }
 
-export interface PlaceOnline
-extends Place {
+export interface PlaceOnline extends Place {
   connectionLink: string
   identifier: string
   accessCode: string
   recordLink: string
+  platform: string
 }
 
-export interface PlaceOffline
-extends Place {
+export interface PlaceOffline extends Place {
   address: string
   officeNumber: string
   floor: number
