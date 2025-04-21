@@ -1,12 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { GetCompleteQuestsMinimizeQuery, GetQuestsMinimizeQuery, PostQuestDto, PostQuestionDto } from "./dto/questModule.dto";
+import { GetQuestsMinimizeQuery, PostQuestDto, PostQuestionDto, SaveQuestDto } from "./dto/questModule.dto";
 import { Prisma } from "@prisma/client";
 import { GetQuestionSchema, GetQuestMinimizeSchema, GetQuestSchema } from "./schema/questModule.schema";
 import { QuestQuestion } from "src/models/questQuestion";
 import { QuestAnswer } from "src/models/questAnswer";
 import { NotFoundError } from "src/errors/notFound";
-import { JsonValue } from "@prisma/client/runtime/library";
 
 @Injectable()
 export class QuestModuleService {
@@ -95,57 +94,72 @@ export class QuestModuleService {
   }
 
   async createQuest(quest: PostQuestDto): Promise<GetQuestSchema> {
-    const executor = await this.prisma.users.findUnique({ where: { id: quest.executorId } })
-    const department = await this.prisma.departments.findUnique({ where: { id: quest.departmentId } })
+    return this.saveQuest(quest)
+  }
 
-    if (!executor) {
-      throw new NotFoundError(`Executor with id ${quest.executorId} not found`)
-    }
+  async updateQuest(id: number, quest: SaveQuestDto): Promise<GetQuestSchema> {
+    return this.saveQuest(quest, id)
+  }
 
-    if (!department) {
-      throw new NotFoundError(`Department with id ${quest.departmentId} not found`)
-    }
+  private async saveQuest(quest: SaveQuestDto, id?: number): Promise<GetQuestSchema> {
+    const upsertData: Prisma.questsUpdateInput = {}
 
-    for (let tagId of quest.tagsIds ?? []) {
-      const tag = await this.prisma.quest_tags.findUnique({ where: { id: tagId } })
+    if (quest.name) upsertData.name = quest.name
+    if (quest.tagsIds) {
+      for (let tagId of quest.tagsIds ?? []) {
+        const tag = await this.prisma.quest_tags.findUnique({ where: { id: tagId } })
 
-      if (!tag) {
-        throw new NotFoundError(`Tag with id ${tagId} not found`)
+        if (!tag) {
+          throw new NotFoundError(`Tag with id ${tagId} not found`)
+        }
       }
+
+      upsertData.tags_ids = quest.tagsIds
     }
+    if (quest.questionsIds) {
+      for (let questionId of quest.questionsIds ?? []) {
+        const question = await this.prisma.questions.findUnique({ where: { id: questionId } })
 
-    for (let questionId of quest.questionsIds ?? []) {
-      const question = await this.prisma.questions.findUnique({ where: { id: questionId } })
-
-      if (!question) {
-        throw new NotFoundError(`Question with id ${questionId} not found`)
+        if (!question) {
+          throw new NotFoundError(`Question with id ${questionId} not found`)
+        }
       }
-    }
 
-    const createdQuest = await this.prisma.quests.create({
-      data: {
-        name: quest.name,
-        tags_ids: quest.tagsIds,
-        id_group: quest.groupId,
-        id_executor: executor.id,
-        id_department: department.id,
-        id_difficult: quest.difficultId,
-        questions_ids: quest.questionsIds,
+      upsertData.questions_ids = quest.questionsIds
+    }
+    if (quest.groupId) {
+      const group = await this.prisma.quest_groups.findUnique({ where: { id: quest.groupId } })
+
+      if (!group) {
+        throw new NotFoundError(`Group with id ${quest.groupId} not found`)
       }
-    })
 
-    for (let tagId of quest.tagsIds ?? []) {
-      this.prisma.quest_tags.update({
-        data: {
-          quests: {
-            connect: { id_quest_id_tag: { id_quest: createdQuest.id, id_tag: tagId } }
-          }
-        },
-        where: { id: tagId }
-      })
+      upsertData.group = { connect: { id: quest.groupId } }
     }
+    if (quest.executorId) {
+      const executor = await this.prisma.users.findUnique({ where: { id: quest.executorId } })
 
-    return this.getQuest(createdQuest.id)
+      if (!executor) {
+        throw new NotFoundError(`Executor with id ${quest.executorId} not found`)
+      }
+
+      upsertData.executor = { connect: { id: quest.executorId } }
+    }
+    if (quest.departmentId) {
+      const department = await this.prisma.departments.findUnique({ where: { id: quest.departmentId } })
+
+      if (!department) {
+        throw new NotFoundError(`Department with id ${quest.departmentId} not found`)
+      }
+
+      upsertData.department = { connect: { id: quest.departmentId } }
+    }   
+
+    const savedQuest = id
+      ? await this.prisma.quests.update({ where: { id }, data: upsertData })
+      : await this.prisma.quests.create({ data: upsertData as Prisma.questsCreateInput })
+
+    return this.getQuest(savedQuest.id)
   }
 
   async createQuestion(question: PostQuestionDto): Promise<GetQuestionSchema> {

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { QuestModuleService } from "./questModule.service";
 import { ApiResponse, ApiTags } from "@nestjs/swagger";
 import { GetQuestionSchema, GetQuestMinimizeSchema, GetQuestSchema } from "./schema/questModule.schema";
@@ -57,6 +57,26 @@ export class QuestModuleController {
   @Post('quests')
   async createQuest(@Body() quest: PostQuestDto): Promise<GetQuestSchema> {
     return this.questModuleService.createQuest(quest)
+  }
+
+  @ApiResponse({
+    status: 200,
+    type: GetQuestSchema,
+    example: getQuestSchemaExample
+  })  
+  @Get('/quests/:id')
+  async getQuest(@Param('id') id: number): Promise<GetQuestSchema> {
+    return this.questModuleService.getQuest(id)
+  }
+
+  @ApiResponse({
+    status: 200,
+    type: GetQuestSchema,
+    example: getQuestSchemaExample
+  })  
+  @Post('/quests/:id')
+  async updateQuest(@Param('id') id: number, @Body() quest: PostQuestDto): Promise<GetQuestSchema> {
+    return this.questModuleService.updateQuest(id, quest)
   }
 
   @Post('questions')

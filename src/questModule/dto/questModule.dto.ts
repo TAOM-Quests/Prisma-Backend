@@ -58,3 +58,14 @@ export class PostQuestionDto {
   @ApiProperty({ example: 'answer', required: false })
   correctAnswer?: CorrectAnswer
 }
+
+export class SaveQuestDto {
+  id?: number
+  name?: string
+  groupId?: number
+  tagsIds?: number[]
+  executorId?: number
+  difficultId?: number
+  departmentId?: number
+  questionsIds?: number[]
+}
