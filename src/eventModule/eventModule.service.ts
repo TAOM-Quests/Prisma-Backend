@@ -539,7 +539,7 @@ export class EventModuleService {
   private async getImage(event): Promise<GetFileStatsSchema> {
     const foundFile = await this.prisma.shared_files.findUnique({
       where: {
-        id: event.id_image,
+        id: event.id_image_file,
       },
     })
 
