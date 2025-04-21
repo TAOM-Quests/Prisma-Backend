@@ -117,6 +117,13 @@ export class EventModuleService {
           },
         })
       : null
+    const foundImage = event.imageId
+      ? await this.prisma.shared_files.findUnique({
+          where: {
+            id: event.imageId,
+          },
+        })
+      : null
 
     if (!foundDepartment) {
       throw new NotFoundError(
@@ -129,8 +136,11 @@ export class EventModuleService {
     if (event.typeId && !foundType) {
       throw new NotFoundError(`Type with id ${event.typeId} not found`)
     }
+    if (event.imageId && !foundImage) {
+      throw new NotFoundError(`Image with id ${event.imageId} not found`)
+    }
 
-    for (let executorId of event.executorsIds || []) {
+    for (let executorId of event.executorsIds ?? []) {
       const foundExecutor = await this.prisma.users.findUnique({
         where: {
           id: executorId,
@@ -142,7 +152,7 @@ export class EventModuleService {
       }
     }
 
-    for (let fileId of event.filesIds || []) {
+    for (let fileId of event.filesIds ?? []) {
       const foundFile = await this.prisma.shared_files.findUnique({
         where: {
           id: fileId,
@@ -170,12 +180,13 @@ export class EventModuleService {
     if (event.schedule) updateData.schedule = { set: event.schedule }
     if (event.statusId) updateData.status = { connect: { id: event.statusId } }
     if (event.typeId) updateData.type = { connect: { id: event.typeId } }
+    if (event.imageId) updateData.image = { connect: { id: event.imageId } }
 
-    for (let executorId of event.executorsIds || []) {
+    for (let executorId of event.executorsIds ?? []) {
       await this.addExecutorToEvent(createdEvent.id, executorId)
     }
 
-    for (let fileId of event.filesIds || []) {
+    for (let fileId of event.filesIds ?? []) {
       await this.addFileToEvent(createdEvent.id, fileId)
     }
 
@@ -232,6 +243,13 @@ export class EventModuleService {
           },
         })
       : null
+    const foundImage = updateEvent.imageId
+      ? await this.prisma.shared_files.findUnique({
+          where: {
+            id: updateEvent.imageId,
+          },
+        })
+      : null
 
     if (updateEvent.statusId && !foundStatus) {
       throw new NotFoundError(
@@ -241,8 +259,11 @@ export class EventModuleService {
     if (updateEvent.typeId && !foundType) {
       throw new NotFoundError(`Type with id ${updateEvent.typeId} not found`)
     }
+    if (updateEvent.imageId && !foundImage) {
+      throw new NotFoundError(`Image with id ${updateEvent.imageId} not found`)
+    }
 
-    for (let executorId of updateEvent.executorsIds) {
+    for (let executorId of updateEvent.executorsIds ?? []) {
       const foundExecutor = await this.prisma.users.findUnique({
         where: {
           id: executorId,
@@ -254,7 +275,7 @@ export class EventModuleService {
       }
     }
 
-    for (let fileId of updateEvent.filesIds) {
+    for (let fileId of updateEvent.filesIds ?? []) {
       const foundFile = await this.prisma.shared_files.findUnique({
         where: {
           id: fileId,
@@ -268,6 +289,7 @@ export class EventModuleService {
 
     const updateData: Prisma.eventsUpdateInput = {}
 
+    if (updateEvent.date) updateData.date = updateEvent.date
     if (updateEvent.name) updateData.name = updateEvent.name
     if (updateEvent.description)
       updateData.description = updateEvent.description
@@ -282,19 +304,19 @@ export class EventModuleService {
     if (updateEvent.typeId)
       updateData.type = { connect: { id: updateEvent.typeId } }
 
-    for (let executorId of event.executors_ids) {
+    for (let executorId of event.executors_ids ?? []) {
       await this.removeExecutorFromEvent(id, executorId)
     }
 
-    for (let executorId of updateEvent.executorsIds) {
+    for (let executorId of updateEvent.executorsIds ?? []) {
       await this.addExecutorToEvent(id, executorId)
     }
 
-    for (let fileId of event.files_ids) {
+    for (let fileId of event.files_ids ?? []) {
       await this.removeFileFromEvent(id, fileId)
     }
 
-    for (let fileId of updateEvent.filesIds) {
+    for (let fileId of updateEvent.filesIds ?? []) {
       await this.addFileToEvent(id, fileId)
     }
 
@@ -334,13 +356,13 @@ export class EventModuleService {
       throw new NotFoundError(`Event with id ${id} not found`)
     }
 
-    for (let executorId of event.executors_ids) {
+    for (let executorId of event.executors_ids ?? []) {
       await this.removeExecutorFromEvent(id, executorId)
     }
-    for (let participantId of event.participants_ids) {
+    for (let participantId of event.participants_ids ?? []) {
       await this.removeParticipantFromEvent(id, participantId)
     }
-    for (let fileId of event.files_ids) {
+    for (let fileId of event.files_ids ?? []) {
       await this.removeFileFromEvent(id, fileId)
     }
 
@@ -369,7 +391,7 @@ export class EventModuleService {
       await this.addParticipantToEvent(event.id, participantId)
     }
 
-    for (let participantId of updateParticipants.remove || []) {
+    for (let participantId of updateParticipants.remove ?? []) {
       await this.removeParticipantFromEvent(event.id, participantId)
     }
   }
@@ -417,7 +439,7 @@ export class EventModuleService {
   private async getExecutors(event): Promise<Executor[]> {
     const executors: Executor[] = []
 
-    for (let executorId of event.executors_ids) {
+    for (let executorId of event.executors_ids ?? []) {
       const foundExecutor = await this.prisma.users.findUnique({
         where: {
           id: executorId,
@@ -517,7 +539,7 @@ export class EventModuleService {
   private async getImage(event): Promise<GetFileStatsSchema> {
     const foundFile = await this.prisma.shared_files.findUnique({
       where: {
-        id: event.id_image_file,
+        id: event.id_image,
       },
     })
 
