@@ -750,8 +750,11 @@ export class EventModuleService {
       data: {
         files_ids: foundEvent.files_ids.concat(fileId),
         files: {
-          connect: {
-            id_event_id_file: { id_event: eventId, id_file: fileId },
+          connectOrCreate: {
+            where: {
+              id_event_id_file: { id_event: eventId, id_file: fileId },
+            },
+            create: { file: { connect: { id: fileId } } },
           },
         },
       },

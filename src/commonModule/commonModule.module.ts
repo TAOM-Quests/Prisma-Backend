@@ -14,7 +14,11 @@ import { PrismaService } from "src/prisma/prisma.service";
           const uniquePrefix = Date.now() + '-' + Math.round(Math.random() * 1E9)
           cb(null, uniquePrefix + '.' + file.originalname.split('.').pop())
         }
-      })
+      }),
+      fileFilter: (_, file, cb) => {
+        file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
+        cb(null, true);        
+      }
     }),
   ],
   controllers: [CommonModuleController],
