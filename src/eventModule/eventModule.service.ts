@@ -302,7 +302,8 @@ export class EventModuleService {
     if (updateEvent.statusId)
       updateData.status = { connect: { id: updateEvent.statusId } }
     if (updateEvent.typeId)
-      updateData.type = { connect: { id: updateEvent.typeId } }
+      updateData.type = { connect: { id: updateEvent.typeId } }    
+    if (updateEvent.imageId) updateData.image = { connect: { id: updateEvent.imageId } }
 
     for (let executorId of event.executors_ids ?? []) {
       await this.removeExecutorFromEvent(id, executorId)
