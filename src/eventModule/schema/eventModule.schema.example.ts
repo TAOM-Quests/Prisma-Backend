@@ -43,6 +43,10 @@ export const getEventsMinimizeSchemaExample: GetEventMinimizeSchema[] = [
 
 export const getEventSchemaExample: GetEventSchema = {
   id: 1,
+  department: {
+    id: 1,
+    name: 'IT',
+  },
   name: 'TAOM SKILLS',
   description: 'TAOM SKILLS description',
   date: new Date('2025-04-02'),

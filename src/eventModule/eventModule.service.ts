@@ -81,6 +81,7 @@ export class EventModuleService {
 
     return {
       id: eventWithAdditionalData.id,
+      department: eventWithAdditionalData.department,
       name: eventWithAdditionalData.name,
       description: eventWithAdditionalData.description,
       date: eventWithAdditionalData.date,
@@ -199,6 +200,7 @@ export class EventModuleService {
 
     return {
       id: eventWithAdditionalData.id,
+      department: eventWithAdditionalData.department,
       name: eventWithAdditionalData.name,
       description: eventWithAdditionalData.description,
       date: eventWithAdditionalData.date,
@@ -334,6 +336,7 @@ export class EventModuleService {
 
     return {
       id: eventWithAdditionalData.id,
+      department: eventWithAdditionalData.department,
       name: eventWithAdditionalData.name,
       description: eventWithAdditionalData.description,
       date: eventWithAdditionalData.date,
@@ -428,6 +431,8 @@ export class EventModuleService {
   }
 
   private async getEventWithAdditionalData(event): Promise<GetEventSchema> {
+    event.department = await this.getDepartment(event)
+
     if (event.executors_ids.length)
       event.executors = await this.getExecutors(event)
     if (event.participants_ids.length)

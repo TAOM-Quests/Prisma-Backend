@@ -1,5 +1,6 @@
 import { JsonArray } from "@prisma/client/runtime/library"
 import { GetFileStatsSchema } from "src/commonModule/schema/commonModule.schema"
+import { Department } from "src/models/department"
 import { PlaceOffline, PlaceOnline, ScheduleItem } from "src/models/event"
 import { EventStatus } from "src/models/eventStatus"
 import { EventType } from "src/models/eventType"
@@ -17,6 +18,7 @@ export class GetEventMinimizeSchema {
 
 export class GetEventSchema {
   id: number
+  department: Department
   name: string
   description: string
   date: Date
