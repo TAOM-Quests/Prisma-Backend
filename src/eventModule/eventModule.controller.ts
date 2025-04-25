@@ -20,14 +20,18 @@ export class EventModuleController {
   @ApiQuery({name: 'department', type: 'number', required: false})
   @ApiQuery({name: 'participant', type: 'number', required: false})
   @ApiQuery({name: 'type', type: 'number', required: false})
-  @ApiQuery({name: 'date', type: 'date', required: false})
+  @ApiQuery({name: 'dateStart', type: 'date', required: false})
+  @ApiQuery({name: 'dateEnd', type: 'date', required: false})
   @ApiQuery({name: 'executor', type: 'number', required: false})
+  @ApiQuery({name: 'limit', type: 'number', required: false})
   @Get('/events')
   async getEvents(@Query() getEventsParams): Promise<GetEventMinimizeSchema[]> {
     const params: GetEventsMinimizeQuery = {
+      limit: +(getEventsParams.limit ?? 12),
       name: getEventsParams.name,
       department: +getEventsParams.department,
-      date: getEventsParams.date && new Date(getEventsParams.date),
+      dateStart: getEventsParams.dateStart && new Date(getEventsParams.dateStart),
+      dateEnd: getEventsParams.dateEnd && new Date(getEventsParams.dateEnd),
       executor: +getEventsParams.executor,
       participant: +getEventsParams.participant,
       type: +getEventsParams.type

@@ -36,7 +36,8 @@ export class EventModuleService {
     if (getEventsParams.name) where.name = { contains: getEventsParams.name }
     if (getEventsParams.department)
       where.id_department = getEventsParams.department
-    if (getEventsParams.date) where.date = getEventsParams.date
+    if (getEventsParams.dateStart) where.date = { gte: getEventsParams.dateStart }
+    if (getEventsParams.dateEnd) where.date = { lte: getEventsParams.dateEnd }
     if (getEventsParams.executor)
       where.executors_ids = { has: getEventsParams.executor }
     if (getEventsParams.participant)
@@ -45,6 +46,8 @@ export class EventModuleService {
 
     const foundEvents = await this.prisma.events.findMany({
       where,
+      take: getEventsParams.limit,
+      orderBy: { date: 'desc' },
     })
 
     return await Promise.all(
