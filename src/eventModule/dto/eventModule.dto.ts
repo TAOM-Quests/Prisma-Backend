@@ -3,6 +3,7 @@ import { JsonArray } from "@prisma/client/runtime/library"
 
 export interface GetEventsMinimizeQuery {
   limit: number
+  offset: number
   name?: string
   type?: number
   dateEnd?: Date

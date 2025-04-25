@@ -48,6 +48,7 @@ export class EventModuleService {
       where,
       take: getEventsParams.limit,
       orderBy: { date: 'desc' },
+      skip: getEventsParams.offset,
     })
 
     return await Promise.all(
