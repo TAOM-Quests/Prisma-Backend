@@ -289,21 +289,25 @@ export class EventModuleService {
 
     const updateData: Prisma.eventsUpdateInput = {}
 
-    if (updateEvent.date) updateData.date = updateEvent.date
-    if (updateEvent.name) updateData.name = updateEvent.name
-    if (updateEvent.description)
+    if ('name' in updateEvent) updateData.name = updateEvent.name
+    if ('description' in updateEvent)
       updateData.description = updateEvent.description
-    if (updateEvent.date) updateData.date = updateEvent.date
-    if (updateEvent.seatsNumber)
+    if ('date' in updateEvent) updateData.date = updateEvent.date
+    if ('seatsNumber' in updateEvent)
       updateData.seats_number = updateEvent.seatsNumber
-    if (updateEvent.places) updateData.places = { set: updateEvent.places }
-    if (updateEvent.schedule)
+    if ('places' in updateEvent) updateData.places = { set: updateEvent.places }
+    if ('schedule' in updateEvent)
       updateData.schedule = { set: updateEvent.schedule }
-    if (updateEvent.statusId)
-      updateData.status = { connect: { id: updateEvent.statusId } }
-    if (updateEvent.typeId)
-      updateData.type = { connect: { id: updateEvent.typeId } }    
-    if (updateEvent.imageId) updateData.image = { connect: { id: updateEvent.imageId } }
+    if ('statusId' in updateEvent)
+      updateData.status =  { connect: { id: updateEvent.statusId } }
+    if ('typeId' in updateEvent)
+      updateData.type = updateEvent.typeId
+        ? { connect: { id: updateEvent.typeId } }
+        : { disconnect: { id: event.id_type } }
+    if ('imageId' in updateEvent)
+      updateData.image = updateEvent.imageId
+        ? { connect: { id: updateEvent.imageId } }
+        : { disconnect: { id: event.id_image_file } }
 
     for (let executorId of event.executors_ids ?? []) {
       await this.removeExecutorFromEvent(id, executorId)
