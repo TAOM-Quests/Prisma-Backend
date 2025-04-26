@@ -1,4 +1,3 @@
-import { platform } from 'os'
 import { GetEventMinimizeSchema, GetEventSchema } from './eventModule.schema'
 
 export const getEventsMinimizeSchemaExample: GetEventMinimizeSchema[] = [
@@ -38,6 +37,12 @@ export const getEventsMinimizeSchemaExample: GetEventMinimizeSchema[] = [
       originalName: 'TAOM SKILLS',
       url: 'https://localhost:3000/eventModule/file?fileName=TAOM SKILLS.png',
     },
+    schedule: [
+      {
+        timeEnd: new Date('2025-04-02 09:00'),
+        timeStart: new Date('2025-04-02 10:00'),
+      },
+    ],
   },
 ]
 

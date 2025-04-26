@@ -14,6 +14,7 @@ export class GetEventMinimizeSchema {
   status: EventStatus
   type: EventType
   image: GetFileStatsSchema
+  schedule: ScheduleItem[]
 }
 
 export class GetEventSchema {

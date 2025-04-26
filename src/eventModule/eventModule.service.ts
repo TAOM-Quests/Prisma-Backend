@@ -64,6 +64,7 @@ export class EventModuleService {
           type: eventWithAdditionalData.type,
           status: eventWithAdditionalData.status,
           image: eventWithAdditionalData.image,
+          schedule: eventWithAdditionalData.schedule,
         }
       }),
     )
