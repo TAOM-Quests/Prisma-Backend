@@ -6,11 +6,13 @@ import { GetQuestMinimizeSchema, GetQuestQuestionSchema, GetQuestSchema } from "
 import { QuestQuestion } from "src/models/questQuestion";
 import { QuestAnswer } from "src/models/questAnswer";
 import { NotFoundError } from "src/errors/notFound";
+import { CommonModuleService } from "src/commonModule/commonModule.service";
 
 @Injectable()
 export class QuestModuleService {
   constructor(
-    private prisma: PrismaService
+    private prisma: PrismaService,
+    private commonModuleService: CommonModuleService,
   ) {}
 
   async getQuests(getQuestsQuery: GetQuestsMinimizeQuery): Promise<GetQuestMinimizeSchema[]> {
@@ -30,6 +32,8 @@ export class QuestModuleService {
       }
 
       if (foundQuest.name) quest.name = foundQuest.name
+      if (foundQuest.time) quest.time = foundQuest.time
+      if (foundQuest.description) quest.description = foundQuest.description
       if (foundQuest.id_group) {
         const group = await this.prisma.quest_groups.findUnique({ where: { id: foundQuest.id_group } })
         quest.group = { id: group.id, name: group.name, departmentId: group.id_department }
@@ -41,6 +45,10 @@ export class QuestModuleService {
       if (foundQuest.id_difficult) {
         const difficult = await this.prisma.quest_difficulties.findUnique({ where: { id: foundQuest.id_difficult } })
         quest.difficult = { id: difficult.id, name: difficult.name }
+      }
+      if (foundQuest.id_image) {
+        const image = await this.prisma.shared_files.findUnique({ where: { id: foundQuest.id_image } })
+        quest.image = await this.commonModuleService.getFileStats(image.name)
       }
 
       quests.push(quest)
@@ -103,18 +111,44 @@ export class QuestModuleService {
 
   private async saveQuest(quest: SaveQuestDto, id?: number): Promise<GetQuestSchema> {
     const upsertData: Prisma.questsUpdateInput = {}
+    
+    if (quest.departmentId) {
+      const department = await this.prisma.departments.findUnique({ where: { id: quest.departmentId } })
 
-    if (quest.name) upsertData.name = quest.name
-    if (quest.tagsIds) {
-      for (let tagId of quest.tagsIds ?? []) {
-        const tag = await this.prisma.quest_tags.findUnique({ where: { id: tagId } })
-
-        if (!tag) {
-          throw new NotFoundError(`Tag with id ${tagId} not found`)
-        }
+      if (!department) {
+        throw new NotFoundError(`Department with id ${quest.departmentId} not found`)
       }
 
-      upsertData.tags_ids = quest.tagsIds
+      upsertData.department = { connect: { id: quest.departmentId } }
+    }   
+    if (quest.name) upsertData.name = quest.name
+    if (quest.time) upsertData.time = quest.time
+    if (quest.description) upsertData.description = quest.description
+    if (quest.tags) {
+      const questTagsIds: number[] = []
+
+      for (const {id: tagId, name: tagName} of quest.tags) {
+        const tag = tagId
+          ? await this.prisma.quest_tags.findUnique({ where: { id: tagId } })
+          : await this.prisma.quest_tags.create({
+            data: {
+              name: tagName,
+              department: {
+                connect: {
+                  id: quest.departmentId
+                }
+              }
+            }
+          })
+
+        if (!tag) {
+          throw new NotFoundError(`Quest tag with id ${tagId} not found`)
+        }
+
+        questTagsIds.push(tag.id)
+      }
+
+      upsertData.tags_ids = questTagsIds
     }
     if (quest.questionsIds) {
       for (let questionId of quest.questionsIds ?? []) {
@@ -127,14 +161,25 @@ export class QuestModuleService {
 
       upsertData.questions_ids = quest.questionsIds
     }
-    if (quest.groupId) {
-      const group = await this.prisma.quest_groups.findUnique({ where: { id: quest.groupId } })
+    if (quest.group) {
+      const group = quest.group.id
+        ? await this.prisma.quest_groups.findUnique({ where: { id: quest.group.id } })
+        : await this.prisma.quest_groups.create({
+          data: {
+            name: quest.group.name,
+            department: {
+              connect: {
+                id: quest.departmentId
+              }
+            }
+          }
+        })
 
       if (!group) {
-        throw new NotFoundError(`Group with id ${quest.groupId} not found`)
+        throw new NotFoundError(`Group with id ${quest.group.id} not found`)
       }
 
-      upsertData.group = { connect: { id: quest.groupId } }
+      upsertData.group = { connect: { id: quest.group.id } }
     }
     if (quest.executorId) {
       const executor = await this.prisma.users.findUnique({ where: { id: quest.executorId } })
@@ -145,15 +190,6 @@ export class QuestModuleService {
 
       upsertData.executor = { connect: { id: quest.executorId } }
     }
-    if (quest.departmentId) {
-      const department = await this.prisma.departments.findUnique({ where: { id: quest.departmentId } })
-
-      if (!department) {
-        throw new NotFoundError(`Department with id ${quest.departmentId} not found`)
-      }
-
-      upsertData.department = { connect: { id: quest.departmentId } }
-    }   
 
     const savedQuest = id
       ? await this.prisma.quests.update({ where: { id }, data: upsertData })

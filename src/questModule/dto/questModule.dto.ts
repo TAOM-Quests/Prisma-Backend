@@ -1,5 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { CorrectAnswer } from "src/models/questAnswer"
+import { QuestGroup } from "src/models/questGroup"
+import { QuestTag } from "src/models/questTag"
 
 export class GetQuestsMinimizeQuery {
   ids?: number[]
@@ -26,11 +28,17 @@ export class PostQuestDto {
   @ApiProperty({ example: 'Python Start', required: false })
   name?: string
 
-  @ApiProperty({ example: 1, required: false })
-  groupId?: number
+  @ApiProperty({ example: '9:30', required: false })
+  time?: string
 
-  @ApiProperty({ example: [1, 2], required: false })
-  tagsIds?: number[]
+  @ApiProperty({ example: '<b>BEST PYTHON QUEST</b>', required: false })
+  description?: string
+
+  @ApiProperty({ example: {id: 1, name: 'Start'} , required: false })
+  group?: Partial<QuestGroup>
+
+  @ApiProperty({ example: [{id: 1, name: 'Start'}, {name: 'Python'}], required: false })
+  tags?: Partial<QuestTag>[]
 
   @ApiProperty({ example: 1, required: false })
   difficultId?: number
@@ -70,12 +78,14 @@ export class PostQuestionDto {
 export class SaveQuestDto {
   id?: number
   name?: string
-  groupId?: number
-  tagsIds?: number[]
+  time?: string
   executorId?: number
+  description?: string
   difficultId?: number
   departmentId?: number
   questionsIds?: number[]
+  tags?: Partial<QuestTag>[]
+  group?: Partial<QuestGroup>
 }
 
 export class SaveQuestionDto {
