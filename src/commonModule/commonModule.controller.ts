@@ -2,8 +2,8 @@ import { Controller, Get, Post, Query, Req, StreamableFile, UploadedFile, UseInt
 import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CommonModuleService } from "./commonModule.service";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { GetFileStatsSchema } from "./schema/commonModule.schema";
-import { getFileStatsSchemaExample } from "./schema/commonModule.schema.example";
+import { GetDepartmentsSchema, GetFileStatsSchema } from "./schema/commonModule.schema";
+import { getDepartmentsSchemaExample, getFileStatsSchemaExample } from "./schema/commonModule.schema.example";
 
 @ApiTags('commonModule')
 @Controller('commonModule')
@@ -11,6 +11,16 @@ export class CommonModuleController {
   constructor(
     private commonModuleService: CommonModuleService
   ) {}
+
+  @ApiResponse({
+    status: 200,
+    type: GetDepartmentsSchema,
+    example: getDepartmentsSchemaExample
+  })
+  @Get('departments')
+  async getDepartments(): Promise<GetDepartmentsSchema[]> {
+    return this.commonModuleService.getDepartments()
+  }
 
   @Get('file')
   async getFile(@Query('fileName') fileName: string): Promise<StreamableFile> {

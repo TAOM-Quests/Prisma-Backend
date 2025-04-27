@@ -2,7 +2,7 @@ import { Injectable, Req, StreamableFile } from '@nestjs/common'
 import { createReadStream } from 'fs'
 import { join } from 'path'
 import * as mime from 'mime-types'
-import { GetFileStatsSchema } from './schema/commonModule.schema'
+import { GetDepartmentsSchema, GetFileStatsSchema } from './schema/commonModule.schema'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { NotFoundError } from 'src/errors/notFound'
 
@@ -11,6 +11,16 @@ const BASE_FILE_URL = `http://${process.env.SERVER_HOSTNAME ?? 'localhost:' + pr
 @Injectable()
 export class CommonModuleService {
   constructor(private prisma: PrismaService) {}
+
+  async getDepartments(): Promise<GetDepartmentsSchema[]> {
+    const foundDepartments = await this.prisma.departments.findMany()
+
+    return foundDepartments
+      .map((department) => ({
+        id: department.id,
+        name: department.name,
+      }))
+  }
 
   async getFile(fileName: string): Promise<StreamableFile> {
     const file = createReadStream(join(process.cwd(), `public/${fileName}`))
