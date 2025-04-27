@@ -190,6 +190,15 @@ export class QuestModuleService {
 
       upsertData.executor = { connect: { id: quest.executorId } }
     }
+    if (quest.imageId) {
+      const image = await this.prisma.shared_files.findUnique({ where: { id: quest.imageId } })
+
+      if (!image) {
+        throw new NotFoundError(`Image with id ${quest.imageId} not found`)
+      }
+
+      upsertData.image = { connect: { id: quest.imageId } }
+    }
 
     const savedQuest = id
       ? await this.prisma.quests.update({ where: { id }, data: upsertData })

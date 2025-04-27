@@ -43,6 +43,9 @@ export class PostQuestDto {
   @ApiProperty({ example: 1, required: false })
   difficultId?: number
 
+  @ApiProperty({ example: 1, required: false })
+  imageId?: number
+
   @ApiProperty({ example: [
     {
       questId: 1,
@@ -79,6 +82,7 @@ export class SaveQuestDto {
   id?: number
   name?: string
   time?: string
+  imageId?: number
   executorId?: number
   description?: string
   difficultId?: number
