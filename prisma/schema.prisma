@@ -187,20 +187,13 @@ model quest_tags_on_quests {
 }
 
 model questions {
-  id        Int              @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   text      String?
+  type      String?
   id_quest  Int
-  id_type   Int?
   id_answer Int?
-  answer    answers?         @relation(fields: [id_answer], references: [id])
-  quest     quests           @relation(fields: [id_quest], references: [id])
-  type      questions_types? @relation(fields: [id_type], references: [id])
-}
-
-model questions_types {
-  id        Int         @id @default(autoincrement())
-  name      String
-  questions questions[]
+  answer    answers? @relation(fields: [id_answer], references: [id])
+  quest     quests   @relation(fields: [id_quest], references: [id])
 }
 
 model shared_files {

@@ -55,27 +55,7 @@ export class PostQuestDto {
       correctAnswer: 1
     }
   ], required: false })
-  questions?: PostQuestionDto[] 
-}
-
-export class PostQuestionDto {
-  @ApiProperty({ example: 1, required: true })
-  questId: number
-
-  @ApiProperty({ example: 'Question 1', required: false })
-  text?: string
-
-  @ApiProperty({ example: 1, required: false })
-  typeId?: number
-
-  @ApiProperty({ example: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'], required: false })
-  answers?: string[]
-
-  @ApiProperty({ example: 1, required: false })
-  @ApiProperty({ example: [1, 2], required: false })
-  @ApiProperty({ example: ['1 - 3', '2 - 4'], required: false })
-  @ApiProperty({ example: 'answer', required: false })
-  correctAnswer?: CorrectAnswer
+  questions?: SaveQuestionDto[] 
 }
 
 export class GetQuestGroupsQuery {  
@@ -97,16 +77,18 @@ export class SaveQuestDto {
   description?: string
   difficultId?: number
   departmentId?: number
-  questionsIds?: number[]
   tags?: Partial<QuestTag>[]
   group?: Partial<QuestGroup>
+  questions?: SaveQuestionDto[]
 }
 
 export class SaveQuestionDto {
   id?: number
+  type: string
   text?: string
-  typeId?: number
   questId?: number
-  answers?: string[]
-  correctAnswer?: CorrectAnswer
+  answer: {
+    options?: string[]
+    correctAnswer?: CorrectAnswer
+  }
 }
