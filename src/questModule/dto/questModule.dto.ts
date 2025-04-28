@@ -1,5 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { CorrectAnswer } from "src/models/questAnswer"
+import { QuestGroup } from "src/models/questGroup"
+import { QuestTag } from "src/models/questTag"
 
 export class GetQuestsMinimizeQuery {
   ids?: number[]
@@ -26,14 +28,23 @@ export class PostQuestDto {
   @ApiProperty({ example: 'Python Start', required: false })
   name?: string
 
-  @ApiProperty({ example: 1, required: false })
-  groupId?: number
+  @ApiProperty({ example: '9:30', required: false })
+  time?: string
 
-  @ApiProperty({ example: [1, 2], required: false })
-  tagsIds?: number[]
+  @ApiProperty({ example: '<b>BEST PYTHON QUEST</b>', required: false })
+  description?: string
+
+  @ApiProperty({ example: {id: 1, name: 'Start'} , required: false })
+  group?: Partial<QuestGroup>
+
+  @ApiProperty({ example: [{id: 1, name: 'Start'}, {name: 'Python'}], required: false })
+  tags?: Partial<QuestTag>[]
 
   @ApiProperty({ example: 1, required: false })
   difficultId?: number
+
+  @ApiProperty({ example: 1, required: false })
+  imageId?: number
 
   @ApiProperty({ example: [
     {
@@ -44,45 +55,40 @@ export class PostQuestDto {
       correctAnswer: 1
     }
   ], required: false })
-  questions?: PostQuestionDto[] 
+  questions?: SaveQuestionDto[] 
 }
 
-export class PostQuestionDto {
-  @ApiProperty({ example: 1, required: true })
-  questId: number
-
-  @ApiProperty({ example: 'Question 1', required: false })
-  text?: string
-
+export class GetQuestGroupsQuery {  
   @ApiProperty({ example: 1, required: false })
-  typeId?: number
+  departmentId?: number
+}
 
-  @ApiProperty({ example: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'], required: false })
-  answers?: string[]
-
+export class GetQuestTagsQuery {  
   @ApiProperty({ example: 1, required: false })
-  @ApiProperty({ example: [1, 2], required: false })
-  @ApiProperty({ example: ['1 - 3', '2 - 4'], required: false })
-  @ApiProperty({ example: 'answer', required: false })
-  correctAnswer?: CorrectAnswer
+  departmentId?: number
 }
 
 export class SaveQuestDto {
   id?: number
   name?: string
-  groupId?: number
-  tagsIds?: number[]
+  time?: string
+  imageId?: number
   executorId?: number
+  description?: string
   difficultId?: number
   departmentId?: number
-  questionsIds?: number[]
+  tags?: Partial<QuestTag>[]
+  group?: Partial<QuestGroup>
+  questions?: SaveQuestionDto[]
 }
 
 export class SaveQuestionDto {
   id?: number
+  type: string
   text?: string
-  typeId?: number
   questId?: number
-  answers?: string[]
-  correctAnswer?: CorrectAnswer
+  answer: {
+    options?: string[]
+    correctAnswer?: CorrectAnswer
+  }
 }

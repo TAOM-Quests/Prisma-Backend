@@ -127,6 +127,8 @@ model quests {
   id                  Int                    @id @default(autoincrement())
   id_department       Int
   name                String?
+  time                String?
+  description         String?
   id_group            Int?
   id_executor         Int
   tags_ids            Int[]
@@ -134,6 +136,7 @@ model quests {
   result_ids          Int[]
   questions_ids       Int[]
   complete_quests_ids Int[]
+  id_image            Int?
   results             quest_results[]
   tags                quest_tags_on_quests[]
   questions           questions[]
@@ -141,6 +144,7 @@ model quests {
   difficult           quest_difficulties?    @relation(fields: [id_difficult], references: [id])
   group               quest_groups?          @relation(fields: [id_group], references: [id])
   executor            users                  @relation(fields: [id_executor], references: [id])
+  image               shared_files?          @relation(fields: [id_image], references: [id])
 }
 
 model quest_difficulties {
@@ -183,20 +187,13 @@ model quest_tags_on_quests {
 }
 
 model questions {
-  id        Int              @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   text      String?
+  type      String?
   id_quest  Int
-  id_type   Int?
   id_answer Int?
-  answer    answers?         @relation(fields: [id_answer], references: [id])
-  quest     quests           @relation(fields: [id_quest], references: [id])
-  type      questions_types? @relation(fields: [id_type], references: [id])
-}
-
-model questions_types {
-  id        Int         @id @default(autoincrement())
-  name      String
-  questions questions[]
+  answer    answers? @relation(fields: [id_answer], references: [id])
+  quest     quests   @relation(fields: [id_quest], references: [id])
 }
 
 model shared_files {
@@ -209,6 +206,8 @@ model shared_files {
   users              users[]
   events_where_image events[]
   events_where_file  shared_files_on_events[]
+
+  quests quests[]
 }
 
 model shared_files_on_events {

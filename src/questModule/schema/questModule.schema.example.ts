@@ -1,12 +1,21 @@
-import { PostQuestDto } from "../dto/questModule.dto";
-import { GetQuestMinimizeSchema, GetQuestSchema } from "./questModule.schema";
+import { GetQuestDifficultiesSchema, GetQuestGroupsSchema, GetQuestMinimizeSchema, GetQuestSchema, GetQuestTagsSchema } from "./questModule.schema";
 
 export const getQuestSchemaMinimizeExample: GetQuestMinimizeSchema = {
   id: 1,
   name: 'TAOM SKILLS',
+  time: '9:30',
+  description: '<b>BEST QUEST EVER</b>',
   group: { id: 1, name: 'TAOM SKILLS', departmentId: 1 },
   difficult: { id: 1, name: 'Easy' },
   tags: [{ id: 1, name: 'TAOM' }, { id: 2, name: 'Start' }],
+  image: {
+    id: 1,
+    size: 1000,
+    extension: 'jpg',
+    originalName: "test",
+    name: '1744810610173-320802287.png',
+    url: "https://localhost:3000/commonModule/file?fileName=1744810610173-320802287.png",
+  },
 }
 
 export const getQuestSchemaExample: GetQuestSchema = {
@@ -84,4 +93,19 @@ export const getQuestSchemaExample: GetQuestSchema = {
       }
     }
   ]
+}
+
+export const getQuestDifficultiesSchemaExample: GetQuestDifficultiesSchema = {
+  id: 1,
+  name: 'Easy'
+}
+
+export const getQuestGroupsSchemaExample: GetQuestGroupsSchema = {
+  id: 1,
+  name: 'Start'
+}
+
+export const getQuestTagsSchemaExample: GetQuestTagsSchema = {
+  id: 1,
+  name: 'Python'
 }
