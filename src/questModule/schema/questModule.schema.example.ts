@@ -1,4 +1,4 @@
-import { GetQuestMinimizeSchema, GetQuestSchema } from "./questModule.schema";
+import { GetQuestDifficultiesSchema, GetQuestGroupsSchema, GetQuestMinimizeSchema, GetQuestSchema, GetQuestTagsSchema } from "./questModule.schema";
 
 export const getQuestSchemaMinimizeExample: GetQuestMinimizeSchema = {
   id: 1,
@@ -93,4 +93,19 @@ export const getQuestSchemaExample: GetQuestSchema = {
       }
     }
   ]
+}
+
+export const getQuestDifficultiesSchemaExample: GetQuestDifficultiesSchema = {
+  id: 1,
+  name: 'Easy'
+}
+
+export const getQuestGroupsSchemaExample: GetQuestGroupsSchema = {
+  id: 1,
+  name: 'Start'
+}
+
+export const getQuestTagsSchemaExample: GetQuestTagsSchema = {
+  id: 1,
+  name: 'Python'
 }

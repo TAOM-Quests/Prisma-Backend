@@ -34,3 +34,18 @@ export class GetQuestQuestionSchema {
   answer?: QuestAnswer
   type?: QuestQuestionType
 }
+
+export class GetQuestDifficultiesSchema {
+  id: number
+  name: string
+}
+
+export class GetQuestGroupsSchema {
+  id: number
+  name: string
+}
+
+export class GetQuestTagsSchema {
+  id: number
+  name: string
+}

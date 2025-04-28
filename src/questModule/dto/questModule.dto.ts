@@ -78,6 +78,16 @@ export class PostQuestionDto {
   correctAnswer?: CorrectAnswer
 }
 
+export class GetQuestGroupsQuery {  
+  @ApiProperty({ example: 1, required: false })
+  departmentId?: number
+}
+
+export class GetQuestTagsQuery {  
+  @ApiProperty({ example: 1, required: false })
+  departmentId?: number
+}
+
 export class SaveQuestDto {
   id?: number
   name?: string

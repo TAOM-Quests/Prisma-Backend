@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { GetQuestsMinimizeQuery, PostQuestDto, PostQuestionDto, SaveQuestDto, SaveQuestionDto } from "./dto/questModule.dto";
+import { GetQuestGroupsQuery, GetQuestsMinimizeQuery, GetQuestTagsQuery, PostQuestDto, PostQuestionDto, SaveQuestDto, SaveQuestionDto } from "./dto/questModule.dto";
 import { Prisma } from "@prisma/client";
-import { GetQuestMinimizeSchema, GetQuestQuestionSchema, GetQuestSchema } from "./schema/questModule.schema";
+import { GetQuestDifficultiesSchema, GetQuestGroupsSchema, GetQuestMinimizeSchema, GetQuestQuestionSchema, GetQuestSchema, GetQuestTagsSchema } from "./schema/questModule.schema";
 import { QuestQuestion } from "src/models/questQuestion";
 import { QuestAnswer } from "src/models/questAnswer";
 import { NotFoundError } from "src/errors/notFound";
@@ -109,6 +109,48 @@ export class QuestModuleService {
     return this.saveQuest(quest, id)
   }
 
+  async getDifficulties(): Promise<GetQuestDifficultiesSchema[]> {
+    const difficulties = await this.prisma.quest_difficulties.findMany()
+
+    return difficulties
+      .map(difficult => ({
+        id: difficult.id,
+        name: difficult.name
+      }))
+  }
+
+  async getGroups(getGroupsQuery: GetQuestGroupsQuery): Promise<GetQuestGroupsSchema[]> {
+    const groupsFindParams: Prisma.quest_groupsFindManyArgs = {}
+
+    if (getGroupsQuery.departmentId) {
+      groupsFindParams.where = { id_department: getGroupsQuery.departmentId }
+    }
+
+    const groups = await this.prisma.quest_groups.findMany(groupsFindParams)
+
+    return groups
+      .map(group => ({
+        id: group.id,
+        name: group.name
+      }))
+  }
+
+  async getTags(getTagsQuery: GetQuestTagsQuery): Promise<GetQuestTagsSchema[]> {
+    const tagsFindParams: Prisma.quest_tagsFindManyArgs = {}
+
+    if (getTagsQuery.departmentId) {
+      tagsFindParams.where = { id_department: getTagsQuery.departmentId }
+    }
+
+    const tags = await this.prisma.quest_tags.findMany(tagsFindParams)
+
+    return tags
+      .map(tag => ({
+        id: tag.id,
+        name: tag.name
+      }))
+  }
+
   private async saveQuest(quest: SaveQuestDto, id?: number): Promise<GetQuestSchema> {
     const upsertData: Prisma.questsUpdateInput = {}
     
@@ -130,16 +172,17 @@ export class QuestModuleService {
       for (const {id: tagId, name: tagName} of quest.tags) {
         const tag = tagId
           ? await this.prisma.quest_tags.findUnique({ where: { id: tagId } })
-          : await this.prisma.quest_tags.create({
-            data: {
-              name: tagName,
-              department: {
-                connect: {
-                  id: quest.departmentId
-                }
-              }
-            }
-          })
+          : await this.prisma.quest_tags.findFirst({ where: { name: tagName, department: { id: quest.departmentId } }}) 
+            ??  await this.prisma.quest_tags.create({
+                  data: {
+                    name: tagName,
+                    department: {
+                      connect: {
+                        id: quest.departmentId
+                      }
+                    }
+                  }
+                })
 
         if (!tag) {
           throw new NotFoundError(`Quest tag with id ${tagId} not found`)
