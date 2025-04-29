@@ -71,8 +71,8 @@ export class QuestModuleController {
     example: getQuestSchemaExample
   })  
   @Get('/quests/:id')
-  async getQuest(@Param('id') id: number): Promise<GetQuestSchema> {
-    return this.questModuleService.getQuest(id)
+  async getQuest(@Param('id') id: string): Promise<GetQuestSchema> {
+    return this.questModuleService.getQuest(+id)
   }
 
   @ApiResponse({

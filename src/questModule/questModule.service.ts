@@ -254,7 +254,7 @@ export class QuestModuleService {
       : await this.prisma.quests.create({ data: upsertData as Prisma.questsCreateInput })
 
     const createdQuestionsIds: number[] = []
-    for (const question of quest.questions.filter(q => !q.id) ?? []) {
+    for (const question of quest.questions?.filter(q => !q.id) ?? []) {
       const createdQuestion = await this.createQuestion({...question, questId: savedQuest.id})
       createdQuestionsIds.push(createdQuestion.id)
     }
