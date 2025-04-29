@@ -81,8 +81,8 @@ export class QuestModuleController {
     example: getQuestSchemaExample
   })  
   @Post('/quests/:id')
-  async updateQuest(@Param('id') id: number, @Body() quest: PostQuestDto): Promise<GetQuestSchema> {
-    return this.questModuleService.updateQuest(id, quest)
+  async updateQuest(@Param('id') id: string, @Body() quest: PostQuestDto): Promise<GetQuestSchema> {
+    return this.questModuleService.updateQuest(+id, quest)
   }
 
   @ApiResponse({

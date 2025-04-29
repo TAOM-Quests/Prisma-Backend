@@ -1,6 +1,6 @@
 export interface QuestAnswer {
   id: number
-  answers?: string[]
+  options?: string[]
   correctAnswer?: CorrectAnswer
 }
 

@@ -1,9 +1,8 @@
 import { QuestAnswer } from "./questAnswer"
-import { QuestQuestionType } from "./questQuestionType"
 
 export interface QuestQuestion {
   id: number
-  text?: string
-  type?: QuestQuestionType
-  answer?: QuestAnswer
+  text: string
+  type: string
+  answer: QuestAnswer
 }

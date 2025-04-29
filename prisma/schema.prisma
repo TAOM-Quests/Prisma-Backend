@@ -26,7 +26,7 @@ model answers {
 
 model answers_single {
   id               Int      @id @default(autoincrement())
-  answers          String[]
+  options          String[]
   correct_answers  Int?
   id_parent_answer Int      @unique
   parent_answer    answers  @relation(fields: [id_parent_answer], references: [id])
@@ -34,7 +34,7 @@ model answers_single {
 
 model answers_multiple {
   id               Int      @id @default(autoincrement())
-  answers          String[]
+  options          String[]
   correct_answers  Int[]
   id_parent_answer Int      @unique
   parent_answer    answers  @relation(fields: [id_parent_answer], references: [id])
@@ -42,7 +42,7 @@ model answers_multiple {
 
 model answers_connection {
   id               Int      @id @default(autoincrement())
-  answers          String[]
+  options          String[]
   correct_answers  String[]
   id_parent_answer Int      @unique
   parent_answer    answers  @relation(fields: [id_parent_answer], references: [id])
@@ -50,7 +50,7 @@ model answers_connection {
 
 model answers_box_sorting {
   id               Int      @id @default(autoincrement())
-  answers          String[]
+  options          String[]
   correct_answers  Json?
   id_parent_answer Int      @unique
   parent_answer    answers  @relation(fields: [id_parent_answer], references: [id])

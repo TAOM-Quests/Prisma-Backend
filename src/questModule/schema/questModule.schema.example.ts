@@ -29,13 +29,10 @@ export const getQuestSchemaExample: GetQuestSchema = {
     {
       id: 1,
       text: 'Question 1',
-      type: {
-        id: 1,
-        name: 'Single'
-      },
+      type: 'single',
       answer: {
         id: 1,
-        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
+        options: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctAnswer: 1
       }
     },
@@ -43,13 +40,10 @@ export const getQuestSchemaExample: GetQuestSchema = {
     {
       id: 2,
       text: 'Question 2',
-      type: {
-        id: 2,
-        name: 'Multiple'
-      },
+      type: 'multiple',
       answer: {
         id: 1,
-        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
+        options: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctAnswer: [1, 2]
       }
     },
@@ -57,23 +51,17 @@ export const getQuestSchemaExample: GetQuestSchema = {
     {
       id: 3,
       text: 'Question 3',
-      type: {
-        id: 3,
-        name: 'Connection'
-      },
+      type: 'connection',
       answer: {
         id: 1,
-        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
+        options: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctAnswer: ['1 - 3', '2 - 4']
       }
     },
     // {
     //   id: 4,
     //   text: 'Question 4',
-    //   type: {
-    //     id: 4,
-    //     name: 'BoxSorting'
-    //   },
+    //   type: 'boxSorting',
     //   answer: {
     //     id: 1,
     //     answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
@@ -83,10 +71,7 @@ export const getQuestSchemaExample: GetQuestSchema = {
     {
       id: 5,
       text: 'Question 5',
-      type: {
-        id: 5,
-        name: 'Free'
-      },
+      type: 'free',
       answer: {
         id: 1,
         correctAnswer: 'FreeAnswer'

@@ -81,6 +81,7 @@ export class QuestModuleService {
     }
 
     if (foundQuest.name) quest.name = foundQuest.name
+
     if (foundQuest.id_group) {
       const group = await this.prisma.quest_groups.findUnique({ where: { id: foundQuest.id_group } })
       quest.group = { id: group.id, name: group.name, departmentId: group.id_department }
@@ -258,7 +259,6 @@ export class QuestModuleService {
       const createdQuestion = await this.createQuestion({...question, questId: savedQuest.id})
       createdQuestionsIds.push(createdQuestion.id)
     }
-    console.log('CREATED QUESTIONS IDS',createdQuestionsIds)
     await this.prisma.quests.update({
       where: { id: savedQuest.id },
       data: { 
@@ -283,27 +283,25 @@ export class QuestModuleService {
 
       if (question.type === 'single') {
         updateAnswerData.single = { create: {
-          answers: question.answer.options,
+          options: question.answer.options,
           correct_answers: question.answer.correctAnswer as number
         } }
-
-        console.log('UPDATE ANSWER DATA', updateAnswerData)
       }
       if (question.type === 'multiple') {
         updateAnswerData.multiple = { create: {
-          answers: question.answer.options,
+          options: question.answer.options,
           correct_answers: question.answer.correctAnswer as number[]
         } }
       }
       if (question.type === 'connection') {
         updateAnswerData.connection = { create: {
-          answers: question.answer.options,
+          options: question.answer.options,
           correct_answers: question.answer.correctAnswer as string[]
         } }
       }
       if (question.type === 'boxSorting') {
         updateAnswerData.box_sorting = { create: {
-          answers: question.answer.options,
+          options: question.answer.options,
           correct_answers: question.answer.correctAnswer 
         } }
       }
@@ -398,13 +396,13 @@ export class QuestModuleService {
           await this.prisma.answers_single.update({
             where: { id: foundAnswer.id_single },
             data: {
-              answers: question.answer.options,
+              options: question.answer.options,
               correct_answers: question.answer.correctAnswer as number
             }
           })
         } else {
           updateAnswerData.single = { create: {
-          answers: question.answer.options,
+          options: question.answer.options,
           correct_answers: question.answer.correctAnswer as number
           } }
         }        
@@ -414,13 +412,13 @@ export class QuestModuleService {
           await this.prisma.answers_multiple.update({
             where: { id: foundAnswer.id_multiple },
             data: {
-              answers: question.answer.options,
+              options: question.answer.options,
               correct_answers: question.answer.correctAnswer as number[]
             }
           })
         } else {
           updateAnswerData.multiple = { create: {
-            answers: question.answer.options,
+            options: question.answer.options,
             correct_answers: question.answer.correctAnswer as number[]
           } }
         }
@@ -430,13 +428,13 @@ export class QuestModuleService {
           await this.prisma.answers_connection.update({
             where: { id: foundAnswer.id_connection },
             data: {
-              answers: question.answer.options,
+              options: question.answer.options,
               correct_answers: question.answer.correctAnswer as string[]
             }
           })
         } else {
           updateAnswerData.connection = { create: {
-            answers: question.answer.options,
+            options: question.answer.options,
             correct_answers: question.answer.correctAnswer as string[]
           } }
         }
@@ -446,13 +444,13 @@ export class QuestModuleService {
           await this.prisma.answers_box_sorting.update({
             where: { id: foundAnswer.id_box_sorting },
             data: {
-              answers: question.answer.options,
+              options: question.answer.options,
               correct_answers: question.answer.correctAnswer
             }
           })
         } else {
           updateAnswerData.box_sorting = { create: {
-            answers: question.answer.options,
+            options: question.answer.options,
             correct_answers: question.answer.correctAnswer 
           } }
         } 
@@ -485,7 +483,6 @@ export class QuestModuleService {
 
   private async getQuestQuestions(questId: number): Promise<QuestQuestion[]> {
     const questions = await this.prisma.questions.findMany({ where: { quest: { id: questId } } })
-    console.log('QUESTIONS', questions)
 
     return Promise.all(questions.map(async question => await this.getQuestionById(question.id)))
   }
@@ -497,44 +494,42 @@ export class QuestModuleService {
       throw new NotFoundError(`Question with id ${id} not found`)
     }
 
-    const questQuestion: QuestQuestion = {
-      id
-    }
-
     const answer = await this.prisma.answers.findUnique({ where: { id: question.id_answer } })
-
-    console.log('ANSWER', answer)
+    let questionAnswer: QuestAnswer
 
     if (answer.id_single) {
       const singleAnswer = await this.prisma.answers_single.findUnique({ where: { id: answer.id_single } })
-      const questionAnswer: QuestAnswer = questQuestion.answer = {
+      questionAnswer = {
         id: answer.id,
+        options: singleAnswer.options,
+        correctAnswer: singleAnswer.correct_answers
       }
-
-      questionAnswer.answers = singleAnswer.answers
-      questionAnswer.correctAnswer = singleAnswer.correct_answers
     }
 
     if (answer.id_multiple) {
       const multipleAnswer = await this.prisma.answers_multiple.findUnique({ where: { id: answer.id_multiple } })
-      const questionAnswer: QuestAnswer = questQuestion.answer = {
+      questionAnswer = {
         id: answer.id,
+        options: multipleAnswer.options,
+        correctAnswer: multipleAnswer.correct_answers,
       }
 
-      questionAnswer.answers = multipleAnswer.answers
-      questionAnswer.correctAnswer = multipleAnswer.correct_answers
     }
 
     if (answer.id_connection) {
       const connectionAnswer = await this.prisma.answers_connection.findUnique({ where: { id: answer.id_connection } })
-      const questionAnswer: QuestAnswer = questQuestion.answer = {
+      questionAnswer = {
         id: answer.id,
+        options: connectionAnswer.options,
+        correctAnswer: connectionAnswer.correct_answers,
       }
-
-      questionAnswer.answers = connectionAnswer.answers
-      questionAnswer.correctAnswer = connectionAnswer.correct_answers
     }
 
-    return questQuestion
+    return {
+      id: question.id,
+      text: question.text,
+      type: question.type,
+      answer: questionAnswer
+    }
   }
 }
