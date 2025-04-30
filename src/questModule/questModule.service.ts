@@ -525,6 +525,22 @@ export class QuestModuleService {
       }
     }
 
+    if (answer.id_box_sorting) {
+      const boxSortingAnswer = await this.prisma.answers_box_sorting.findUnique({ where: { id: answer.id_box_sorting } })
+      questionAnswer = {
+        id: answer.id,
+        options: boxSortingAnswer.options,
+        correctAnswer: boxSortingAnswer.correct_answers as {[key: string]: number[]},
+      }
+    }
+
+    if (answer.id_free) {
+      const freeAnswer = await this.prisma.answers_free.findUnique({ where: { id: answer.id_free } })
+      questionAnswer = {
+        id: answer.id,
+        correctAnswer: freeAnswer.correct_answers,
+      }
+    }
     return {
       id: question.id,
       text: question.text,
