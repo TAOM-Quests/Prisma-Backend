@@ -77,6 +77,22 @@ export const getQuestSchemaExample: GetQuestSchema = {
         correctAnswer: 'FreeAnswer'
       }
     }
+  ],
+  results: [
+    {
+      id: 1,
+      minPoints: 10,
+      name: 'Result 1',
+      description: 'Description 1',
+      image: {
+        id: 1,
+        size: 1000,
+        extension: 'jpg',
+        originalName: "test",
+        name: '1744810610173-320802287.png',
+        url: "https://localhost:3000/commonModule/file?fileName=1744810610173-320802287.png",
+      },
+    }
   ]
 }
 

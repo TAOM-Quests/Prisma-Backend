@@ -162,11 +162,14 @@ model quest_groups {
 }
 
 model quest_results {
-  id          Int    @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   name        String
   description String
+  min_points  Int
+  id_image    Int?
   id_quest    Int
-  quest       quests @relation(fields: [id_quest], references: [id])
+  quest       quests        @relation(fields: [id_quest], references: [id])
+  image       shared_files? @relation(fields: [id_image], references: [id])
 }
 
 model quest_tags {
@@ -208,6 +211,8 @@ model shared_files {
   events_where_file  shared_files_on_events[]
 
   quests quests[]
+
+  quest_results quest_results[]
 }
 
 model shared_files_on_events {

@@ -23,6 +23,7 @@ export class GetQuestSchema {
   name?: string
   tags?: QuestTag[]
   group?: QuestGroup
+  results?: GetQuestResult[]
   difficult?: QuestDifficult
   questions?: QuestQuestion[]
 }
@@ -32,6 +33,14 @@ export class GetQuestQuestionSchema {
   text: string
   type: string
   answer: QuestAnswer
+}
+
+export class GetQuestResult {
+  id: number
+  name: string
+  minPoints: number
+  description: string
+  image?: GetFileStatsSchema
 }
 
 export class GetQuestDifficultiesSchema {

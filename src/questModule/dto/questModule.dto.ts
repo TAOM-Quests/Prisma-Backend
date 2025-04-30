@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { CorrectAnswer } from "src/models/questAnswer"
 import { QuestGroup } from "src/models/questGroup"
+import { QuestResult } from "src/models/questResult"
 import { QuestTag } from "src/models/questTag"
 
 export class GetQuestsMinimizeQuery {
@@ -80,6 +81,7 @@ export class SaveQuestDto {
   tags?: Partial<QuestTag>[]
   group?: Partial<QuestGroup>
   questions?: SaveQuestionDto[]
+  results?: Partial<QuestResult>[]
 }
 
 export class SaveQuestionDto {

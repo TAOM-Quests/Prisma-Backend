@@ -2,11 +2,12 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { GetQuestGroupsQuery, GetQuestsMinimizeQuery, GetQuestTagsQuery, PostQuestDto, SaveQuestDto, SaveQuestionDto } from "./dto/questModule.dto";
 import { Prisma } from "@prisma/client";
-import { GetQuestDifficultiesSchema, GetQuestGroupsSchema, GetQuestMinimizeSchema, GetQuestQuestionSchema, GetQuestSchema, GetQuestTagsSchema } from "./schema/questModule.schema";
+import { GetQuestDifficultiesSchema, GetQuestGroupsSchema, GetQuestMinimizeSchema, GetQuestQuestionSchema, GetQuestSchema, GetQuestTagsSchema, GetQuestResult } from "./schema/questModule.schema";
 import { QuestQuestion } from "src/models/questQuestion";
 import { QuestAnswer } from "src/models/questAnswer";
 import { NotFoundError } from "src/errors/notFound";
 import { CommonModuleService } from "src/commonModule/commonModule.service";
+import { QuestResult } from "src/models/questResult";
 
 @Injectable()
 export class QuestModuleService {
@@ -97,6 +98,10 @@ export class QuestModuleService {
     if (foundQuest.questions_ids) {
       const questions = await this.getQuestQuestions(foundQuest.id)
       quest.questions = questions
+    }
+    if (foundQuest.result_ids) {
+      const results = await this.getResultsByQuestId(foundQuest.id)
+      quest.results = results
     }
 
     return quest
@@ -210,6 +215,23 @@ export class QuestModuleService {
 
       upsertData.questions_ids = foundQuestionsIds
       upsertData.questions = { connect: foundQuestionsIds.map(id => ({ id })) }
+    }    
+    if (quest.results) {
+      const foundResultsIds: number[] = []
+      for (let result of quest.results.filter(r => r.id) ?? []) {
+        const foundResult = await this.prisma.quest_results.findUnique({ where: { id: result.id } })
+        
+        if (!foundResult) {
+          throw new NotFoundError(`Result with id ${foundResult.id} not found`)
+        }
+
+       await this.saveResult(result)
+
+        foundResultsIds.push(foundResult.id)
+      }      
+
+      upsertData.result_ids = foundResultsIds
+      upsertData.results = { connect: foundResultsIds.map(id => ({ id })) }
     }
     if (quest.group) {
       const group = quest.group.id
@@ -254,7 +276,13 @@ export class QuestModuleService {
       ? await this.prisma.quests.update({ where: { id }, data: upsertData })
       : await this.prisma.quests.create({ data: upsertData as Prisma.questsCreateInput })
 
+    const createdResultsIds: number[] = []
     const createdQuestionsIds: number[] = []
+
+    for (const result of quest.results?.filter(r => !r.id) ?? []) {
+      const createdResult = await this.saveResult({...result, questId: savedQuest.id})
+      createdResultsIds.push(createdResult.id)
+    }
     for (const question of quest.questions?.filter(q => !q.id) ?? []) {
       const createdQuestion = await this.createQuestion({...question, questId: savedQuest.id})
       createdQuestionsIds.push(createdQuestion.id)
@@ -263,7 +291,9 @@ export class QuestModuleService {
       where: { id: savedQuest.id },
       data: { 
         questions_ids: [...savedQuest.questions_ids, ...createdQuestionsIds ],
-        questions: { connect: createdQuestionsIds.map(id => ({ id })) }
+        questions: { connect: createdQuestionsIds.map(id => ({ id })) },
+        result_ids: [...savedQuest.result_ids, ...createdResultsIds ],
+        results: { connect: createdResultsIds.map(id => ({ id })) }
       }
     })
 
@@ -547,5 +577,71 @@ export class QuestModuleService {
       type: question.type,
       answer: questionAnswer
     }
+  }
+
+  private async getResultsByQuestId(questId: number): Promise<GetQuestResult[]> {
+    const results = await this.prisma.quest_results.findMany({ where: { quest: { id: questId } } })
+
+    return Promise.all(results.map(async result => await this.getResultById(result.id)))
+  }
+
+  private async getResultById(id: number): Promise<GetQuestResult> {
+    const foundResult =  await this.prisma.quest_results.findUnique({ where: { id } })
+
+    if (!foundResult) {
+      throw new NotFoundError(`Result with id ${id} not found`)
+    }
+
+    const foundImage = foundResult.id_image
+      ? await this.prisma.shared_files.findUnique({ where: { id: foundResult.id_image } })
+      : null
+
+    return {
+      id: foundResult.id,
+      name: foundResult.name,
+      image: foundImage ? await this.commonModuleService.getFileStats(foundImage.name) : null,
+      minPoints: foundResult.min_points,
+      description: foundResult.description
+    }
+  }
+
+  private async saveResult(result:  Partial<QuestResult>): Promise<GetQuestResult> {
+
+    if (result.id) {
+      const foundResult = await this.prisma.quest_results.findUnique({ where: { id: result.id } })
+
+      if (!foundResult) {
+        throw new NotFoundError(`Result with id ${result.id} not found`)
+      }
+
+      const updateResultData: Prisma.quest_resultsUpdateInput = {}
+
+      if (result.name) updateResultData.name = result.name
+      if (result.imageId) updateResultData.image = { connect: { id: result.imageId } }
+      if (result.minPoints) updateResultData.min_points = result.minPoints
+      if (result.description) updateResultData.description = result.description
+
+      await this.prisma.quest_results.update({
+        where: { id: result.id },
+        data: updateResultData
+      })
+    } else {
+      const createResultData: Prisma.quest_resultsCreateInput = {
+        name: result.name,
+        min_points: result.minPoints,
+        description: result.description,
+        quest: { connect: { id: result.questId } },
+      }
+
+      if (result.imageId) createResultData.image = { connect: { id: result.imageId } }
+
+      const {id} = await this.prisma.quest_results.create({
+        data: createResultData
+      })
+
+      result.id = id
+    }
+
+    return this.getResultById(result.id)
   }
 }
