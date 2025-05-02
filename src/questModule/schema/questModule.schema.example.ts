@@ -11,7 +11,7 @@ export const getQuestSchemaMinimizeExample: GetQuestMinimizeSchema = {
   name: 'TAOM SKILLS',
   time: '9:30',
   description: '<b>BEST QUEST EVER</b>',
-  group: { id: 1, name: 'TAOM SKILLS', departmentId: 1 },
+  group: { id: 1, name: 'TAOM SKILLS' },
   difficult: { id: 1, name: 'Easy' },
   tags: [
     { id: 1, name: 'TAOM' },

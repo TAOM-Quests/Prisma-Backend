@@ -10,22 +10,17 @@ export class GetQuestMinimizeSchema {
   id: number
   name?: string
   time?: string
-  tags?: QuestTag[]
-  group?: QuestGroup
   description?: string
   image?: GetFileStatsSchema
-  difficult?: QuestDifficult
-}
-
-export class GetQuestSchema {
-  id: number
-  executor: Employee
-  name?: string
-  results?: GetQuestResultSchema[]
   tags?: GetQuestTagsSchema[]
   group?: GetQuestGroupsSchema
-  questions?: GetQuestQuestionSchema[]
   difficult?: GetQuestDifficultiesSchema
+}
+
+export class GetQuestSchema extends GetQuestMinimizeSchema {
+  executor: Employee
+  results?: GetQuestResultSchema[]
+  questions?: GetQuestQuestionSchema[]
 }
 
 export class GetQuestQuestionSchema {

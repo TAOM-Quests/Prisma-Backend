@@ -2,12 +2,65 @@ import { Injectable } from '@nestjs/common'
 import { SaveQuestDto } from './dto/questModule.dto'
 import { Prisma } from '@prisma/client'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { GetQuestSchema } from './schema/questModule.schema'
+import {
+  GetQuestMinimizeSchema,
+  GetQuestSchema,
+} from './schema/questModule.schema'
 import { NotFoundError } from 'src/errors/notFound'
+import { CommonModuleService } from 'src/commonModule/commonModule.service'
 
 @Injectable()
 export class QuestService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private commonModuleService: CommonModuleService,
+  ) {}
+
+  async getMinimizeById(id: number): Promise<GetQuestMinimizeSchema> {
+    const foundQuest = await this.prisma.quests.findUnique({ where: { id } })
+
+    if (!foundQuest) {
+      throw new NotFoundError(`Quest with id ${id} not found`)
+    }
+
+    const quest: GetQuestMinimizeSchema = {
+      id: foundQuest.id,
+      tags: await this.prisma.quest_tags.findMany({
+        where: { quests: { some: { id_quest: foundQuest.id } } },
+      }),
+    }
+
+    if (foundQuest.name) quest.name = foundQuest.name
+    if (foundQuest.time) quest.time = foundQuest.time
+    if (foundQuest.description) quest.description = foundQuest.description
+    if (foundQuest.id_image) {
+      quest.image = await this.commonModuleService.getFileStatsById(
+        foundQuest.id_image,
+      )
+    }
+    if (foundQuest.id_group) {
+      const group = await this.prisma.quest_groups.findUnique({
+        where: { id: foundQuest.id_group },
+      })
+
+      quest.group = {
+        id: group.id,
+        name: group.name,
+      }
+    }
+    if (foundQuest.id_difficult) {
+      const difficult = await this.prisma.quest_difficulties.findUnique({
+        where: { id: foundQuest.id_difficult },
+      })
+
+      quest.difficult = {
+        id: difficult.id,
+        name: difficult.name,
+      }
+    }
+
+    return quest
+  }
 
   async getById(id: number): Promise<GetQuestSchema> {
     const foundQuest = await this.prisma.quests.findUnique({ where: { id } })
@@ -23,18 +76,14 @@ export class QuestService {
       where: { id: executor.id_position },
     })
 
-    const quest: GetQuestSchema = {
-      id: foundQuest.id,
+    return {
+      ...(await this.getMinimizeById(id)),
       executor: {
         id: executor.id,
         name: executor.first_name + ' ' + executor.last_name,
         position: executorPosition.name,
       },
     }
-
-    if (foundQuest.name) quest.name = foundQuest.name
-
-    return quest
   }
 
   async create(quest: SaveQuestDto): Promise<GetQuestSchema> {

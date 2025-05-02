@@ -44,56 +44,19 @@ export class QuestModuleService {
 
     if (getQuestsQuery.ids) where.id = { in: getQuestsQuery.ids }
     if (getQuestsQuery.tagsIds)
-      where.tags_ids = { hasSome: getQuestsQuery.tagsIds }
+      where.tags = { some: { id_tag: { in: getQuestsQuery.tagsIds } } }
     if (getQuestsQuery.executorsIds)
       where.id_executor = { in: getQuestsQuery.executorsIds }
     if (getQuestsQuery.departmentsIds)
       where.id_department = { in: getQuestsQuery.departmentsIds }
 
     const foundQuests = await this.prisma.quests.findMany({ where })
-    const quests: GetQuestMinimizeSchema[] = []
 
-    for (let foundQuest of foundQuests) {
-      const quest: GetQuestMinimizeSchema = {
-        id: foundQuest.id,
-      }
-
-      if (foundQuest.name) quest.name = foundQuest.name
-      if (foundQuest.time) quest.time = foundQuest.time
-      if (foundQuest.description) quest.description = foundQuest.description
-      if (foundQuest.id_group) {
-        const group = await this.prisma.quest_groups.findUnique({
-          where: { id: foundQuest.id_group },
-        })
-        quest.group = {
-          id: group.id,
-          name: group.name,
-          departmentId: group.id_department,
-        }
-      }
-      if (foundQuest.tags_ids) {
-        const tags = await this.prisma.quest_tags.findMany({
-          where: { id: { in: foundQuest.tags_ids } },
-        })
-        quest.tags = tags.map((tag) => ({ id: tag.id, name: tag.name }))
-      }
-      if (foundQuest.id_difficult) {
-        const difficult = await this.prisma.quest_difficulties.findUnique({
-          where: { id: foundQuest.id_difficult },
-        })
-        quest.difficult = { id: difficult.id, name: difficult.name }
-      }
-      if (foundQuest.id_image) {
-        const image = await this.prisma.shared_files.findUnique({
-          where: { id: foundQuest.id_image },
-        })
-        quest.image = await this.commonModuleService.getFileStats(image.name)
-      }
-
-      quests.push(quest)
-    }
-
-    return quests
+    return await Promise.all(
+      foundQuests.map(
+        async (quest) => await this.questService.getById(quest.id),
+      ),
+    )
   }
 
   // async getCompleteQuests(getQuestsQuery: GetCompleteQuestsMinimizeQuery): Promise<GetQuestMinimizeSchema[]> {
