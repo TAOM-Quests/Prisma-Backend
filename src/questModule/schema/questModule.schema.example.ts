@@ -1,4 +1,10 @@
-import { GetQuestDifficultiesSchema, GetQuestGroupsSchema, GetQuestMinimizeSchema, GetQuestSchema, GetQuestTagsSchema } from "./questModule.schema";
+import {
+  GetQuestDifficultiesSchema,
+  GetQuestGroupsSchema,
+  GetQuestMinimizeSchema,
+  GetQuestSchema,
+  GetQuestTagsSchema,
+} from './questModule.schema'
 
 export const getQuestSchemaMinimizeExample: GetQuestMinimizeSchema = {
   id: 1,
@@ -7,14 +13,17 @@ export const getQuestSchemaMinimizeExample: GetQuestMinimizeSchema = {
   description: '<b>BEST QUEST EVER</b>',
   group: { id: 1, name: 'TAOM SKILLS', departmentId: 1 },
   difficult: { id: 1, name: 'Easy' },
-  tags: [{ id: 1, name: 'TAOM' }, { id: 2, name: 'Start' }],
+  tags: [
+    { id: 1, name: 'TAOM' },
+    { id: 2, name: 'Start' },
+  ],
   image: {
     id: 1,
     size: 1000,
     extension: 'jpg',
-    originalName: "test",
+    originalName: 'test',
     name: '1744810610173-320802287.png',
-    url: "https://localhost:3000/commonModule/file?fileName=1744810610173-320802287.png",
+    url: 'https://localhost:3000/commonModule/file?fileName=1744810610173-320802287.png',
   },
 }
 
@@ -22,9 +31,12 @@ export const getQuestSchemaExample: GetQuestSchema = {
   id: 1,
   executor: { id: 1, name: 'Roman Nichi', position: 'President of Academy' },
   name: 'TAOM SKILLS',
-  group: { id: 1, name: 'TAOM SKILLS', departmentId: 1 },
+  group: { id: 1, name: 'TAOM SKILLS' },
   difficult: { id: 1, name: 'Easy' },
-  tags: [{ id: 1, name: 'TAOM' }, { id: 2, name: 'Start' }],
+  tags: [
+    { id: 1, name: 'TAOM' },
+    { id: 2, name: 'Start' },
+  ],
   questions: [
     {
       id: 1,
@@ -33,10 +45,10 @@ export const getQuestSchemaExample: GetQuestSchema = {
       answer: {
         id: 1,
         options: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
-        correctAnswer: 1
-      }
+        correctAnswer: 1,
+      },
     },
-    
+
     {
       id: 2,
       text: 'Question 2',
@@ -44,10 +56,10 @@ export const getQuestSchemaExample: GetQuestSchema = {
       answer: {
         id: 1,
         options: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
-        correctAnswer: [1, 2]
-      }
+        correctAnswer: [1, 2],
+      },
     },
-    
+
     {
       id: 3,
       text: 'Question 3',
@@ -55,8 +67,8 @@ export const getQuestSchemaExample: GetQuestSchema = {
       answer: {
         id: 1,
         options: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
-        correctAnswer: ['1 - 3', '2 - 4']
-      }
+        correctAnswer: ['1 - 3', '2 - 4'],
+      },
     },
     // {
     //   id: 4,
@@ -74,9 +86,9 @@ export const getQuestSchemaExample: GetQuestSchema = {
       type: 'free',
       answer: {
         id: 1,
-        correctAnswer: 'FreeAnswer'
-      }
-    }
+        correctAnswer: 'FreeAnswer',
+      },
+    },
   ],
   results: [
     {
@@ -88,25 +100,25 @@ export const getQuestSchemaExample: GetQuestSchema = {
         id: 1,
         size: 1000,
         extension: 'jpg',
-        originalName: "test",
+        originalName: 'test',
         name: '1744810610173-320802287.png',
-        url: "https://localhost:3000/commonModule/file?fileName=1744810610173-320802287.png",
+        url: 'https://localhost:3000/commonModule/file?fileName=1744810610173-320802287.png',
       },
-    }
-  ]
+    },
+  ],
 }
 
 export const getQuestDifficultiesSchemaExample: GetQuestDifficultiesSchema = {
   id: 1,
-  name: 'Easy'
+  name: 'Easy',
 }
 
 export const getQuestGroupsSchemaExample: GetQuestGroupsSchema = {
   id: 1,
-  name: 'Start'
+  name: 'Start',
 }
 
 export const getQuestTagsSchemaExample: GetQuestTagsSchema = {
   id: 1,
-  name: 'Python'
+  name: 'Python',
 }

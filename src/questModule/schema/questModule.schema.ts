@@ -1,10 +1,10 @@
-import { GetFileStatsSchema } from "src/commonModule/schema/commonModule.schema"
-import { QuestAnswer } from "src/models/questAnswer"
-import { QuestDifficult } from "src/models/questDifficult"
-import { QuestGroup } from "src/models/questGroup"
-import { QuestQuestion } from "src/models/questQuestion"
-import { QuestTag } from "src/models/questTag"
-import { Employee } from "src/models/users"
+import { GetFileStatsSchema } from 'src/commonModule/schema/commonModule.schema'
+import { QuestAnswer } from 'src/models/questAnswer'
+import { QuestDifficult } from 'src/models/questDifficult'
+import { QuestGroup } from 'src/models/questGroup'
+import { QuestQuestion } from 'src/models/questQuestion'
+import { QuestTag } from 'src/models/questTag'
+import { Employee } from 'src/models/users'
 
 export class GetQuestMinimizeSchema {
   id: number
@@ -21,11 +21,11 @@ export class GetQuestSchema {
   id: number
   executor: Employee
   name?: string
-  tags?: QuestTag[]
-  group?: QuestGroup
-  results?: GetQuestResult[]
-  difficult?: QuestDifficult
-  questions?: QuestQuestion[]
+  results?: GetQuestResultSchema[]
+  tags?: GetQuestTagsSchema[]
+  group?: GetQuestGroupsSchema
+  questions?: GetQuestQuestionSchema[]
+  difficult?: GetQuestDifficultiesSchema
 }
 
 export class GetQuestQuestionSchema {
@@ -35,7 +35,7 @@ export class GetQuestQuestionSchema {
   answer: QuestAnswer
 }
 
-export class GetQuestResult {
+export class GetQuestResultSchema {
   id: number
   name: string
   minPoints: number

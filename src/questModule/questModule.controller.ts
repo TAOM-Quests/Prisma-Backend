@@ -1,26 +1,46 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
-import { QuestModuleService } from "./questModule.service";
-import { ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { GetQuestDifficultiesSchema, GetQuestGroupsSchema, GetQuestMinimizeSchema, GetQuestSchema, GetQuestTagsSchema } from "./schema/questModule.schema";
-import { getQuestDifficultiesSchemaExample, getQuestGroupsSchemaExample, getQuestSchemaExample, getQuestSchemaMinimizeExample, getQuestTagsSchemaExample } from "./schema/questModule.schema.example";
-import { GetQuestGroupsQuery, GetQuestTagsQuery, PostQuestDto } from "./dto/questModule.dto";
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
+import { QuestModuleService } from './questModule.service'
+import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
+import {
+  GetQuestDifficultiesSchema,
+  GetQuestGroupsSchema,
+  GetQuestMinimizeSchema,
+  GetQuestSchema,
+  GetQuestTagsSchema,
+} from './schema/questModule.schema'
+import {
+  getQuestDifficultiesSchemaExample,
+  getQuestGroupsSchemaExample,
+  getQuestSchemaExample,
+  getQuestSchemaMinimizeExample,
+  getQuestTagsSchemaExample,
+} from './schema/questModule.schema.example'
+import {
+  GetQuestGroupsQuery,
+  GetQuestTagsQuery,
+  PostQuestDto,
+  SaveQuestDto,
+} from './dto/questModule.dto'
 
 @ApiTags('questModule')
 @Controller('questModule')
 export class QuestModuleController {
-  constructor(
-    private questModuleService: QuestModuleService
-  ) {}
+  constructor(private questModuleService: QuestModuleService) {}
 
   @ApiResponse({
     status: 200,
     type: GetQuestMinimizeSchema,
-    example: getQuestSchemaMinimizeExample
+    example: getQuestSchemaMinimizeExample,
   })
   @ApiQuery({ name: 'id', type: 'number', required: false })
   @ApiQuery({ name: 'department', type: 'number', required: false })
   @ApiQuery({ name: 'tag', type: 'number', isArray: true, required: false })
-  @ApiQuery({ name: 'executor', type: 'number', isArray: true, required: false })
+  @ApiQuery({
+    name: 'executor',
+    type: 'number',
+    isArray: true,
+    required: false,
+  })
   @ApiQuery({ name: 'isComplete', type: 'boolean', required: false })
   @ApiQuery({ name: 'completeBy', type: 'number', required: false })
   @Get('quests')
@@ -30,7 +50,7 @@ export class QuestModuleController {
     @Query('tag') tagsIds: string[],
     @Query('executor') executorsIds: string[],
     @Query('isComplete') isComplete: boolean,
-    @Query('completeBy') completeByUserId: string
+    @Query('completeBy') completeByUserId: string,
   ): Promise<GetQuestMinimizeSchema[]> {
     // return isComplete
     //   ? this.questModuleService.getCompleteQuests({
@@ -48,28 +68,32 @@ export class QuestModuleController {
     //   })
 
     return this.questModuleService.getQuests({
-      ids: ids.map(id => +id),
-      departmentsIds: departmentsIds.map(id => +id),
-      tagsIds: tagsIds.map(id => +id),
-      executorsIds: executorsIds.map(id => +id)
+      ids: ids.map((id) => +id),
+      departmentsIds: departmentsIds.map((id) => +id),
+      tagsIds: tagsIds.map((id) => +id),
+      executorsIds: executorsIds.map((id) => +id),
     })
   }
 
   @ApiResponse({
     status: 200,
     type: GetQuestSchema,
-    example: getQuestSchemaExample
+    example: getQuestSchemaExample,
   })
   @Post('quests')
   async createQuest(@Body() quest: PostQuestDto): Promise<GetQuestSchema> {
-    return this.questModuleService.createQuest(quest)
+    const createQuestData: SaveQuestDto = {
+      ...quest,
+    }
+
+    return this.questModuleService.createQuest(createQuestData)
   }
 
   @ApiResponse({
     status: 200,
     type: GetQuestSchema,
-    example: getQuestSchemaExample
-  })  
+    example: getQuestSchemaExample,
+  })
   @Get('/quests/:id')
   async getQuest(@Param('id') id: string): Promise<GetQuestSchema> {
     return this.questModuleService.getQuest(+id)
@@ -78,17 +102,20 @@ export class QuestModuleController {
   @ApiResponse({
     status: 200,
     type: GetQuestSchema,
-    example: getQuestSchemaExample
-  })  
+    example: getQuestSchemaExample,
+  })
   @Post('/quests/:id')
-  async updateQuest(@Param('id') id: string, @Body() quest: PostQuestDto): Promise<GetQuestSchema> {
+  async updateQuest(
+    @Param('id') id: string,
+    @Body() quest: PostQuestDto,
+  ): Promise<GetQuestSchema> {
     return this.questModuleService.updateQuest(+id, quest)
   }
 
   @ApiResponse({
     status: 200,
     type: GetQuestDifficultiesSchema,
-    example: getQuestDifficultiesSchemaExample
+    example: getQuestDifficultiesSchemaExample,
   })
   @Get('/difficulties')
   async getDifficulties(): Promise<GetQuestDifficultiesSchema[]> {
@@ -98,11 +125,13 @@ export class QuestModuleController {
   @ApiResponse({
     status: 200,
     type: GetQuestGroupsSchema,
-    example: getQuestGroupsSchemaExample
+    example: getQuestGroupsSchemaExample,
   })
   @ApiQuery({ name: 'departmentId', type: 'number', required: false })
   @Get('/groups')
-  async getGroups(@Query('departmentId') departmentId: string): Promise<GetQuestGroupsSchema[]> {
+  async getGroups(
+    @Query('departmentId') departmentId: string,
+  ): Promise<GetQuestGroupsSchema[]> {
     const getQuestGroups: GetQuestGroupsQuery = {}
 
     if (departmentId) {
@@ -115,11 +144,13 @@ export class QuestModuleController {
   @ApiResponse({
     status: 200,
     type: GetQuestTagsSchema,
-    example: getQuestTagsSchemaExample
+    example: getQuestTagsSchemaExample,
   })
   @ApiQuery({ name: 'departmentId', type: 'number', required: false })
   @Get('/tags')
-  async getTags(@Query('departmentId') departmentId: string): Promise<GetQuestTagsSchema[]> {
+  async getTags(
+    @Query('departmentId') departmentId: string,
+  ): Promise<GetQuestTagsSchema[]> {
     const getQuestTags: GetQuestTagsQuery = {}
 
     if (departmentId) {
