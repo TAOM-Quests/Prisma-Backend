@@ -8,6 +8,7 @@ import {
 } from './schema/questModule.schema'
 import { NotFoundError } from 'src/errors/notFound'
 import { CommonModuleService } from 'src/commonModule/commonModule.service'
+import { difference } from 'lodash'
 
 @Injectable()
 export class QuestService {
@@ -91,6 +92,39 @@ export class QuestService {
   }
 
   async update(quest: SaveQuestDto): Promise<GetQuestSchema> {
+    const oldQuestQuestionsIds = (
+      await this.prisma.questions.findMany({
+        where: { quest: { id: { in: quest.questions.map((q) => q.id) } } },
+      })
+    ).map((q) => q.id)
+    const newQuestQuestionsIds = quest.questions.map((q) => q.id)
+    for (const questionIdToDisconnect of [
+      ...difference(oldQuestQuestionsIds, newQuestQuestionsIds),
+      ...difference(newQuestQuestionsIds, oldQuestQuestionsIds),
+    ]) {
+      await this.prisma.quests.update({
+        where: { id: questionIdToDisconnect },
+        data: { questions: { disconnect: { id: questionIdToDisconnect } } },
+      })
+    }
+
+    const oldQuestResultsIds = (
+      await this.prisma.quest_results.findMany({
+        where: { quest: { id: { in: quest.results.map((q) => q.id) } } },
+      })
+    ).map((q) => q.id)
+    const newQuestResultsIds = quest.results.map((q) => q.id)
+    await this.prisma.quest_results.deleteMany({
+      where: {
+        id: {
+          in: [
+            ...difference(oldQuestResultsIds, newQuestResultsIds),
+            ...difference(newQuestResultsIds, oldQuestResultsIds),
+          ],
+        },
+      },
+    })
+
     return this.saveQuest(quest)
   }
 

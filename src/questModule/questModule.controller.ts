@@ -81,12 +81,8 @@ export class QuestModuleController {
     example: getQuestSchemaExample,
   })
   @Post('quests')
-  async createQuest(@Body() quest: PostQuestDto): Promise<GetQuestSchema> {
-    const createQuestData: SaveQuestDto = {
-      ...quest,
-    }
-
-    return this.questModuleService.createQuest(createQuestData)
+  async createQuest(@Body() quest: SaveQuestDto): Promise<GetQuestSchema> {
+    return this.questModuleService.createQuest(quest)
   }
 
   @ApiResponse({
@@ -107,7 +103,7 @@ export class QuestModuleController {
   @Post('/quests/:id')
   async updateQuest(
     @Param('id') id: string,
-    @Body() quest: PostQuestDto,
+    @Body() quest: SaveQuestDto,
   ): Promise<GetQuestSchema> {
     return this.questModuleService.updateQuest(+id, quest)
   }

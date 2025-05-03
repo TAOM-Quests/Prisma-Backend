@@ -86,14 +86,15 @@ export class SaveQuestDto {
   description?: string
   difficultId?: number
   departmentId?: number
+  results?: SaveResultDto[]
   questions?: SaveQuestionDto[]
-  results?: Omit<QuestResult, 'id'>[]
   group?: { name: string; id?: number }
   tags?: { name: string; id?: number }[]
 }
 
 export class SaveQuestionDto {
   type: string
+  questId: number
   answer: SaveAnswerDto
   id?: number
   text?: string
@@ -106,8 +107,8 @@ export class SaveAnswerDto {
 }
 
 export class SaveResultDto {
-  id: number
   questId: number
+  id?: number
   name?: string
   imageId?: number
   minPoints?: number

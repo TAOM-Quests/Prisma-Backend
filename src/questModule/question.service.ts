@@ -127,7 +127,7 @@ export class QuestionService {
   ): Promise<GetQuestQuestionSchema> {
     const upsertQuestion: Prisma.questionsUpsertArgs = {
       where: { id: question.id ?? -1 },
-      create: { quest: { connect: { id: questId } } },
+      create: { quest: { connect: { id: questId ?? question.questId } } },
       update: {},
     }
     const upsertData: Prisma.questionsUpdateInput = {}

@@ -78,15 +78,29 @@ export class QuestModuleService {
         this.questionService.createAndConnectToQuest(question, createdQuest.id),
       ),
     )
+    createdQuest.results = await Promise.all(
+      quest.results.map((result) =>
+        this.resultService.create(result, createdQuest.id),
+      ),
+    )
 
     return createdQuest
   }
 
   async updateQuest(id: number, quest: SaveQuestDto): Promise<GetQuestSchema> {
-    const updatedQuest = await this.questService.create(quest)
+    const updatedQuest = await this.questService.update(quest)
     updatedQuest.questions = await Promise.all(
-      quest.questions.map((question) =>
-        this.questionService.updateQuestion(question),
+      quest.questions.map(async (question) =>
+        question.id
+          ? await this.questionService.updateQuestion(question)
+          : await this.questionService.createAndConnectToQuest(question, id),
+      ),
+    )
+    updatedQuest.results = await Promise.all(
+      quest.results.map(async (result) =>
+        result.id
+          ? await this.resultService.update(result)
+          : await this.resultService.create(result, id),
       ),
     )
 
