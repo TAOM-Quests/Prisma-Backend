@@ -16,22 +16,14 @@ export class GetEventMinimizeSchema {
   image?: GetFileStatsSchema
 }
 
-export class GetEventSchema {
-  id: number
-  status: EventStatus
+export class GetEventSchema extends GetEventMinimizeSchema {
   executors: Executor[]
   department: Department
-  schedule: ScheduleItem[]
   files: GetFileStatsSchema[]
   participants: Participant[]
-  places: (PlaceOffline | PlaceOnline)[]
-  date?: Date
-  name?: string
-  type?: EventType
   description?: string
   seatsNumber?: number
   inspector?: Inspector
-  image?: GetFileStatsSchema
 }
 
 export class GetEventTypeSchema {

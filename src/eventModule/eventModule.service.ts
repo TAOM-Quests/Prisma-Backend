@@ -109,7 +109,12 @@ export class EventModuleService {
       await this.removeFileFromEvent(id, fileId)
     }
 
-    event.id = id
+    const foundEvent = await this.prisma.events.findUnique({
+      where: { id },
+    })
+
+    event.id = foundEvent.id
+    event.departmentId = foundEvent.id_department
 
     return await this.saveEvent(event)
   }
@@ -196,6 +201,8 @@ export class EventModuleService {
       status: await this.getStatus(event),
     }
 
+    if (event.name) eventData.name = event.name
+    if (event.date) eventData.date = event.date
     if (event.id_type) eventData.type = await this.getType(event)
     if (event.id_image_file) eventData.image = await this.getImage(event)
 
@@ -211,6 +218,7 @@ export class EventModuleService {
       participants: await this.getParticipants(event),
     }
 
+    if (event.description) eventData.description = event.description
     if (event.seats_number) eventData.seatsNumber = event.seats_number
     if (event.id_inspector) eventData.inspector = await this.getInspector(event)
 
@@ -234,8 +242,9 @@ export class EventModuleService {
         position: foundExecutorPosition.name,
       }
 
-      if (executor.id_image_file)
+      if (executor.id_image_file) {
         executorData.image = await this.getImage(executor)
+      }
 
       executors.push(executorData)
     }
