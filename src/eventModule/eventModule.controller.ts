@@ -12,11 +12,13 @@ import {
   GetEventMinimizeSchema,
   GetEventSchema,
   GetEventStatusSchema,
+  GetEventTagSchema,
   GetEventTypeSchema,
 } from './schema/eventModule.schema'
 import {
   CreateEventDto,
   GetEventsMinimizeQuery,
+  GetEventTagsQuery,
   UpdateEventDto,
   UpdateEventParticipantsDto,
 } from './dto/eventModule.dto'
@@ -24,6 +26,7 @@ import {
   getEventSchemaExample,
   getEventsMinimizeSchemaExample,
   getEventStatusSchemaExample,
+  getEventTagsSchemaExample,
   getEventTypeSchemaExample,
 } from './schema/eventModule.schema.example'
 import { EventModuleService } from './eventModule.service'
@@ -135,5 +138,23 @@ export class EventModuleController {
   @Get('/statuses')
   async getStatuses(): Promise<GetEventStatusSchema[]> {
     return this.eventModuleService.getStatuses()
+  }
+
+  @ApiResponse({
+    status: 200,
+    type: GetEventTagSchema,
+    example: getEventTagsSchemaExample,
+  })
+  @Get('/tags')
+  async getTags(
+    @Query('department') departmentId: string,
+  ): Promise<GetEventTagSchema[]> {
+    const getEventTags: GetEventTagsQuery = {}
+
+    if (departmentId) {
+      getEventTags.departmentId = +departmentId
+    }
+
+    return this.eventModuleService.getTags(getEventTags)
   }
 }

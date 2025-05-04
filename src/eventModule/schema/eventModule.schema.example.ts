@@ -43,6 +43,16 @@ export const getEventsMinimizeSchemaExample: GetEventMinimizeSchema[] = [
         timeStart: new Date('2025-04-02 10:00'),
       },
     ],
+    tags: [
+      {
+        id: 1,
+        name: 'TAOM',
+      },
+      {
+        id: 2,
+        name: 'IT',
+      },
+    ],
   },
 ]
 
@@ -122,6 +132,16 @@ export const getEventSchemaExample: GetEventSchema = {
       url: 'https://localhost:3000/eventModule/file?fileName=TAOM SKILLS.pdf',
     },
   ],
+  tags: [
+    {
+      id: 1,
+      name: 'TAOM',
+    },
+    {
+      id: 2,
+      name: 'IT',
+    },
+  ],
 }
 
 export const getEventTypeSchemaExample = [
@@ -143,5 +163,16 @@ export const getEventStatusSchemaExample = [
   {
     id: 2,
     name: 'Canceled',
+  },
+]
+
+export const getEventTagsSchemaExample = [
+  {
+    id: 1,
+    name: 'TAOM',
+  },
+  {
+    id: 2,
+    name: 'IT',
   },
 ]

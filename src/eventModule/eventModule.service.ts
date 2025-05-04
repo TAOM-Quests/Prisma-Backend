@@ -6,11 +6,13 @@ import {
   UpdateEventDto,
   UpdateEventParticipantsDto,
   SaveEventDto,
+  GetEventTagsQuery,
 } from './dto/eventModule.dto'
 import {
   GetEventMinimizeSchema,
   GetEventSchema,
   GetEventStatusSchema,
+  GetEventTagSchema,
   GetEventTypeSchema,
 } from './schema/eventModule.schema'
 import { Prisma } from '@prisma/client'
@@ -22,6 +24,7 @@ import { NotFoundError } from 'src/errors/notFound'
 import { CommonModuleService } from 'src/commonModule/commonModule.service'
 import { GetFileStatsSchema } from 'src/commonModule/schema/commonModule.schema'
 import { difference } from 'lodash'
+import { EventTag } from 'src/models/eventTag'
 
 @Injectable()
 export class EventModuleService {
@@ -191,6 +194,21 @@ export class EventModuleService {
     }))
   }
 
+  async getTags(searchQuery: GetEventTagsQuery): Promise<GetEventTagSchema[]> {
+    const where: Prisma.event_tagsWhereInput = {}
+
+    if (searchQuery.departmentId) {
+      where.department_id = searchQuery.departmentId
+    }
+
+    const tags = await this.prisma.event_tags.findMany({ where })
+
+    return tags.map((tag) => ({
+      id: tag.id,
+      name: tag.name,
+    }))
+  }
+
   private async getEventMinimizeWithAdditionalData(
     event,
   ): Promise<GetEventMinimizeSchema> {
@@ -199,6 +217,7 @@ export class EventModuleService {
       places: event.places,
       schedule: event.schedule,
       status: await this.getStatus(event),
+      tags: await this.getEventTags(event),
     }
 
     if (event.name) eventData.name = event.name
@@ -265,14 +284,10 @@ export class EventModuleService {
 
   private async getInspector(event): Promise<Inspector> {
     const foundInspector = await this.prisma.users.findUnique({
-      where: {
-        id: event.id_inspector,
-      },
+      where: { id: event.id_inspector },
     })
     const foundInspectorPosition = await this.prisma.user_positions.findUnique({
-      where: {
-        id: foundInspector.id_position,
-      },
+      where: { id: foundInspector.id_position },
     })
 
     return {
@@ -297,9 +312,7 @@ export class EventModuleService {
 
   private async getStatus(event): Promise<EventStatus> {
     const foundStatus = await this.prisma.event_statuses.findUnique({
-      where: {
-        id: event.id_status,
-      },
+      where: { id: event.id_status },
     })
 
     return {
@@ -310,9 +323,7 @@ export class EventModuleService {
 
   private async getDepartment(event): Promise<Department> {
     const foundDepartment = await this.prisma.departments.findUnique({
-      where: {
-        id: event.id_department,
-      },
+      where: { id: event.id_department },
     })
 
     return {
@@ -323,9 +334,7 @@ export class EventModuleService {
 
   private async getImage(event): Promise<GetFileStatsSchema> {
     const foundFile = await this.prisma.shared_files.findUnique({
-      where: {
-        id: event.id_image_file,
-      },
+      where: { id: event.id_image_file },
     })
 
     return await this.commonModuleService.getFileStats(foundFile.name)
@@ -341,6 +350,17 @@ export class EventModuleService {
         async (file) => await this.commonModuleService.getFileStats(file.name),
       ),
     )
+  }
+
+  private async getEventTags(event): Promise<EventTag[]> {
+    const tags = await this.prisma.event_tags.findMany({
+      where: { events: { some: { id: event.id } } },
+    })
+
+    return tags.map((tag) => ({
+      id: tag.id,
+      name: tag.name,
+    }))
   }
 
   private async saveEvent(event: SaveEventDto): Promise<GetEventSchema> {
@@ -371,6 +391,17 @@ export class EventModuleService {
     }
     for (const fileId of event.filesIds) {
       await this.addFileToEvent(savedEvent.id, fileId)
+    }
+    for (const tag of event.tags) {
+      await this.prisma.event_tags.upsert({
+        where: { id: tag.id ?? -1 },
+        create: {
+          name: tag.name,
+          events: { connect: { id: savedEvent.id } },
+          department: { connect: { id: event.departmentId } },
+        },
+        update: { events: { connect: { id: savedEvent.id } } },
+      })
     }
 
     return this.getEventById(savedEvent.id)

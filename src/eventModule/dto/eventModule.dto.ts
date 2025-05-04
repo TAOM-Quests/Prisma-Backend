@@ -17,6 +17,10 @@ export interface GetEventParams {
   id: number
 }
 
+export interface GetEventTagsQuery {
+  departmentId?: number
+}
+
 export class SaveEventDto {
   id: number
   departmentId?: number
@@ -105,6 +109,12 @@ export class SaveEventDto {
     required: false,
   })
   filesIds?: number[]
+
+  @ApiProperty({
+    example: [{ id: 1, name: 'Start' }, { name: 'Python' }],
+    required: false,
+  })
+  tags?: { name: string; id?: number }[]
 }
 
 export class CreateEventDto extends SaveEventDto {
