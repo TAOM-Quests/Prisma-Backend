@@ -88,9 +88,6 @@ model events {
   id_image_file    Int?
   places           Json[]
   schedule         Json[]
-  files_ids        Int[]
-  executors_ids    Int[]
-  participants_ids Int[]
   status           event_statuses                @relation(fields: [id_status], references: [id])
   department       departments                   @relation(fields: [id_department], references: [id])
   type             event_types?                  @relation(fields: [id_type], references: [id])
@@ -216,8 +213,6 @@ model users {
   password                     String
   id_role                      Int?
   id_department                Int?
-  events_where_executor_ids    Int[]
-  events_where_participant_ids Int[]
   token                        String                        @unique
   birth_date                   DateTime?
   first_name                   String?
