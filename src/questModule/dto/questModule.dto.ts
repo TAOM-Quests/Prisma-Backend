@@ -114,3 +114,43 @@ export class SaveResultDto {
   minPoints?: number
   description?: string
 }
+
+export class SaveQuestCompleteDto {
+  name: string
+  questId: number
+  executor: {
+    name: string
+    imageId?: number
+  }
+  time?: string
+  tags?: string[]
+  imageId?: number
+  difficult?: string
+  description?: string
+  departmentId?: number
+  result?: SaveResultCompleteDto
+  questions?: SaveQuestionCompleteDto[]
+}
+
+export class SaveQuestionCompleteDto {
+  id: number
+  type: string
+  answer: SaveAnswerCompleteDto
+  text?: string
+  imageId?: number
+}
+
+export class SaveAnswerCompleteDto {
+  id: number
+  isCorrect: boolean
+  userAnswer: CorrectAnswer
+  options?: string[]
+}
+
+export class SaveResultCompleteDto {
+  id: number
+  name: string
+  description: string
+  userCorrectAnswerCount: number
+  imageId?: number
+}

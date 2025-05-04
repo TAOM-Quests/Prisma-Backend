@@ -19,6 +19,7 @@ import {
   GetQuestGroupsQuery,
   GetQuestTagsQuery,
   PostQuestDto,
+  SaveQuestCompleteDto,
   SaveQuestDto,
 } from './dto/questModule.dto'
 
@@ -106,6 +107,17 @@ export class QuestModuleController {
     @Body() quest: SaveQuestDto,
   ): Promise<GetQuestSchema> {
     return this.questModuleService.updateQuest(+id, quest)
+  }
+
+  @Post('/quests/:id/complete')
+  async completeQuest(
+    @Param('id') id: string,
+    @Query('userId') userId: string,
+    @Body() quest: SaveQuestCompleteDto,
+  ): Promise<void> {
+    quest.questId = +id
+
+    await this.questModuleService.saveCompleteQuest(quest, +userId)
   }
 
   @ApiResponse({

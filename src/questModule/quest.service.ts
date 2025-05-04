@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { SaveQuestDto } from './dto/questModule.dto'
+import { SaveQuestCompleteDto, SaveQuestDto } from './dto/questModule.dto'
 import { Prisma } from '@prisma/client'
 import { PrismaService } from 'src/prisma/prisma.service'
 import {
@@ -126,6 +126,18 @@ export class QuestService {
     })
 
     return this.saveQuest(quest)
+  }
+
+  async saveComplete(
+    quest: SaveQuestCompleteDto,
+    userId: number,
+  ): Promise<void> {
+    await this.prisma.complete_quests.create({
+      data: {
+        user: { connect: { id: userId } },
+        quest_data: quest as unknown as Prisma.JsonObject,
+      },
+    })
   }
 
   private async saveQuest(quest: SaveQuestDto): Promise<GetQuestSchema> {

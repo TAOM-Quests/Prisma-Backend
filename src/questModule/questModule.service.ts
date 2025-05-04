@@ -5,6 +5,7 @@ import {
   GetQuestsMinimizeQuery,
   GetQuestTagsQuery,
   PostQuestDto,
+  SaveQuestCompleteDto,
   SaveQuestDto,
   SaveQuestionDto,
 } from './dto/questModule.dto'
@@ -105,6 +106,13 @@ export class QuestModuleService {
     )
 
     return updatedQuest
+  }
+
+  async saveCompleteQuest(
+    quest: SaveQuestCompleteDto,
+    userId: number,
+  ): Promise<void> {
+    await this.questService.saveComplete(quest, userId)
   }
 
   async getDifficulties(): Promise<GetQuestDifficultiesSchema[]> {
