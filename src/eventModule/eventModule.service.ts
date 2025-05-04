@@ -189,24 +189,32 @@ export class EventModuleService {
   private async getEventMinimizeWithAdditionalData(
     event,
   ): Promise<GetEventMinimizeSchema> {
-    if (event.id_type) event.type = await this.getType(event)
-    if (event.id_status) event.status = await this.getStatus(event)
-    if (event.id_image_file) event.image = await this.getImage(event)
+    const eventData: GetEventMinimizeSchema = {
+      id: event.id,
+      places: event.places,
+      schedule: event.schedule,
+      status: await this.getStatus(event),
+    }
 
-    return event
+    if (event.id_type) eventData.type = await this.getType(event)
+    if (event.id_image_file) eventData.image = await this.getImage(event)
+
+    return eventData
   }
 
   private async getEventWithAdditionalData(event): Promise<GetEventSchema> {
-    event = await this.getEventMinimizeWithAdditionalData(event)
+    const eventData: GetEventSchema = {
+      ...(await this.getEventMinimizeWithAdditionalData(event)),
+      files: await this.getFiles(event),
+      executors: await this.getExecutors(event),
+      department: await this.getDepartment(event),
+      participants: await this.getParticipants(event),
+    }
 
-    event.department = await this.getDepartment(event)
-    event.executors = await this.getExecutors(event)
-    event.participants = await this.getParticipants(event)
-    event.files = await this.getFiles(event)
+    if (event.seats_number) eventData.seatsNumber = event.seats_number
+    if (event.id_inspector) eventData.inspector = await this.getInspector(event)
 
-    if (event.id_inspector) event.inspector = await this.getInspector(event)
-
-    return event
+    return eventData
   }
 
   private async getExecutors(event): Promise<Executor[]> {
