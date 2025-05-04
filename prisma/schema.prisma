@@ -15,52 +15,46 @@ model answers {
   id_connection  Int?
   id_box_sorting Int?
   id_free        Int?
-  questions_ids  Int[]
-  box_sorting    answers_box_sorting?
-  connection     answers_connection?
-  free           answers_free?
-  multiple       answers_multiple?
-  single         answers_single?
+  single         answers_single?      @relation(fields: [id_single], references: [id])
+  multiple       answers_multiple?    @relation(fields: [id_multiple], references: [id])
+  connection     answers_connection?  @relation(fields: [id_connection], references: [id])
+  box_sorting    answers_box_sorting? @relation(fields: [id_box_sorting], references: [id])
+  free           answers_free?        @relation(fields: [id_free], references: [id])
   questions      questions[]
 }
 
 model answers_single {
-  id               Int      @id @default(autoincrement())
-  answers          String[]
-  correct_answers  Int?
-  id_parent_answer Int      @unique
-  parent_answer    answers  @relation(fields: [id_parent_answer], references: [id])
+  id              Int       @id @default(autoincrement())
+  correct_answers Int
+  options         String[]
+  answers         answers[]
 }
 
 model answers_multiple {
-  id               Int      @id @default(autoincrement())
-  answers          String[]
-  correct_answers  Int[]
-  id_parent_answer Int      @unique
-  parent_answer    answers  @relation(fields: [id_parent_answer], references: [id])
+  id              Int       @id @default(autoincrement())
+  options         String[]
+  correct_answers Int[]
+  answers         answers[]
 }
 
 model answers_connection {
-  id               Int      @id @default(autoincrement())
-  answers          String[]
-  correct_answers  String[]
-  id_parent_answer Int      @unique
-  parent_answer    answers  @relation(fields: [id_parent_answer], references: [id])
+  id              Int       @id @default(autoincrement())
+  options         String[]
+  correct_answers String[]
+  answers         answers[]
 }
 
 model answers_box_sorting {
-  id               Int      @id @default(autoincrement())
-  answers          String[]
-  correct_answers  Json?
-  id_parent_answer Int      @unique
-  parent_answer    answers  @relation(fields: [id_parent_answer], references: [id])
+  id              Int       @id @default(autoincrement())
+  options         String[]
+  correct_answers Json
+  answers         answers[]
 }
 
 model answers_free {
-  id               Int     @id @default(autoincrement())
-  correct_answers  String?
-  id_parent_answer Int     @unique
-  parent_answer    answers @relation(fields: [id_parent_answer], references: [id])
+  id              Int       @id @default(autoincrement())
+  correct_answers String
+  answers         answers[]
 }
 
 model complete_quests {
@@ -71,16 +65,12 @@ model complete_quests {
 }
 
 model departments {
-  id               Int            @id @default(autoincrement())
-  name             String
-  id_users         Int[]
-  quest_groups_ids Int[]
-  quest_tags_ids   Int[]
-  quests_ids       Int[]
-  quest_groups     quest_groups[]
-  quest_tags       quest_tags[]
-  quests           quests[]
-  users            users[]
+  id           Int            @id @default(autoincrement())
+  name         String
+  quest_groups quest_groups[]
+  quest_tags   quest_tags[]
+  quests       quests[]
+  users        users[]
 
   events events[]
 }
@@ -124,27 +114,23 @@ model event_types {
 }
 
 model quests {
-  id                  Int                    @id @default(autoincrement())
-  id_department       Int
-  name                String?
-  time                String?
-  description         String?
-  id_group            Int?
-  id_executor         Int
-  tags_ids            Int[]
-  id_difficult        Int?
-  result_ids          Int[]
-  questions_ids       Int[]
-  complete_quests_ids Int[]
-  id_image            Int?
-  results             quest_results[]
-  tags                quest_tags_on_quests[]
-  questions           questions[]
-  department          departments            @relation(fields: [id_department], references: [id])
-  difficult           quest_difficulties?    @relation(fields: [id_difficult], references: [id])
-  group               quest_groups?          @relation(fields: [id_group], references: [id])
-  executor            users                  @relation(fields: [id_executor], references: [id])
-  image               shared_files?          @relation(fields: [id_image], references: [id])
+  id            Int                    @id @default(autoincrement())
+  id_department Int
+  name          String?
+  time          String?
+  description   String?
+  id_group      Int?
+  id_executor   Int
+  id_difficult  Int?
+  id_image      Int?
+  results       quest_results[]
+  tags          quest_tags_on_quests[]
+  questions     questions[]
+  department    departments            @relation(fields: [id_department], references: [id])
+  difficult     quest_difficulties?    @relation(fields: [id_difficult], references: [id])
+  group         quest_groups?          @relation(fields: [id_group], references: [id])
+  executor      users                  @relation(fields: [id_executor], references: [id])
+  image         shared_files?          @relation(fields: [id_image], references: [id])
 }
 
 model quest_difficulties {
@@ -162,11 +148,14 @@ model quest_groups {
 }
 
 model quest_results {
-  id          Int    @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   name        String
   description String
+  min_points  Int
+  id_image    Int?
   id_quest    Int
-  quest       quests @relation(fields: [id_quest], references: [id])
+  quest       quests        @relation(fields: [id_quest], references: [id])
+  image       shared_files? @relation(fields: [id_image], references: [id])
 }
 
 model quest_tags {
@@ -208,6 +197,8 @@ model shared_files {
   events_where_file  shared_files_on_events[]
 
   quests quests[]
+
+  quest_results quest_results[]
 }
 
 model shared_files_on_events {

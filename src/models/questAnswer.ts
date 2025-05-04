@@ -1,13 +1,18 @@
 export interface QuestAnswer {
   id: number
-  answers?: string[]
+  options?: string[]
   correctAnswer?: CorrectAnswer
 }
 
-export type CorrectAnswer = SingleCorrectAnswer | MultipleCorrectAnswer | ConnectionCorrectAnswer | FreeCorrectAnswer
+export type CorrectAnswer =
+  | SingleCorrectAnswer
+  | MultipleCorrectAnswer
+  | ConnectionCorrectAnswer
+  | BoxCorrectAnswer
+  | FreeCorrectAnswer
 
-type SingleCorrectAnswer = number
-type MultipleCorrectAnswer = number[]
-type ConnectionCorrectAnswer = string[]
-// type BoxCorrectAnswer = number
-type FreeCorrectAnswer = string
+export type SingleCorrectAnswer = number
+export type MultipleCorrectAnswer = number[]
+export type ConnectionCorrectAnswer = string[]
+export type BoxCorrectAnswer = { [key: string]: number[] }
+export type FreeCorrectAnswer = string

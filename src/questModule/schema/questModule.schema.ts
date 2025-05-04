@@ -1,38 +1,41 @@
-import { GetFileStatsSchema } from "src/commonModule/schema/commonModule.schema"
-import { QuestAnswer } from "src/models/questAnswer"
-import { QuestDifficult } from "src/models/questDifficult"
-import { QuestGroup } from "src/models/questGroup"
-import { QuestQuestion } from "src/models/questQuestion"
-import { QuestQuestionType } from "src/models/questQuestionType"
-import { QuestTag } from "src/models/questTag"
-import { Employee } from "src/models/users"
+import { GetFileStatsSchema } from 'src/commonModule/schema/commonModule.schema'
+import { QuestAnswer } from 'src/models/questAnswer'
+import { QuestDifficult } from 'src/models/questDifficult'
+import { QuestGroup } from 'src/models/questGroup'
+import { QuestQuestion } from 'src/models/questQuestion'
+import { QuestTag } from 'src/models/questTag'
+import { Employee } from 'src/models/users'
 
 export class GetQuestMinimizeSchema {
   id: number
   name?: string
   time?: string
-  tags?: QuestTag[]
-  group?: QuestGroup
   description?: string
   image?: GetFileStatsSchema
-  difficult?: QuestDifficult
+  tags?: GetQuestTagsSchema[]
+  group?: GetQuestGroupsSchema
+  difficult?: GetQuestDifficultiesSchema
 }
 
-export class GetQuestSchema {
-  id: number
+export class GetQuestSchema extends GetQuestMinimizeSchema {
   executor: Employee
-  name?: string
-  tags?: QuestTag[]
-  group?: QuestGroup
-  difficult?: QuestDifficult
-  questions?: QuestQuestion[]
+  results?: GetQuestResultSchema[]
+  questions?: GetQuestQuestionSchema[]
 }
 
 export class GetQuestQuestionSchema {
   id: number
-  text?: string
-  answer?: QuestAnswer
-  type?: QuestQuestionType
+  text: string
+  type: string
+  answer: QuestAnswer
+}
+
+export class GetQuestResultSchema {
+  id: number
+  name: string
+  minPoints: number
+  description: string
+  image?: GetFileStatsSchema
 }
 
 export class GetQuestDifficultiesSchema {
