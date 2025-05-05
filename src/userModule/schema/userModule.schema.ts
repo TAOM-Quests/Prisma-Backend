@@ -7,7 +7,7 @@ export class GetUsersSchema {
   id: number
   name: string
   position?: string
-  avatar?: GetFileStatsSchema
+  image?: GetFileStatsSchema
 }
 
 export class AuthUserSchema {
@@ -32,6 +32,7 @@ export class GetUserProfileSchema {
   phoneNumber?: string
   department?: Department
   position?: UserPosition
+  image?: GetFileStatsSchema
 }
 
 export class UpdateUserProfileSchema {
@@ -44,4 +45,5 @@ export class UpdateUserProfileSchema {
   firstName?: string
   patronymic?: string
   phoneNumber?: string
+  image?: GetFileStatsSchema
 }

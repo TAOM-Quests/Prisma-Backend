@@ -6,7 +6,11 @@ import {
   GetUsersSchema,
   UpdateUserProfileSchema,
 } from './schema/userModule.schema'
-import { GetUsersQuery, UpdateProfileDto, UserAuthDto } from './dto/userModule.dto'
+import {
+  GetUsersQuery,
+  UpdateProfileDto,
+  UserAuthDto,
+} from './dto/userModule.dto'
 import { genSaltSync, hashSync, compare } from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { NotFoundError } from 'src/errors/notFound'
@@ -37,34 +41,39 @@ export class UserModuleService {
 
     const users = await this.prisma.users.findMany({ where })
 
-    return Promise.all(users.map(async (user) => {
-      const resultUser: GetUsersSchema = { 
-        id: user.id,
-        name: (user.first_name + ' ' + user.last_name).trim()
-      }
+    return Promise.all(
+      users.map(async (user) => {
+        const resultUser: GetUsersSchema = {
+          id: user.id,
+          name: (user.first_name + ' ' + user.last_name).trim(),
+        }
 
-      if (user.id_position) {
-        const foundPosition = await this.prisma.user_positions.findUniqueOrThrow({
-          where: {
-            id: user.id_position
-          }
-        })
+        if (user.id_position) {
+          const foundPosition =
+            await this.prisma.user_positions.findUniqueOrThrow({
+              where: {
+                id: user.id_position,
+              },
+            })
 
-        resultUser.position = foundPosition.name
-      }
+          resultUser.position = foundPosition.name
+        }
 
-      if (user.id_image_file) {
-        const foundFile = await this.prisma.shared_files.findUniqueOrThrow({
-          where: {
-            id: user.id_image_file
-          }
-        })
+        if (user.id_image_file) {
+          const foundFile = await this.prisma.shared_files.findUniqueOrThrow({
+            where: {
+              id: user.id_image_file,
+            },
+          })
 
-        resultUser.avatar = await this.commonModuleService.getFileStats(foundFile.name)
-      }
+          resultUser.image = await this.commonModuleService.getFileStats(
+            foundFile.name,
+          )
+        }
 
-      return resultUser
-    }))
+        return resultUser
+      }),
+    )
   }
 
   async createUser(userAuth: UserAuthDto): Promise<AuthUserSchema> {
@@ -179,7 +188,13 @@ export class UserModuleService {
       birthDate: foundUser.birth_date,
       sex: USER_SEX[foundUser.sex],
       phoneNumber: foundUser.phone_number,
-      telegram: foundUser.telegram
+      telegram: foundUser.telegram,
+    }
+
+    if (foundUser.id_image_file) {
+      profile.image = await this.commonModuleService.getFileStatsById(
+        foundUser.id_image_file,
+      )
     }
 
     if (isEmployee) {
@@ -233,7 +248,7 @@ export class UserModuleService {
       },
     })
 
-    return {
+    const result: UpdateUserProfileSchema = {
       id: updatedUser.id,
       email: updatedUser.email,
       firstName: updatedUser.first_name,
@@ -242,8 +257,16 @@ export class UserModuleService {
       birthDate: updatedUser.birth_date,
       sex: updatedUser.sex,
       phoneNumber: updatedUser.phone_number,
-      telegram: updatedUser.telegram
+      telegram: updatedUser.telegram,
     }
+
+    if (updatedUser.id_image_file) {
+      result.image = await this.commonModuleService.getFileStatsById(
+        updatedUser.id_image_file,
+      )
+    }
+
+    return result
   }
 
   private async setRole(entity, roleId) {
@@ -295,6 +318,9 @@ export class UserModuleService {
     }
     if (updateProfile.telegram) {
       result.telegram = updateProfile.telegram
+    }
+    if (updateProfile.imageId) {
+      result.image = { connect: { id: updateProfile.imageId } }
     }
 
     return result
