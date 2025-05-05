@@ -95,7 +95,6 @@ export class EventModuleService {
     ).map((executor) => executor.id)
     for (const executorId of [
       ...difference(oldExecutorsIds ?? [], event.executorsIds ?? []),
-      ...difference(event.executorsIds ?? [], oldExecutorsIds ?? []),
     ]) {
       await this.removeExecutorFromEvent(id, executorId)
     }
@@ -107,7 +106,6 @@ export class EventModuleService {
     ).map((file) => file.id)
     for (const fileId of [
       ...difference(oldFilesIds ?? [], event.filesIds ?? []),
-      ...difference(event.filesIds ?? [], oldFilesIds ?? []),
     ]) {
       await this.removeFileFromEvent(id, fileId)
     }
@@ -392,7 +390,7 @@ export class EventModuleService {
     for (const fileId of event.filesIds) {
       await this.addFileToEvent(savedEvent.id, fileId)
     }
-    for (const tag of event.tags) {
+    for (const tag of event.tags ?? []) {
       await this.prisma.event_tags.upsert({
         where: { id: tag.id ?? -1 },
         create: {
@@ -408,17 +406,10 @@ export class EventModuleService {
   }
 
   private async addExecutorToEvent(eventId: number, executorId: number) {
-    await this.prisma.events.update({
-      where: { id: eventId },
+    await this.prisma.user_executors_on_events.create({
       data: {
-        executors: {
-          connect: {
-            id_event_id_executor: {
-              id_event: eventId,
-              id_executor: executorId,
-            },
-          },
-        },
+        id_executor: executorId,
+        id_event: eventId,
       },
     })
   }

@@ -51,8 +51,6 @@ export class EventModuleController {
   @ApiQuery({ name: 'offset', type: 'number', required: false })
   @Get('/events')
   async getEvents(@Query() getEventsParams): Promise<GetEventMinimizeSchema[]> {
-    console.log('QUERY PARAMS', getEventsParams)
-
     const params: GetEventsMinimizeQuery = {
       limit: +(getEventsParams.limit ?? 12),
       offset: +(getEventsParams.offset ?? 0),
