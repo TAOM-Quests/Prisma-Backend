@@ -14,9 +14,11 @@ export class AuthUserSchema {
   id: number
   email: string
   token: string
+  name?: string
   isAdmin?: boolean
   isEmployee?: boolean
   departmentId?: number
+  image?: GetFileStatsSchema
 }
 
 export class GetUserProfileSchema {

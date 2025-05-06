@@ -60,14 +60,8 @@ export class UserModuleService {
         }
 
         if (user.id_image_file) {
-          const foundFile = await this.prisma.shared_files.findUniqueOrThrow({
-            where: {
-              id: user.id_image_file,
-            },
-          })
-
-          resultUser.image = await this.commonModuleService.getFileStats(
-            foundFile.name,
+          resultUser.image = await this.commonModuleService.getFileStatsById(
+            user.id_image_file,
           )
         }
 
@@ -127,6 +121,13 @@ export class UserModuleService {
       id: foundUser.id,
       email: foundUser.email,
       token: foundUser.token,
+      name: `${foundUser.first_name ?? ''} ${foundUser.last_name ?? ''}`.trim(),
+    }
+
+    if (foundUser.id_image_file) {
+      authUser.image = await this.commonModuleService.getFileStatsById(
+        foundUser.id_image_file,
+      )
     }
 
     if (foundUser.id_role) {
@@ -155,6 +156,13 @@ export class UserModuleService {
         id: foundUser.id,
         email: foundUser.email,
         token: foundUser.token,
+        name: `${foundUser.first_name ?? ''} ${foundUser.last_name ?? ''}`.trim(),
+      }
+
+      if (foundUser.id_image_file) {
+        authUser.image = await this.commonModuleService.getFileStatsById(
+          foundUser.id_image_file,
+        )
       }
 
       if (foundUser.id_role) {
