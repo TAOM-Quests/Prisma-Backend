@@ -71,31 +71,32 @@ model departments {
   quest_tags   quest_tags[]
   quests       quests[]
   users        users[]
-
-  events events[]
+  events       events[]
+  event_tags   event_tags[]
 }
 
 model events {
-  id               Int                           @id @default(autoincrement())
-  id_status        Int                           @default(1)
-  id_department    Int
-  date             DateTime?
-  name             String?
-  description      String?
-  seats_number     Int?
-  id_type          Int?
-  id_inspector     Int?
-  id_image_file    Int?
-  places           Json[]
-  schedule         Json[]
-  status           event_statuses                @relation(fields: [id_status], references: [id])
-  department       departments                   @relation(fields: [id_department], references: [id])
-  type             event_types?                  @relation(fields: [id_type], references: [id])
-  image            shared_files?                 @relation(fields: [id_image_file], references: [id])
-  inspector        users?                        @relation(fields: [id_inspector], references: [id])
-  files            shared_files_on_events[]
-  executors        user_executors_on_events[]
-  participants     user_participants_on_events[]
+  id            Int                           @id @default(autoincrement())
+  id_status     Int                           @default(1)
+  id_department Int
+  date          DateTime?
+  name          String?
+  description   String?
+  seats_number  Int?
+  id_type       Int?
+  id_inspector  Int?
+  id_image_file Int?
+  places        Json[]
+  schedule      Json[]
+  status        event_statuses                @relation(fields: [id_status], references: [id])
+  department    departments                   @relation(fields: [id_department], references: [id])
+  type          event_types?                  @relation(fields: [id_type], references: [id])
+  image         shared_files?                 @relation(fields: [id_image_file], references: [id])
+  inspector     users?                        @relation(fields: [id_inspector], references: [id])
+  files         shared_files_on_events[]
+  executors     user_executors_on_events[]
+  participants  user_participants_on_events[]
+  tags          event_tags[]
 }
 
 model event_statuses {
@@ -108,6 +109,14 @@ model event_types {
   id     Int      @id @default(autoincrement())
   name   String
   events events[]
+}
+
+model event_tags {
+  id            Int         @id @default(autoincrement())
+  name          String
+  department_id Int
+  department    departments @relation(fields: [department_id], references: [id])
+  events        events[]
 }
 
 model quests {
