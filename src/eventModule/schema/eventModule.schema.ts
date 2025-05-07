@@ -8,6 +8,7 @@ import { Executor, Inspector, Participant } from 'src/models/users'
 export class GetEventMinimizeSchema {
   id: number
   status: EventStatus
+  department: Department
   schedule: ScheduleItem[]
   places: (PlaceOffline | PlaceOnline)[]
   date?: Date
@@ -18,7 +19,6 @@ export class GetEventMinimizeSchema {
 
 export class GetEventSchema extends GetEventMinimizeSchema {
   executors: Executor[]
-  department: Department
   files: GetFileStatsSchema[]
   participants: Participant[]
   description?: string
