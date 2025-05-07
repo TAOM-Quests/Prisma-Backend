@@ -406,10 +406,17 @@ export class EventModuleService {
   }
 
   private async addExecutorToEvent(eventId: number, executorId: number) {
-    await this.prisma.user_executors_on_events.create({
+    await this.prisma.events.update({
+      where: { id: eventId },
       data: {
-        id_executor: executorId,
-        id_event: eventId,
+        executors: {
+          connect: {
+            id_event_id_executor: {
+              id_event: eventId,
+              id_executor: executorId,
+            },
+          },
+        },
       },
     })
   }
