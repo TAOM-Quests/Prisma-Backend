@@ -46,6 +46,9 @@ export class UserModuleService {
         const resultUser: GetUsersSchema = {
           id: user.id,
           name: (user.first_name + ' ' + user.last_name).trim(),
+          image: await this.commonModuleService.getFileStatsById(
+            user.id_image_file,
+          ),
         }
 
         if (user.id_position) {
@@ -57,12 +60,6 @@ export class UserModuleService {
             })
 
           resultUser.position = foundPosition.name
-        }
-
-        if (user.id_image_file) {
-          resultUser.image = await this.commonModuleService.getFileStatsById(
-            user.id_image_file,
-          )
         }
 
         return resultUser
@@ -103,6 +100,9 @@ export class UserModuleService {
       id: createdUser.id,
       email: createdUser.email,
       token,
+      image: await this.commonModuleService.getFileStatsById(
+        createdUser.id_image_file,
+      ),
     }
   }
 
@@ -122,12 +122,9 @@ export class UserModuleService {
       email: foundUser.email,
       token: foundUser.token,
       name: `${foundUser.first_name ?? ''} ${foundUser.last_name ?? ''}`.trim(),
-    }
-
-    if (foundUser.id_image_file) {
-      authUser.image = await this.commonModuleService.getFileStatsById(
+      image: await this.commonModuleService.getFileStatsById(
         foundUser.id_image_file,
-      )
+      ),
     }
 
     if (foundUser.id_role) {
@@ -157,12 +154,9 @@ export class UserModuleService {
         email: foundUser.email,
         token: foundUser.token,
         name: `${foundUser.first_name ?? ''} ${foundUser.last_name ?? ''}`.trim(),
-      }
-
-      if (foundUser.id_image_file) {
-        authUser.image = await this.commonModuleService.getFileStatsById(
+        image: await this.commonModuleService.getFileStatsById(
           foundUser.id_image_file,
-        )
+        ),
       }
 
       if (foundUser.id_role) {
@@ -197,12 +191,9 @@ export class UserModuleService {
       sex: USER_SEX[foundUser.sex],
       phoneNumber: foundUser.phone_number,
       telegram: foundUser.telegram,
-    }
-
-    if (foundUser.id_image_file) {
-      profile.image = await this.commonModuleService.getFileStatsById(
+      image: await this.commonModuleService.getFileStatsById(
         foundUser.id_image_file,
-      )
+      ),
     }
 
     if (isEmployee) {
@@ -266,12 +257,9 @@ export class UserModuleService {
       sex: updatedUser.sex,
       phoneNumber: updatedUser.phone_number,
       telegram: updatedUser.telegram,
-    }
-
-    if (updatedUser.id_image_file) {
-      result.image = await this.commonModuleService.getFileStatsById(
+      image: await this.commonModuleService.getFileStatsById(
         updatedUser.id_image_file,
-      )
+      ),
     }
 
     return result
@@ -294,41 +282,41 @@ export class UserModuleService {
     updateProfile: UpdateProfileDto,
   ): Prisma.usersUpdateInput {
     const result: Prisma.usersUpdateInput = {}
-
     const userSex = Object.keys(USER_SEX).find(
       (sex) => USER_SEX[sex] === updateProfile.sex,
     )
+    const updatedFields = Object.keys(updateProfile)
 
     if (updateProfile.sex && !userSex) {
       throw new BadRequestError(`Sex ${updateProfile.sex} not found`)
     }
 
-    if (updateProfile.email) {
+    if (updatedFields.includes('email')) {
       result.email = updateProfile.email
     }
-    if (updateProfile.firstName) {
+    if (updatedFields.includes('firstName')) {
       result.first_name = updateProfile.firstName
     }
-    if (updateProfile.lastName) {
+    if (updatedFields.includes('lastName')) {
       result.last_name = updateProfile.lastName
     }
-    if (updateProfile.patronymic) {
+    if (updatedFields.includes('patronymic')) {
       result.patronymic = updateProfile.patronymic
     }
-    if (updateProfile.birthDate) {
+    if (updatedFields.includes('birthDate')) {
       result.birth_date = updateProfile.birthDate
     }
-    if (updateProfile.sex) {
+    if (updatedFields.includes('sex')) {
       result.sex = userSex as user_sex
     }
-    if (updateProfile.phoneNumber) {
+    if (updatedFields.includes('phoneNumber')) {
       result.phone_number = updateProfile.phoneNumber
     }
-    if (updateProfile.telegram) {
+    if (updatedFields.includes('telegram')) {
       result.telegram = updateProfile.telegram
     }
-    if (updateProfile.imageId) {
-      result.image = { connect: { id: updateProfile.imageId } }
+    if (updatedFields.includes('imageId')) {
+      result.image = { connect: { id: updateProfile.imageId ?? 1 } }
     }
 
     return result
