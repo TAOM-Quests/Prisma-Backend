@@ -31,37 +31,37 @@ export class UpdateProfileDto {
     required: false,
   })
   email: string
-  
+
   @ApiProperty({
     example: 'Roman',
     required: false,
   })
   firstName: string
-  
+
   @ApiProperty({
     example: 'Nichi',
     required: false,
   })
   lastName: string
-  
+
   @ApiProperty({
     example: 'Olegovich',
     required: false,
   })
   patronymic: string
-  
+
   @ApiProperty({
     example: new Date('2003-06-28T00:00:00.000Z'),
     required: false,
   })
   birthDate: Date
-  
+
   @ApiProperty({
     example: 'Мужской',
     required: false,
   })
   sex: USER_SEX
-  
+
   @ApiProperty({
     example: '8(999)999-99-99',
     required: false,
@@ -73,4 +73,10 @@ export class UpdateProfileDto {
     required: false,
   })
   telegram: string
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  imageId: number
 }

@@ -10,6 +10,7 @@ export class GetEventMinimizeSchema {
   id: number
   tags: EventTag[]
   status: EventStatus
+  department: Department
   schedule: ScheduleItem[]
   places: (PlaceOffline | PlaceOnline)[]
   date?: Date
@@ -20,7 +21,6 @@ export class GetEventMinimizeSchema {
 
 export class GetEventSchema extends GetEventMinimizeSchema {
   executors: Executor[]
-  department: Department
   files: GetFileStatsSchema[]
   participants: Participant[]
   description?: string

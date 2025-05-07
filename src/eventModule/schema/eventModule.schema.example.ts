@@ -5,6 +5,10 @@ export const getEventsMinimizeSchemaExample: GetEventMinimizeSchema[] = [
     id: 1,
     name: 'TAOM SKILLS',
     date: new Date('2025-04-02'),
+    department: {
+      id: 1,
+      name: 'IT',
+    },
     places: [
       {
         isOnline: false,

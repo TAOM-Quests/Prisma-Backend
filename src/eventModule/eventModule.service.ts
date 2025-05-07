@@ -216,6 +216,7 @@ export class EventModuleService {
       schedule: event.schedule,
       status: await this.getStatus(event),
       tags: await this.getEventTags(event),
+      department: await this.getDepartment(event),
     }
 
     if (event.name) eventData.name = event.name
@@ -231,7 +232,6 @@ export class EventModuleService {
       ...(await this.getEventMinimizeWithAdditionalData(event)),
       files: await this.getFiles(event),
       executors: await this.getExecutors(event),
-      department: await this.getDepartment(event),
       participants: await this.getParticipants(event),
     }
 

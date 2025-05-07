@@ -1,4 +1,7 @@
-import { GetUserProfileSchema, UpdateUserProfileSchema } from "./userModule.schema"
+import {
+  GetUserProfileSchema,
+  UpdateUserProfileSchema,
+} from './userModule.schema'
 
 export const getUsersSchemaExample = {
   id: 10,
@@ -32,8 +35,16 @@ export const getUserProfileSchemaExample: GetUserProfileSchema = {
   role: {
     id: 0,
     name: 'Admin',
-    description: 'Director of department'
-  }
+    description: 'Director of department',
+  },
+  image: {
+    id: 1,
+    name: 'image.png',
+    size: 12345,
+    originalName: 'image.png',
+    extension: 'png',
+    url: 'https://localhost:3000/commonModule/file?fileName=image.png',
+  },
 }
 
 export const updateUserProfileSchemaExample: UpdateUserProfileSchema = {
@@ -45,4 +56,12 @@ export const updateUserProfileSchemaExample: UpdateUserProfileSchema = {
   birthDate: new Date('2003-06-28T00:00:00.000Z'),
   sex: 'Male',
   phoneNumber: '8(999)999-99-99',
+  image: {
+    id: 1,
+    name: 'image.png',
+    size: 12345,
+    originalName: 'image.png',
+    extension: 'png',
+    url: 'https://localhost:3000/commonModule/file?fileName=image.png',
+  },
 }
