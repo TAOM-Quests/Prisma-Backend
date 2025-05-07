@@ -6,24 +6,25 @@ import { UserRole } from 'src/models/userRole'
 export class GetUsersSchema {
   id: number
   name: string
+  image: GetFileStatsSchema
   position?: string
-  image?: GetFileStatsSchema
 }
 
 export class AuthUserSchema {
   id: number
   email: string
   token: string
+  image: GetFileStatsSchema
   name?: string
   isAdmin?: boolean
   isEmployee?: boolean
   departmentId?: number
-  image?: GetFileStatsSchema
 }
 
 export class GetUserProfileSchema {
   id: number
   email: string
+  image: GetFileStatsSchema
   sex?: string
   role?: UserRole
   birthDate?: Date
@@ -34,11 +35,11 @@ export class GetUserProfileSchema {
   phoneNumber?: string
   department?: Department
   position?: UserPosition
-  image?: GetFileStatsSchema
 }
 
 export class UpdateUserProfileSchema {
   id: number
+  image: GetFileStatsSchema
   sex?: string
   email?: string
   birthDate?: Date
@@ -47,5 +48,4 @@ export class UpdateUserProfileSchema {
   firstName?: string
   patronymic?: string
   phoneNumber?: string
-  image?: GetFileStatsSchema
 }
