@@ -291,31 +291,31 @@ export class UserModuleService {
       throw new BadRequestError(`Sex ${updateProfile.sex} not found`)
     }
 
-    if ('email' in updatedFields) {
+    if (updatedFields.includes('email')) {
       result.email = updateProfile.email
     }
-    if ('firstName' in updatedFields) {
+    if (updatedFields.includes('firstName')) {
       result.first_name = updateProfile.firstName
     }
-    if ('lastName' in updatedFields) {
+    if (updatedFields.includes('lastName')) {
       result.last_name = updateProfile.lastName
     }
-    if ('patronymic' in updatedFields) {
+    if (updatedFields.includes('patronymic')) {
       result.patronymic = updateProfile.patronymic
     }
-    if ('birthDate' in updatedFields) {
+    if (updatedFields.includes('birthDate')) {
       result.birth_date = updateProfile.birthDate
     }
-    if ('sex' in updatedFields) {
+    if (updatedFields.includes('sex')) {
       result.sex = userSex as user_sex
     }
-    if ('phoneNumber' in updatedFields) {
+    if (updatedFields.includes('phoneNumber')) {
       result.phone_number = updateProfile.phoneNumber
     }
-    if ('telegram' in updatedFields) {
+    if (updatedFields.includes('telegram')) {
       result.telegram = updateProfile.telegram
     }
-    if ('imageId' in updatedFields) {
+    if (updatedFields.includes('imageId')) {
       result.image = { connect: { id: updateProfile.imageId ?? 1 } }
     }
 
