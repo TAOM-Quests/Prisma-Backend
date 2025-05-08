@@ -362,25 +362,50 @@ export class EventModuleService {
   }
 
   private async saveEvent(event: SaveEventDto): Promise<GetEventSchema> {
+    const foundEvent = await this.prisma.events.findUnique({
+      where: { id: event.id ?? -1 },
+    })
     const upsertEvent: Prisma.eventsUpsertArgs = {
       where: { id: event.id ?? -1 },
       create: { department: { connect: { id: event.departmentId } } },
       update: {},
     }
     const upsertData: Prisma.eventsUpdateInput = {}
+    const onlyUpdateData: Prisma.eventsUpdateInput = {}
+    const upsertFields = Object.keys(event)
 
-    if (event.date) upsertData.date = event.date
-    if (event.name) upsertData.name = event.name
-    if (event.places) upsertData.places = event.places
-    if (event.schedule) upsertData.schedule = event.schedule
-    if (event.description) upsertData.description = event.description
-    if (event.seatsNumber) upsertData.seats_number = event.seatsNumber
-    if (event.typeId) upsertData.type = { connect: { id: event.typeId } }
-    if (event.imageId) upsertData.image = { connect: { id: event.imageId } }
-    if (event.statusId) upsertData.status = { connect: { id: event.statusId } }
+    //Поля с простыми типами данных
+    if (upsertFields.includes('date')) upsertData.date = event.date
+    if (upsertFields.includes('name')) upsertData.name = event.name
+    if (upsertFields.includes('places')) upsertData.places = event.places
+    if (upsertFields.includes('schedule')) upsertData.schedule = event.schedule
+    if (upsertFields.includes('description'))
+      upsertData.description = event.description
+    if (upsertFields.includes('seatsNumber'))
+      upsertData.seats_number = event.seatsNumber
+
+    //Обязательные поля с внешними ключами
+    if (upsertFields.includes('statusId'))
+      upsertData.status = { connect: { id: event.statusId } }
+
+    //Не обязательные поля с внешними ключами
+    if (upsertFields.includes('typeId')) {
+      if (event.typeId) {
+        upsertData.type = { connect: { id: event.typeId } }
+      } else if (foundEvent?.id_type) {
+        onlyUpdateData.type = { delete: true }
+      }
+    }
+    if (upsertFields.includes('imageId')) {
+      if (event.imageId) {
+        upsertData.image = { connect: { id: event.imageId } }
+      } else if (foundEvent?.id_image_file) {
+        onlyUpdateData.image = { delete: true }
+      }
+    }
 
     upsertEvent.create = Object.assign(upsertEvent.create, upsertData)
-    upsertEvent.update = upsertData
+    upsertEvent.update = { ...upsertData, ...onlyUpdateData }
 
     const savedEvent = await this.prisma.events.upsert(upsertEvent)
 
@@ -410,11 +435,14 @@ export class EventModuleService {
       where: { id: eventId },
       data: {
         executors: {
-          connect: {
-            id_event_id_executor: {
-              id_event: eventId,
-              id_executor: executorId,
+          connectOrCreate: {
+            where: {
+              id_event_id_executor: {
+                id_event: eventId,
+                id_executor: executorId,
+              },
             },
+            create: { id_executor: executorId },
           },
         },
       },
@@ -426,7 +454,7 @@ export class EventModuleService {
       where: { id: eventId },
       data: {
         executors: {
-          disconnect: {
+          delete: {
             id_event_id_executor: {
               id_event: eventId,
               id_executor: executorId,
@@ -442,11 +470,14 @@ export class EventModuleService {
       where: { id: eventId },
       data: {
         participants: {
-          connect: {
-            id_event_id_participant: {
-              id_event: eventId,
-              id_participant: participantId,
+          connectOrCreate: {
+            where: {
+              id_event_id_participant: {
+                id_event: eventId,
+                id_participant: participantId,
+              },
             },
+            create: { id_participant: participantId },
           },
         },
       },
@@ -461,7 +492,7 @@ export class EventModuleService {
       where: { id: eventId },
       data: {
         participants: {
-          disconnect: {
+          delete: {
             id_event_id_participant: {
               id_event: eventId,
               id_participant: participantId,
@@ -477,8 +508,14 @@ export class EventModuleService {
       where: { id: eventId },
       data: {
         files: {
-          connect: {
-            id_event_id_file: { id_event: eventId, id_file: fileId },
+          connectOrCreate: {
+            where: {
+              id_event_id_file: {
+                id_event: eventId,
+                id_file: fileId,
+              },
+            },
+            create: { id_file: fileId },
           },
         },
       },
@@ -490,7 +527,7 @@ export class EventModuleService {
       where: { id: eventId },
       data: {
         files: {
-          disconnect: {
+          delete: {
             id_event_id_file: {
               id_event: eventId,
               id_file: fileId,
