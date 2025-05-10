@@ -1,0 +1,26 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Nichi_R
+      - POSTGRES_DB=tq-dev
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  backend:
+    build: .
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+volumes:
+  db-data:
