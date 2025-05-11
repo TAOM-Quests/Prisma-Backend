@@ -1,4 +1,7 @@
-import { GetFileStatsSchema } from 'src/commonModule/schema/commonModule.schema'
+import {
+  GetCommentsSchema,
+  GetFileStatsSchema,
+} from 'src/commonModule/schema/commonModule.schema'
 import { Department } from 'src/models/department'
 import { PlaceOffline, PlaceOnline, ScheduleItem } from 'src/models/event'
 import { EventStatus } from 'src/models/eventStatus'
@@ -23,6 +26,7 @@ export class GetEventSchema extends GetEventMinimizeSchema {
   executors: Executor[]
   files: GetFileStatsSchema[]
   participants: Participant[]
+  inspectorComments: GetCommentsSchema[]
   description?: string
   seatsNumber?: number
   inspector?: Inspector

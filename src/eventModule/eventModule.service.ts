@@ -22,7 +22,10 @@ import { EventStatus } from 'src/models/eventStatus'
 import { Department } from 'src/models/department'
 import { NotFoundError } from 'src/errors/notFound'
 import { CommonModuleService } from 'src/commonModule/commonModule.service'
-import { GetFileStatsSchema } from 'src/commonModule/schema/commonModule.schema'
+import {
+  GetCommentsSchema,
+  GetFileStatsSchema,
+} from 'src/commonModule/schema/commonModule.schema'
 import { difference } from 'lodash'
 import { EventTag } from 'src/models/eventTag'
 
@@ -233,6 +236,7 @@ export class EventModuleService {
       files: await this.getFiles(event),
       executors: await this.getExecutors(event),
       participants: await this.getParticipants(event),
+      inspectorComments: await this.getInspectorComments(event),
     }
 
     if (event.description) eventData.description = event.description
@@ -361,6 +365,13 @@ export class EventModuleService {
     }))
   }
 
+  private async getInspectorComments(event): Promise<GetCommentsSchema[]> {
+    return this.commonModuleService.getComments({
+      entityName: 'events',
+      entityId: event.id,
+    })
+  }
+
   private async saveEvent(event: SaveEventDto): Promise<GetEventSchema> {
     const foundEvent = await this.prisma.events.findUnique({
       where: { id: event.id ?? -1 },
@@ -409,10 +420,10 @@ export class EventModuleService {
 
     const savedEvent = await this.prisma.events.upsert(upsertEvent)
 
-    for (const executorId of event.executorsIds) {
+    for (const executorId of event.executorsIds ?? []) {
       await this.addExecutorToEvent(savedEvent.id, executorId)
     }
-    for (const fileId of event.filesIds) {
+    for (const fileId of event.filesIds ?? []) {
       await this.addFileToEvent(savedEvent.id, fileId)
     }
     for (const tag of event.tags ?? []) {
@@ -424,6 +435,18 @@ export class EventModuleService {
           department: { connect: { id: event.departmentId } },
         },
         update: { events: { connect: { id: savedEvent.id } } },
+      })
+    }
+    for (const comment of event.inspectorComments ?? []) {
+      await this.prisma.comments.upsert({
+        where: { id: comment.id ?? -1 },
+        create: {
+          text: comment.text,
+          user: { connect: { id: comment.userId } },
+          entity_name: 'events',
+          entity_id: savedEvent.id,
+        },
+        update: {},
       })
     }
 

@@ -146,6 +146,7 @@ export const getEventSchemaExample: GetEventSchema = {
       name: 'IT',
     },
   ],
+  inspectorComments: [],
 }
 
 export const getEventTypeSchemaExample = [

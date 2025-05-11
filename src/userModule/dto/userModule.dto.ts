@@ -4,6 +4,7 @@ import { IsEmail } from 'class-validator'
 type USER_SEX = 'Мужской' | 'Женский'
 
 export class GetUsersQuery {
+  id?: number
   roleId?: number
   isAdmin?: boolean
   positionId?: number

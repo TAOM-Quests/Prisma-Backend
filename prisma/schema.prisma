@@ -57,6 +57,17 @@ model answers_free {
   answers         answers[]
 }
 
+model comments {
+  id          Int      @id @default(autoincrement())
+  text        String
+  createdAt   DateTime @default(now())
+  user_id     Int
+  entity_name String
+  entity_id   Int
+  user        users    @relation(fields: [user_id], references: [id])
+  events      events[]
+}
+
 model complete_quests {
   id         Int   @id @default(autoincrement())
   id_user    Int
@@ -76,27 +87,28 @@ model departments {
 }
 
 model events {
-  id            Int                           @id @default(autoincrement())
-  id_status     Int                           @default(1)
-  id_department Int
-  date          DateTime?
-  name          String?
-  description   String?
-  seats_number  Int?
-  id_type       Int?
-  id_inspector  Int?
-  id_image_file Int?
-  places        Json[]
-  schedule      Json[]
-  status        event_statuses                @relation(fields: [id_status], references: [id])
-  department    departments                   @relation(fields: [id_department], references: [id])
-  type          event_types?                  @relation(fields: [id_type], references: [id])
-  image         shared_files?                 @relation(fields: [id_image_file], references: [id])
-  inspector     users?                        @relation(fields: [id_inspector], references: [id])
-  files         shared_files_on_events[]
-  executors     user_executors_on_events[]
-  participants  user_participants_on_events[]
-  tags          event_tags[]
+  id                 Int                           @id @default(autoincrement())
+  id_status          Int                           @default(1)
+  id_department      Int
+  date               DateTime?
+  name               String?
+  description        String?
+  seats_number       Int?
+  id_type            Int?
+  id_inspector       Int?
+  id_image_file      Int?
+  places             Json[]
+  schedule           Json[]
+  inspector_comments comments[]
+  status             event_statuses                @relation(fields: [id_status], references: [id])
+  department         departments                   @relation(fields: [id_department], references: [id])
+  type               event_types?                  @relation(fields: [id_type], references: [id])
+  image              shared_files?                 @relation(fields: [id_image_file], references: [id])
+  inspector          users?                        @relation(fields: [id_inspector], references: [id])
+  files              shared_files_on_events[]
+  executors          user_executors_on_events[]
+  participants       user_participants_on_events[]
+  tags               event_tags[]
 }
 
 model event_statuses {
@@ -217,31 +229,32 @@ model shared_files_on_events {
 }
 
 model users {
-  id                           Int                           @id @default(autoincrement())
-  email                        String                        @unique
-  id_image_file                Int @default(1)
-  password                     String
-  id_role                      Int?
-  id_department                Int?
-  token                        String                        @unique
-  birth_date                   DateTime?
-  first_name                   String?
-  id_position                  Int?
-  last_name                    String?
-  patronymic                   String?
-  phone_number                 String?
-  telegram                     String?                       @unique
-  telegram_chat_id             Int?
-  sex                          user_sex?
-  complete_quests              complete_quests[]
-  events_where_inspector       events[]
-  events_where_executor        user_executors_on_events[]
-  events_where_participant     user_participants_on_events[]
-  department                   departments?                  @relation(fields: [id_department], references: [id])
-  image                        shared_files                 @relation(fields: [id_image_file], references: [id])
-  position                     user_positions?               @relation(fields: [id_position], references: [id])
-  role                         user_roles?                   @relation(fields: [id_role], references: [id])
-  quests                       quests[]
+  id                       Int                           @id @default(autoincrement())
+  email                    String                        @unique
+  id_image_file            Int                           @default(1)
+  password                 String
+  id_role                  Int?
+  id_department            Int?
+  token                    String                        @unique
+  birth_date               DateTime?
+  first_name               String?
+  id_position              Int?
+  last_name                String?
+  patronymic               String?
+  phone_number             String?
+  telegram                 String?                       @unique
+  telegram_chat_id         Int?
+  sex                      user_sex?
+  complete_quests          complete_quests[]
+  events_where_inspector   events[]
+  events_where_executor    user_executors_on_events[]
+  events_where_participant user_participants_on_events[]
+  department               departments?                  @relation(fields: [id_department], references: [id])
+  image                    shared_files                  @relation(fields: [id_image_file], references: [id])
+  position                 user_positions?               @relation(fields: [id_position], references: [id])
+  role                     user_roles?                   @relation(fields: [id_role], references: [id])
+  quests                   quests[]
+  comments                 comments[]
 }
 
 model user_executors_on_events {
