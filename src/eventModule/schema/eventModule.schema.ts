@@ -12,6 +12,7 @@ export class GetEventMinimizeSchema {
   status: EventStatus
   department: Department
   schedule: ScheduleItem[]
+  participantsCount: number
   places: (PlaceOffline | PlaceOnline)[]
   date?: Date
   name?: string

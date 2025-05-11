@@ -217,6 +217,9 @@ export class EventModuleService {
       status: await this.getStatus(event),
       tags: await this.getEventTags(event),
       department: await this.getDepartment(event),
+      participantsCount: await this.prisma.user_participants_on_events.count({
+        where: { id_event: event.id },
+      }),
     }
 
     if (event.name) eventData.name = event.name
