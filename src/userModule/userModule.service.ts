@@ -130,6 +130,7 @@ export class UserModuleService {
 
     if (foundUser.id_role) {
       authUser.isEmployee = true
+      authUser.roleId = foundUser.id_role
       authUser.departmentId = foundUser.id_department
     }
 
@@ -162,6 +163,7 @@ export class UserModuleService {
 
       if (foundUser.id_role) {
         authUser.isEmployee = true
+        authUser.roleId = foundUser.id_role
         authUser.departmentId = foundUser.id_department
       }
 
