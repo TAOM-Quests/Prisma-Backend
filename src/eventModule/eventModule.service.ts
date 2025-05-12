@@ -41,6 +41,7 @@ export class EventModuleService {
   ): Promise<GetEventMinimizeSchema[]> {
     const where: Prisma.eventsWhereInput = {}
 
+    if (getEventsParams.status) where.id_status = getEventsParams.status
     if (getEventsParams.name) where.name = { contains: getEventsParams.name }
     if (getEventsParams.department)
       where.id_department = getEventsParams.department
@@ -220,6 +221,9 @@ export class EventModuleService {
       status: await this.getStatus(event),
       tags: await this.getEventTags(event),
       department: await this.getDepartment(event),
+      participantsCount: await this.prisma.user_participants_on_events.count({
+        where: { id_event: event.id },
+      }),
     }
 
     if (event.name) eventData.name = event.name
