@@ -7,6 +7,7 @@ export interface GetEventsMinimizeQuery {
   name?: string
   type?: number
   dateEnd?: Date
+  status?: number
   dateStart?: Date
   executor?: number
   department?: number

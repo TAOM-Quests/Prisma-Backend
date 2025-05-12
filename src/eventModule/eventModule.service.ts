@@ -38,6 +38,7 @@ export class EventModuleService {
   ): Promise<GetEventMinimizeSchema[]> {
     const where: Prisma.eventsWhereInput = {}
 
+    if (getEventsParams.status) where.id_status = getEventsParams.status
     if (getEventsParams.name) where.name = { contains: getEventsParams.name }
     if (getEventsParams.department)
       where.id_department = getEventsParams.department
