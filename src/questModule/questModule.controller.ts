@@ -53,27 +53,20 @@ export class QuestModuleController {
     @Query('isComplete') isComplete: boolean,
     @Query('completeBy') completeByUserId: string,
   ): Promise<GetQuestMinimizeSchema[]> {
-    // return isComplete
-    //   ? this.questModuleService.getCompleteQuests({
-    //     ids: ids.map(id => +id),
-    //     departmentsIds: departmentsIds.map(id => +id),
-    //     tagsIds: tagsIds.map(id => +id),
-    //     executorsIds: executorsIds.map(id => +id),
-    //     completeByUserId: +completeByUserId
-    //   })
-    //   : this.questModuleService.getQuests({
-    //     ids: ids.map(id => +id),
-    //     departmentsIds: departmentsIds.map(id => +id),
-    //     tagsIds: tagsIds.map(id => +id),
-    //     executorsIds: executorsIds.map(id => +id)
-    //   })
-
-    return this.questModuleService.getQuests({
-      ids: ids.map((id) => +id),
-      departmentsIds: departmentsIds.map((id) => +id),
-      tagsIds: tagsIds.map((id) => +id),
-      executorsIds: executorsIds.map((id) => +id),
-    })
+    return isComplete
+      ? this.questModuleService.getCompleteQuests({
+          ids: ids.map((id) => +id),
+          departmentsIds: departmentsIds.map((id) => +id),
+          tagsIds: tagsIds.map((id) => +id),
+          executorsIds: executorsIds.map((id) => +id),
+          completeByUserId: +completeByUserId,
+        })
+      : this.questModuleService.getQuests({
+          ids: ids.map((id) => +id),
+          departmentsIds: departmentsIds.map((id) => +id),
+          tagsIds: tagsIds.map((id) => +id),
+          executorsIds: executorsIds.map((id) => +id),
+        })
   }
 
   @ApiResponse({
@@ -92,8 +85,13 @@ export class QuestModuleController {
     example: getQuestSchemaExample,
   })
   @Get('/quests/:id')
-  async getQuest(@Param('id') id: string): Promise<GetQuestSchema> {
-    return this.questModuleService.getQuest(+id)
+  async getQuest(
+    @Param('id') id: string,
+    @Query('isComplete') isComplete: string,
+  ): Promise<GetQuestSchema> {
+    return isComplete
+      ? this.questModuleService.getCompleteQuest(+id)
+      : this.questModuleService.getQuest(+id)
   }
 
   @ApiResponse({

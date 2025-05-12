@@ -1,18 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { CorrectAnswer } from 'src/models/questAnswer'
+import { QuestDifficult } from 'src/models/questDifficult'
+import { QuestTag } from 'src/models/questTag'
+import { Employee } from 'src/models/users'
 
 export class GetQuestsMinimizeQuery {
   ids?: number[]
-  departmentsIds?: number[]
   tagsIds?: number[]
   executorsIds?: number[]
+  departmentsIds?: number[]
 }
 
-export class GetCompleteQuestsMinimizeQuery {
-  ids?: number[]
-  departmentsIds?: number[]
-  tagsIds?: number[]
-  executorsIds?: number[]
+export class GetCompleteQuestsMinimizeQuery extends GetQuestsMinimizeQuery {
   completeByUserId?: number
 }
 
@@ -113,26 +112,24 @@ export class SaveResultDto {
 }
 
 export class SaveQuestCompleteDto {
+  id: number
   name: string
-  executor: {
-    name: string
-    imageId?: number
-  }
+  executor: Employee
+  result: SaveResultCompleteDto
+  questions: SaveQuestionCompleteDto[]
   time?: string
-  tags?: string[]
   imageId?: number
-  difficult?: string
+  tags?: QuestTag[]
   description?: string
   departmentId?: number
-  result?: SaveResultCompleteDto
-  questions?: SaveQuestionCompleteDto[]
+  difficult?: QuestDifficult
 }
 
 export class SaveQuestionCompleteDto {
   id: number
+  text: string
   type: string
   answer: SaveAnswerCompleteDto
-  text?: string
   imageId?: number
 }
 

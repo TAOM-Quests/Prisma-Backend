@@ -87,6 +87,57 @@ export class QuestService {
     }
   }
 
+  async getMinimizeCompleteById(id: number): Promise<GetQuestMinimizeSchema> {
+    const foundCompleteRow = await this.prisma.complete_quests.findUnique({
+      where: { id },
+    })
+    const foundQuest =
+      foundCompleteRow.quest_data as unknown as SaveQuestCompleteDto
+
+    if (!foundQuest) {
+      throw new NotFoundError(`Quest with id ${id} not found`)
+    }
+
+    const quest: GetQuestMinimizeSchema = {
+      id: foundQuest.id,
+    }
+
+    if (foundQuest.name) quest.name = foundQuest.name
+    if (foundQuest.time) quest.time = foundQuest.time
+    if (foundQuest.tags) quest.tags = foundQuest.tags
+    if (foundQuest.difficult) quest.difficult = foundQuest.difficult
+    if (foundQuest.description) quest.description = foundQuest.description
+    if (foundQuest.imageId) {
+      quest.image = await this.commonModuleService.getFileStatsById(
+        foundQuest.imageId,
+      )
+    }
+
+    return quest
+  }
+
+  async getCompleteById(id: number): Promise<GetQuestSchema> {
+    const foundCompleteRow = await this.prisma.complete_quests.findUnique({
+      where: { id },
+    })
+    const foundQuest =
+      foundCompleteRow.quest_data as unknown as SaveQuestCompleteDto
+
+    const quest: GetQuestSchema = {
+      ...(await this.getMinimizeCompleteById(id)),
+      executor: foundQuest.executor,
+      questions: foundQuest.questions,
+      results: [
+        {
+          ...foundQuest.result,
+          minPoints: 0,
+        },
+      ],
+    }
+
+    return quest
+  }
+
   async create(quest: SaveQuestDto): Promise<GetQuestSchema> {
     return this.saveQuest(quest)
   }
