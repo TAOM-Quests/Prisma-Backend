@@ -57,6 +57,7 @@ export const getEventsMinimizeSchemaExample: GetEventMinimizeSchema[] = [
         name: 'IT',
       },
     ],
+    participantsCount: 10,
   },
 ]
 
@@ -146,6 +147,7 @@ export const getEventSchemaExample: GetEventSchema = {
       name: 'IT',
     },
   ],
+  participantsCount: 10,
 }
 
 export const getEventTypeSchemaExample = [
