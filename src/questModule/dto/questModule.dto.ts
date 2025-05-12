@@ -114,7 +114,6 @@ export class SaveResultDto {
 
 export class SaveQuestCompleteDto {
   name: string
-  questId: number
   executor: {
     name: string
     imageId?: number

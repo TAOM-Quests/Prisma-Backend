@@ -115,8 +115,6 @@ export class QuestModuleController {
     @Query('userId') userId: string,
     @Body() quest: SaveQuestCompleteDto,
   ): Promise<void> {
-    quest.questId = +id
-
     await this.questModuleService.saveCompleteQuest(quest, +userId)
   }
 
