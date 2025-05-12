@@ -147,6 +147,7 @@ export const getEventSchemaExample: GetEventSchema = {
       name: 'IT',
     },
   ],
+  inspectorComments: [],
   participantsCount: 10,
 }
 

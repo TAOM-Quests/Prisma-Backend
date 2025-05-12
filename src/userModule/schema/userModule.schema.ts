@@ -16,6 +16,7 @@ export class AuthUserSchema {
   token: string
   image: GetFileStatsSchema
   name?: string
+  roleId?: number
   isAdmin?: boolean
   isEmployee?: boolean
   departmentId?: number
