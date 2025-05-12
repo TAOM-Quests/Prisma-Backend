@@ -36,12 +36,14 @@ export class QuestModuleService {
   ): Promise<GetQuestMinimizeSchema[]> {
     const where: Prisma.questsWhereInput = {}
 
-    if (getQuestsQuery.ids) where.id = { in: getQuestsQuery.ids }
-    if (getQuestsQuery.tagsIds)
+    console.log('getQuestsQuery', getQuestsQuery)
+
+    if (getQuestsQuery.ids.length) where.id = { in: getQuestsQuery.ids }
+    if (getQuestsQuery.tagsIds.length)
       where.tags = { some: { id_tag: { in: getQuestsQuery.tagsIds } } }
-    if (getQuestsQuery.executorsIds)
+    if (getQuestsQuery.executorsIds.length)
       where.id_executor = { in: getQuestsQuery.executorsIds }
-    if (getQuestsQuery.departmentsIds)
+    if (getQuestsQuery.departmentsIds.length)
       where.id_department = { in: getQuestsQuery.departmentsIds }
 
     const foundQuests = await this.prisma.quests.findMany({ where })
@@ -69,7 +71,7 @@ export class QuestModuleService {
         `EXISTS (
           SELECT 1
           FROM jsonb_array_elements(quest_data->'tags') AS tag
-          WHERE (tag->>'id')::int = ANY (${Prisma.join(getQuestsQuery.tagsIds)})
+          WHERE (tag->>'id') = ANY (${Prisma.join(getQuestsQuery.tagsIds)})
         )`,
       )
     if (getQuestsQuery.ids)

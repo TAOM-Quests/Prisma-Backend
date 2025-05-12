@@ -120,6 +120,7 @@ export class QuestService {
     const foundCompleteRow = await this.prisma.complete_quests.findUnique({
       where: { id },
     })
+    console.log(foundCompleteRow)
     const foundQuest =
       foundCompleteRow.quest_data as unknown as SaveQuestCompleteDto
 
@@ -145,36 +146,37 @@ export class QuestService {
   async update(quest: SaveQuestDto): Promise<GetQuestSchema> {
     const oldQuestQuestionsIds = (
       await this.prisma.questions.findMany({
-        where: { quest: { id: { in: quest.questions.map((q) => q.id) } } },
+        where: { quest: { id: quest.id } },
       })
     ).map((q) => q.id)
-    const newQuestQuestionsIds = quest.questions.map((q) => q.id)
+    const newQuestQuestionsIds = quest.questions
+      .filter((q) => q.id)
+      .map((q) => q.id)
     for (const questionIdToDisconnect of [
       ...difference(oldQuestQuestionsIds, newQuestQuestionsIds),
       ...difference(newQuestQuestionsIds, oldQuestQuestionsIds),
     ]) {
-      await this.prisma.quests.update({
+      await this.prisma.questions.delete({
         where: { id: questionIdToDisconnect },
-        data: { questions: { disconnect: { id: questionIdToDisconnect } } },
       })
     }
 
     const oldQuestResultsIds = (
       await this.prisma.quest_results.findMany({
-        where: { quest: { id: { in: quest.results.map((q) => q.id) } } },
+        where: { quest: { id: quest.id } },
       })
     ).map((q) => q.id)
-    const newQuestResultsIds = quest.results.map((q) => q.id)
-    await this.prisma.quest_results.deleteMany({
-      where: {
-        id: {
-          in: [
-            ...difference(oldQuestResultsIds, newQuestResultsIds),
-            ...difference(newQuestResultsIds, oldQuestResultsIds),
-          ],
-        },
-      },
-    })
+    const newQuestResultsIds = quest.results
+      .filter((r) => r.id)
+      .map((r) => r.id)
+    for (const resultIdToDisconnect of [
+      ...difference(oldQuestResultsIds, newQuestResultsIds),
+      ...difference(newQuestResultsIds, oldQuestResultsIds),
+    ]) {
+      await this.prisma.quest_results.delete({
+        where: { id: resultIdToDisconnect },
+      })
+    }
 
     return this.saveQuest(quest)
   }

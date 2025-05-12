@@ -16,12 +16,14 @@ import {
   getQuestTagsSchemaExample,
 } from './schema/questModule.schema.example'
 import {
+  GetCompleteQuestsMinimizeQuery,
   GetQuestGroupsQuery,
   GetQuestTagsQuery,
   PostQuestDto,
   SaveQuestCompleteDto,
   SaveQuestDto,
 } from './dto/questModule.dto'
+import { isArray } from 'class-validator'
 
 @ApiTags('questModule')
 @Controller('questModule')
@@ -46,27 +48,38 @@ export class QuestModuleController {
   @ApiQuery({ name: 'completeBy', type: 'number', required: false })
   @Get('quests')
   async getQuests(
-    @Query('id') ids: string[],
-    @Query('department') departmentsIds: string[],
-    @Query('tag') tagsIds: string[],
-    @Query('executor') executorsIds: string[],
+    @Query('id') ids: string | string[],
+    @Query('department') departmentsIds: string | string[],
+    @Query('tag') tagsIds: string | string[],
+    @Query('executor') executorsIds: string | string[],
     @Query('isComplete') isComplete: boolean,
     @Query('completeBy') completeByUserId: string,
   ): Promise<GetQuestMinimizeSchema[]> {
+    const getQuery: GetCompleteQuestsMinimizeQuery = {
+      ids: ids ? (isArray(ids) ? ids.map((id) => +id) : [+ids]) : [],
+      departmentsIds: departmentsIds
+        ? isArray(departmentsIds)
+          ? departmentsIds.map((id) => +id)
+          : [+departmentsIds]
+        : [],
+      tagsIds: tagsIds
+        ? isArray(tagsIds)
+          ? tagsIds.map((id) => +id)
+          : [+tagsIds]
+        : [],
+      executorsIds: executorsIds
+        ? isArray(executorsIds)
+          ? executorsIds.map((id) => +id)
+          : [+executorsIds]
+        : [],
+    }
+
     return isComplete
       ? this.questModuleService.getCompleteQuests({
-          ids: ids.map((id) => +id),
-          departmentsIds: departmentsIds.map((id) => +id),
-          tagsIds: tagsIds.map((id) => +id),
-          executorsIds: executorsIds.map((id) => +id),
+          ...getQuery,
           completeByUserId: +completeByUserId,
         })
-      : this.questModuleService.getQuests({
-          ids: ids.map((id) => +id),
-          departmentsIds: departmentsIds.map((id) => +id),
-          tagsIds: tagsIds.map((id) => +id),
-          executorsIds: executorsIds.map((id) => +id),
-        })
+      : this.questModuleService.getQuests(getQuery)
   }
 
   @ApiResponse({
@@ -85,13 +98,18 @@ export class QuestModuleController {
     example: getQuestSchemaExample,
   })
   @Get('/quests/:id')
-  async getQuest(
-    @Param('id') id: string,
-    @Query('isComplete') isComplete: string,
-  ): Promise<GetQuestSchema> {
-    return isComplete
-      ? this.questModuleService.getCompleteQuest(+id)
-      : this.questModuleService.getQuest(+id)
+  async getQuest(@Param('id') id: string): Promise<GetQuestSchema> {
+    return this.questModuleService.getQuest(+id)
+  }
+
+  @ApiResponse({
+    status: 200,
+    type: GetQuestSchema,
+    example: getQuestSchemaExample,
+  })
+  @Get('/quests/complete/:id')
+  async getCompleteQuest(@Param('id') id: string): Promise<GetQuestSchema> {
+    return this.questModuleService.getCompleteQuest(+id)
   }
 
   @ApiResponse({
