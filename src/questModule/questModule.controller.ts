@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common'
 import { QuestModuleService } from './questModule.service'
 import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 import {
@@ -132,6 +140,11 @@ export class QuestModuleController {
     @Body() quest: SaveQuestCompleteDto,
   ): Promise<void> {
     await this.questModuleService.saveCompleteQuest(quest, +userId)
+  }
+
+  @Delete('/quests/:id')
+  async deleteQuest(@Param('id') id: string): Promise<void> {
+    await this.questModuleService.deleteQuest(+id)
   }
 
   @ApiResponse({

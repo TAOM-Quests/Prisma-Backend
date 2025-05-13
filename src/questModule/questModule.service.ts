@@ -184,6 +184,10 @@ export class QuestModuleService {
     }))
   }
 
+  async deleteQuest(id: number): Promise<void> {
+    await this.questService.delete(id)
+  }
+
   async getTags(
     getTagsQuery: GetQuestTagsQuery,
   ): Promise<GetQuestTagsSchema[]> {

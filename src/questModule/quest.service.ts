@@ -268,4 +268,8 @@ export class QuestService {
 
     return this.getById(savedQuest.id)
   }
+
+  async delete(id: number): Promise<void> {
+    await this.prisma.quests.delete({ where: { id } })
+  }
 }
