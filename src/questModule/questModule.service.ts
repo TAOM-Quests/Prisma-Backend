@@ -36,8 +36,6 @@ export class QuestModuleService {
   ): Promise<GetQuestMinimizeSchema[]> {
     const where: Prisma.questsWhereInput = {}
 
-    console.log('getQuestsQuery', getQuestsQuery)
-
     if (getQuestsQuery.ids.length) where.id = { in: getQuestsQuery.ids }
     if (getQuestsQuery.tagsIds.length)
       where.tags = { some: { id_tag: { in: getQuestsQuery.tagsIds } } }

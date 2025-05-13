@@ -4,11 +4,12 @@ import { Employee } from 'src/models/users'
 
 export class GetQuestMinimizeSchema {
   id: number
+  tags: GetQuestTagsSchema[]
   name?: string
   time?: string
   description?: string
+  completedCount?: number
   image?: GetFileStatsSchema
-  tags?: GetQuestTagsSchema[]
   group?: GetQuestGroupsSchema
   difficult?: GetQuestDifficultiesSchema
 }

@@ -24,8 +24,18 @@ export class QuestService {
       throw new NotFoundError(`Quest with id ${id} not found`)
     }
 
+    const completedCount = Number(
+      (
+        await this.prisma.$queryRaw<{ count: bigint }[]>`
+          SELECT COUNT(*)
+          FROM complete_quests
+          WHERE (quest_data->>'id')::int = ${foundQuest.id}::int
+        `
+      )[0].count,
+    )
     const quest: GetQuestMinimizeSchema = {
       id: foundQuest.id,
+      completedCount: completedCount,
       tags: await this.prisma.quest_tags.findMany({
         where: { quests: { some: { id_quest: foundQuest.id } } },
       }),
@@ -100,11 +110,11 @@ export class QuestService {
 
     const quest: GetQuestMinimizeSchema = {
       id: foundQuest.id,
+      tags: foundQuest.tags,
     }
 
     if (foundQuest.name) quest.name = foundQuest.name
     if (foundQuest.time) quest.time = foundQuest.time
-    if (foundQuest.tags) quest.tags = foundQuest.tags
     if (foundQuest.difficult) quest.difficult = foundQuest.difficult
     if (foundQuest.description) quest.description = foundQuest.description
     if (foundQuest.imageId) {
