@@ -181,6 +181,12 @@ export class UserModuleService {
         id,
       },
     })
+    const foundLevel = await this.prisma.user_levels.findUnique({
+      where: { level: foundUser.level_number },
+    })
+    const foundAchievements = await this.prisma.user_achievements.findMany({
+      where: { users: { some: { id: foundUser.id } } },
+    })
 
     const isEmployee = !!foundUser.id_role
 
@@ -196,6 +202,21 @@ export class UserModuleService {
       telegram: foundUser.telegram,
       image: await this.commonModuleService.getFileStatsById(
         foundUser.id_image_file,
+      ),
+      level: {
+        name: foundLevel.name,
+        number: foundLevel.level,
+        experience: foundUser.experience,
+      },
+      achievements: await Promise.all(
+        (await this.prisma.user_achievements.findMany()).map(async (ach) => ({
+          id: ach.id,
+          name: ach.name,
+          experience: ach.experience,
+          description: ach.description,
+          image: await this.commonModuleService.getFileStatsById(ach.image_id),
+          isReceived: !!foundAchievements.find((a) => a.id === ach.id),
+        })),
       ),
     }
 

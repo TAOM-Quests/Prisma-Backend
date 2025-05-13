@@ -76,14 +76,15 @@ model complete_quests {
 }
 
 model departments {
-  id           Int            @id @default(autoincrement())
-  name         String
-  quest_groups quest_groups[]
-  quest_tags   quest_tags[]
-  quests       quests[]
-  users        users[]
-  events       events[]
-  event_tags   event_tags[]
+  id              Int               @id @default(autoincrement())
+  name            String
+  quest_groups    quest_groups[]
+  quest_tags      quest_tags[]
+  quests          quests[]
+  users           users[]
+  events          events[]
+  event_tags      event_tags[]
+  user_experience user_experience[]
 }
 
 model events {
@@ -213,10 +214,9 @@ model shared_files {
   users              users[]
   events_where_image events[]
   events_where_file  shared_files_on_events[]
-
-  quests quests[]
-
-  quest_results quest_results[]
+  quests             quests[]
+  quest_results      quest_results[]
+  user_achievements  user_achievements[]
 }
 
 model shared_files_on_events {
@@ -244,6 +244,8 @@ model users {
   phone_number             String?
   telegram                 String?                       @unique
   telegram_chat_id         Int?
+  level_number             Int                           @default(1)
+  experience               Int                           @default(0)
   sex                      user_sex?
   complete_quests          complete_quests[]
   events_where_inspector   events[]
@@ -253,8 +255,11 @@ model users {
   image                    shared_files                  @relation(fields: [id_image_file], references: [id])
   position                 user_positions?               @relation(fields: [id_position], references: [id])
   role                     user_roles?                   @relation(fields: [id_role], references: [id])
+  level                    user_levels                   @relation(fields: [level_number], references: [level])
   quests                   quests[]
   comments                 comments[]
+  user_experience          user_experience[]
+  achievements             user_achievements[]
 }
 
 model user_executors_on_events {
@@ -286,6 +291,32 @@ model user_roles {
   id          Int     @id @default(autoincrement())
   name        String
   description String?
+  users       users[]
+}
+
+model user_levels {
+  level      Int     @id @default(autoincrement())
+  name       String
+  experience Int
+  users      users[]
+}
+
+model user_experience {
+  id            Int         @id @default(autoincrement())
+  user_id       Int
+  department_id Int
+  experience    Int
+  user          users       @relation(fields: [user_id], references: [id])
+  department    departments @relation(fields: [department_id], references: [id])
+}
+
+model user_achievements {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  experience  Int
+  image_id    Int
+  image       shared_files @relation(fields: [image_id], references: [id])
   users       users[]
 }
 
