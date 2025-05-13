@@ -302,12 +302,13 @@ model user_levels {
 }
 
 model user_experience {
-  id            Int         @id @default(autoincrement())
   user_id       Int
   department_id Int
   experience    Int
   user          users       @relation(fields: [user_id], references: [id])
   department    departments @relation(fields: [department_id], references: [id])
+
+  @@id([user_id, department_id])
 }
 
 model user_achievements {

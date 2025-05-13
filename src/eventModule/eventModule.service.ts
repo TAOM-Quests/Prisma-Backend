@@ -16,7 +16,7 @@ import {
   GetEventTypeSchema,
 } from './schema/eventModule.schema'
 import { Prisma } from '@prisma/client'
-import { Executor, Inspector, Participant } from 'src/models/users'
+import { Executor, Inspector, Participant, User } from 'src/models/users'
 import { EventType } from 'src/models/eventType'
 import { EventStatus } from 'src/models/eventStatus'
 import { Department } from 'src/models/department'
@@ -28,11 +28,13 @@ import {
 } from 'src/commonModule/schema/commonModule.schema'
 import { difference } from 'lodash'
 import { EventTag } from 'src/models/eventTag'
+import { UserModuleService } from 'src/userModule/userModule.service'
 
 @Injectable()
 export class EventModuleService {
   constructor(
     private prisma: PrismaService,
+    private usersModule: UserModuleService,
     private commonModuleService: CommonModuleService,
   ) {}
 
@@ -172,7 +174,8 @@ export class EventModuleService {
     }
 
     for (let participantId of updateParticipants.add || []) {
-      await this.addParticipantToEvent(event.id, participantId)
+      // await this.addParticipantToEvent(event.id, participantId)
+      await this.usersModule.addAchievement(participantId, 1)
     }
 
     for (let participantId of updateParticipants.remove ?? []) {
