@@ -58,34 +58,45 @@ export class QuestModuleService {
   async getCompleteQuests(
     getQuestsQuery: GetCompleteQuestsMinimizeQuery,
   ): Promise<GetQuestMinimizeSchema[]> {
-    const conditions: string[] = []
+    const conditions: Prisma.Sql[] = []
 
-    if (getQuestsQuery.completeByUserId)
-      conditions.push(`user_id = ${getQuestsQuery.completeByUserId}::int`)
-    if (getQuestsQuery.ids)
+    if (getQuestsQuery.completeByUserId) {
       conditions.push(
-        `(quest_data->>'id') = ANY (${Prisma.join(getQuestsQuery.ids)})`,
+        Prisma.sql`id_user = ${getQuestsQuery.completeByUserId}::int`,
       )
-    if (getQuestsQuery.tagsIds)
+    }
+    if (getQuestsQuery.ids.length) {
       conditions.push(
-        `EXISTS (
+        Prisma.sql`(quest_data->>'id') = ANY (${Prisma.join(getQuestsQuery.ids)})`,
+      )
+    }
+    if (getQuestsQuery.tagsIds.length)
+      conditions.push(
+        Prisma.sql`
+        EXISTS (
           SELECT 1
           FROM jsonb_array_elements(quest_data->'tags') AS tag
           WHERE (tag->>'id') = ANY (${Prisma.join(getQuestsQuery.tagsIds)})
         )`,
       )
-    if (getQuestsQuery.ids)
+    if (getQuestsQuery.executorsIds.length)
       conditions.push(
-        `(quest_data->>'executor'->>'id') = ANY (${Prisma.join(getQuestsQuery.executorsIds)})`,
+        Prisma.sql`(quest_data->>'executor'->>'id') = ANY (${Prisma.join(getQuestsQuery.executorsIds)})`,
       )
-    if (getQuestsQuery.ids)
+    if (getQuestsQuery.departmentsIds.length)
       conditions.push(
-        `(quest_data->>'department'->>'id') = ANY (${Prisma.join(getQuestsQuery.departmentsIds)})`,
+        Prisma.sql`(quest_data->>'department'->>'id') = ANY (${Prisma.join(getQuestsQuery.departmentsIds)})`,
       )
 
-    const foundQuests = await this.prisma.$queryRaw<{ id: number }[]>` SELECT *
+    const whereClause =
+      conditions.length > 0
+        ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+        : Prisma.empty
+    const foundQuests = await this.prisma.$queryRaw<{ id: number }[]>`
+        SELECT id
         FROM complete_quests
-        WHERE ${conditions.join(' AND ')}`
+        ${whereClause}
+      `
 
     return await Promise.all(
       foundQuests.map(

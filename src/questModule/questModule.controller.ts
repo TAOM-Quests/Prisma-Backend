@@ -52,7 +52,7 @@ export class QuestModuleController {
     @Query('department') departmentsIds: string | string[],
     @Query('tag') tagsIds: string | string[],
     @Query('executor') executorsIds: string | string[],
-    @Query('isComplete') isComplete: boolean,
+    @Query('isCompleted') isCompleted: boolean,
     @Query('completeBy') completeByUserId: string,
   ): Promise<GetQuestMinimizeSchema[]> {
     const getQuery: GetCompleteQuestsMinimizeQuery = {
@@ -74,7 +74,7 @@ export class QuestModuleController {
         : [],
     }
 
-    return isComplete
+    return isCompleted
       ? this.questModuleService.getCompleteQuests({
           ...getQuery,
           completeByUserId: +completeByUserId,
