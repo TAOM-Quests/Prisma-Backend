@@ -21,7 +21,7 @@ const USER_ACHIEVEMENTS: Prisma.user_achievementsCreateManyInput[] = [
 export const userAchievements = async (): Promise<void> => {
   await prisma.$transaction(async (tx) => {
     for (let achievement of USER_ACHIEVEMENTS) {
-      await tx.event_types.upsert({
+      await tx.user_achievements.upsert({
         where: { id: achievement.id },
         update: achievement,
         create: achievement,
