@@ -150,12 +150,27 @@ export class QuestService {
         await this.prisma.quest_difficulties.findUnique({
           where: { id: foundQuest.id_difficult },
         })
-      this.gamingService.addExperience(
-        userId,
-        foundQuestDifficult.experience,
-        'quests',
-        foundQuest.id_department,
-      )
+
+      const isFirstTry =
+        Number(
+          (
+            await this.prisma.$queryRaw<{ count: bigint }>`
+          SELECT COUNT(*)
+          FROM complete_quests
+          WHERE id_user = ${userId}
+            AND quest_data->>'id' = ${quest.id}
+        `
+          ).count,
+        ) === 1
+
+      if (isFirstTry) {
+        this.gamingService.addExperience(
+          userId,
+          foundQuestDifficult.experience,
+          'quests',
+          foundQuest.id_department,
+        )
+      }
     }
 
     await this.gamingService.addAchievement(userId, 'FIRST_QUEST_COMPLETE')
