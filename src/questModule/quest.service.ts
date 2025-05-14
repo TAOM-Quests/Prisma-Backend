@@ -109,7 +109,7 @@ export class QuestService {
     }
 
     const quest: GetQuestMinimizeSchema = {
-      id: foundQuest.id,
+      id: id,
       tags: foundQuest.tags,
     }
 
