@@ -5,16 +5,25 @@ import { sharedFiles } from './tables/shared_files'
 import { userPositions } from './tables/user_positions'
 import { eventTypes } from './tables/event_types'
 import { departments } from './tables/departments'
+import { userLevels } from './tables/user_levels'
+import { userAchievements } from './tables/user_achievements'
 
 const prisma = new PrismaClient()
 
 export const main = async (): Promise<void> => {
+  //Общие данные
   await departments()
   await sharedFiles()
 
+  //Данные для пользователей
   await userRoles()
   await userPositions()
 
+  //Данные для геймификации
+  await userLevels()
+  await userAchievements()
+
+  //Данные для мероприятий
   await eventTypes()
   await eventStatuses()
 }

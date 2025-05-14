@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CommonModuleService } from 'src/commonModule/commonModule.service'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { NotificationsGateway } from './notifications.gateway'
-import e from 'express'
+import { capitalize } from 'lodash'
 
 type ExperienceSource = 'quests' | 'events' | 'games' | 'achievements'
 
@@ -20,19 +20,20 @@ export class GamingService {
   ) {}
 
   async addExperience(
-    id: number,
+    userId: number,
     experience: number,
     experienceSource: ExperienceSource,
     departmentId?: number,
   ) {
     const foundUser = await this.prisma.users.findUnique({
-      where: { id },
+      where: { id: userId },
     })
-    let userExperience = foundUser.experience
-    const foundImage =
-      await this.commonModuleService.getFileStats('add_experience.png')
+    const foundImage = await this.commonModuleService.getFileStats(
+      `${capitalize(experienceSource)}_experience.png`,
+    )
 
     this.notificationsGateway.sendNotification({
+      userId,
       type: experienceSource,
       name: 'Новый опыт',
       description: `Вы получили ${experience} опыта`,
@@ -40,8 +41,10 @@ export class GamingService {
     })
 
     if (departmentId) {
-      this.addExperienceByDepartment(id, experience, departmentId)
+      this.addExperienceByDepartment(userId, experience, departmentId)
     }
+
+    let userExperience = foundUser.experience
 
     while (experience > 0) {
       const nextLevel = await this.prisma.user_levels.findUnique({
@@ -49,12 +52,12 @@ export class GamingService {
       })
 
       if (experience + userExperience >= nextLevel.experience) {
-        await this.levelUp(id, foundUser.level_number + 1)
+        await this.levelUp(userId, foundUser.level_number + 1)
         userExperience = 0
-        experience -= nextLevel.experience
+        experience -= nextLevel.experience - userExperience
       } else {
         await this.prisma.users.update({
-          where: { id },
+          where: { id: userId },
           data: {
             experience: userExperience + experience,
           },
@@ -64,10 +67,13 @@ export class GamingService {
     }
   }
 
-  async addAchievement(id: number, achievement: keyof typeof ACHIEVEMENTS_MAP) {
+  async addAchievement(
+    userId: number,
+    achievement: keyof typeof ACHIEVEMENTS_MAP,
+  ) {
     const achievementId = ACHIEVEMENTS_MAP[achievement]
     const userAchievements = await this.prisma.user_achievements.findMany({
-      where: { users: { some: { id } } },
+      where: { users: { some: { id: userId } } },
     })
     const foundAchievement = await this.prisma.user_achievements.findUnique({
       where: { id: achievementId },
@@ -78,7 +84,7 @@ export class GamingService {
 
     if (!userAchievements.find((a) => a.id === achievementId)) {
       await this.prisma.users.update({
-        where: { id },
+        where: { id: userId },
         data: {
           achievements: {
             connect: { id: achievementId },
@@ -87,13 +93,18 @@ export class GamingService {
       })
 
       this.notificationsGateway.sendNotification({
+        userId,
         type: 'achievement',
         name: 'Получено достижение',
         description: `Вы получили достижение ${foundAchievement.name}`,
         imageUrl: foundImage.url,
       })
 
-      await this.addExperience(id, foundAchievement.experience, 'achievements')
+      await this.addExperience(
+        userId,
+        foundAchievement.experience,
+        'achievements',
+      )
     }
   }
 
@@ -114,10 +125,11 @@ export class GamingService {
     })
 
     const foundImage =
-      await this.commonModuleService.getFileStats('level_up.png')
+      await this.commonModuleService.getFileStats('Level_up.png')
 
     this.notificationsGateway.sendNotification({
-      type: 'levelUp',
+      userId,
+      type: 'level_up',
       name: 'Новый уровень',
       description: `Ваш уровень повышен до ${nextLevelNumber}
         ${currentLevel.name !== nextLevel.name ? `, теперь вы ${nextLevel.name}` : ''}`,
