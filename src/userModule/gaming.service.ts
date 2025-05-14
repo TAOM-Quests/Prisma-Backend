@@ -44,15 +44,17 @@ export class GamingService {
       this.addExperienceByDepartment(userId, experience, departmentId)
     }
 
+    let userLevel = foundUser.level_number
     let userExperience = foundUser.experience
 
     while (experience > 0) {
       const nextLevel = await this.prisma.user_levels.findUnique({
-        where: { level: foundUser.level_number + 1 },
+        where: { level: userLevel + 1 },
       })
 
       if (experience + userExperience >= nextLevel.experience) {
-        await this.levelUp(userId, foundUser.level_number + 1)
+        await this.levelUp(userId, userLevel + 1)
+        userLevel++
         userExperience = 0
         experience -= nextLevel.experience - userExperience
       } else {
@@ -94,7 +96,7 @@ export class GamingService {
 
       this.notificationsGateway.sendNotification({
         userId,
-        type: 'achievement',
+        type: 'achievements',
         name: 'Получено достижение',
         description: `Вы получили достижение ${foundAchievement.name}`,
         imageUrl: foundImage.url,
