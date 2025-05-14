@@ -160,7 +160,7 @@ model quest_results {
   min_points  Int
   id_image    Int?
   id_quest    Int
-  quest       quests        @relation(fields: [id_quest], references: [id])
+  quest       quests        @relation(fields: [id_quest], references: [id], onDelete: Cascade)
   image       shared_files? @relation(fields: [id_image], references: [id])
 }
 
@@ -175,7 +175,7 @@ model quest_tags {
 model quest_tags_on_quests {
   id_tag   Int
   id_quest Int
-  quest    quests     @relation(fields: [id_quest], references: [id])
+  quest    quests     @relation(fields: [id_quest], references: [id], onDelete: Cascade)
   tag      quest_tags @relation(fields: [id_tag], references: [id])
 
   @@id([id_quest, id_tag])
@@ -188,7 +188,7 @@ model questions {
   id_quest  Int
   id_answer Int?
   answer    answers? @relation(fields: [id_answer], references: [id])
-  quest     quests   @relation(fields: [id_quest], references: [id])
+  quest     quests   @relation(fields: [id_quest], references: [id], onDelete: Cascade)
 }
 
 model shared_files {
@@ -217,31 +217,31 @@ model shared_files_on_events {
 }
 
 model users {
-  id                           Int                           @id @default(autoincrement())
-  email                        String                        @unique
-  id_image_file                Int @default(1)
-  password                     String
-  id_role                      Int?
-  id_department                Int?
-  token                        String                        @unique
-  birth_date                   DateTime?
-  first_name                   String?
-  id_position                  Int?
-  last_name                    String?
-  patronymic                   String?
-  phone_number                 String?
-  telegram                     String?                       @unique
-  telegram_chat_id             Int?
-  sex                          user_sex?
-  complete_quests              complete_quests[]
-  events_where_inspector       events[]
-  events_where_executor        user_executors_on_events[]
-  events_where_participant     user_participants_on_events[]
-  department                   departments?                  @relation(fields: [id_department], references: [id])
-  image                        shared_files                 @relation(fields: [id_image_file], references: [id])
-  position                     user_positions?               @relation(fields: [id_position], references: [id])
-  role                         user_roles?                   @relation(fields: [id_role], references: [id])
-  quests                       quests[]
+  id                       Int                           @id @default(autoincrement())
+  email                    String                        @unique
+  id_image_file            Int                           @default(1)
+  password                 String
+  id_role                  Int?
+  id_department            Int?
+  token                    String                        @unique
+  birth_date               DateTime?
+  first_name               String?
+  id_position              Int?
+  last_name                String?
+  patronymic               String?
+  phone_number             String?
+  telegram                 String?                       @unique
+  telegram_chat_id         Int?
+  sex                      user_sex?
+  complete_quests          complete_quests[]
+  events_where_inspector   events[]
+  events_where_executor    user_executors_on_events[]
+  events_where_participant user_participants_on_events[]
+  department               departments?                  @relation(fields: [id_department], references: [id])
+  image                    shared_files                  @relation(fields: [id_image_file], references: [id])
+  position                 user_positions?               @relation(fields: [id_position], references: [id])
+  role                     user_roles?                   @relation(fields: [id_role], references: [id])
+  quests                   quests[]
 }
 
 model user_executors_on_events {
