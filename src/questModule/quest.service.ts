@@ -109,8 +109,9 @@ export class QuestService {
     }
 
     const quest: GetQuestMinimizeSchema = {
-      id: id,
+      id: foundQuest.id,
       tags: foundQuest.tags,
+      completeId: id,
     }
 
     if (foundQuest.name) quest.name = foundQuest.name

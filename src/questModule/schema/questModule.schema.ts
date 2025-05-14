@@ -7,6 +7,7 @@ export class GetQuestMinimizeSchema {
   tags: GetQuestTagsSchema[]
   name?: string
   time?: string
+  completeId?: number
   description?: string
   completedCount?: number
   image?: GetFileStatsSchema
