@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service'
 import { JwtModule } from '@nestjs/jwt'
 import { CommonModuleService } from 'src/commonModule/commonModule.service'
 import { NotificationsGateway } from './notifications.gateway'
+import { GamingService } from './gaming.service'
 
 @Module({
   imports: [
@@ -16,11 +17,12 @@ import { NotificationsGateway } from './notifications.gateway'
   ],
   controllers: [UserModuleController],
   providers: [
+    GamingService,
     PrismaService,
     UserModuleService,
     CommonModuleService,
     NotificationsGateway,
   ],
-  exports: [UserModuleService, NotificationsGateway],
+  exports: [UserModuleService, NotificationsGateway, GamingService],
 })
 export class UserModule {}

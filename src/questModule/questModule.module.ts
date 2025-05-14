@@ -7,6 +7,7 @@ import { QuestService } from './quest.service'
 import { QuestionService } from './question.service'
 import { ResultService } from './result.service'
 import { NotificationsGateway } from 'src/userModule/notifications.gateway'
+import { UserModule } from 'src/userModule/userModule.module'
 
 @Module({
   controllers: [QuestModuleController],
@@ -17,7 +18,7 @@ import { NotificationsGateway } from 'src/userModule/notifications.gateway'
     QuestionService,
     QuestModuleService,
     CommonModuleService,
-    NotificationsGateway,
   ],
+  imports: [UserModule],
 })
 export class QuestModule {}

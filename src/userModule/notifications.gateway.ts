@@ -1,5 +1,5 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
-import { Server } from 'http'
+import { Server } from 'socket.io'
 
 export interface Notification {
   name: string
@@ -8,14 +8,12 @@ export interface Notification {
   description: string
 }
 
-@WebSocketGateway(3050, { namespace: 'notifications' })
+@WebSocketGateway(3050, { namespace: 'notifications', cors: '*' })
 export class NotificationsGateway {
   @WebSocketServer()
   server: Server
 
   sendNotification(data: Notification) {
-    console.log('WS WORK')
-
     this.server.emit('notification', data)
   }
 }

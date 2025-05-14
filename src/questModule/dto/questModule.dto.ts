@@ -113,6 +113,7 @@ export class SaveResultDto {
 }
 
 export class SaveQuestCompleteDto {
+  id: number
   name: string
   executor: {
     name: string

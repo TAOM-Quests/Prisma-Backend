@@ -153,9 +153,10 @@ model quests {
 }
 
 model quest_difficulties {
-  id     Int      @id @default(autoincrement())
-  name   String
-  quests quests[]
+  id         Int      @id @default(autoincrement())
+  name       String
+  experience Int
+  quests     quests[]
 }
 
 model quest_groups {

@@ -17,7 +17,6 @@ import { NotFoundError } from 'src/errors/notFound'
 import { BadRequestError } from 'src/errors/badRequest'
 import { Prisma, user_sex } from '@prisma/client'
 import { CommonModuleService } from 'src/commonModule/commonModule.service'
-import { NotificationsGateway } from './notifications.gateway'
 
 const USER_SEX = {
   MALE: 'Мужской',
@@ -30,7 +29,6 @@ export class UserModuleService {
     private jwt: JwtService,
     private prisma: PrismaService,
     private commonModuleService: CommonModuleService,
-    private notificationsGateway: NotificationsGateway,
   ) {}
 
   async getUsers(getUsers: GetUsersQuery): Promise<GetUsersSchema[]> {
@@ -289,93 +287,6 @@ export class UserModuleService {
     }
 
     return result
-  }
-
-  async addExperience(id: number, experience: number, departmentId?: number) {
-    const foundUser = await this.prisma.users.findUnique({
-      where: { id },
-    })
-    const currentLevel = await this.prisma.user_levels.findUnique({
-      where: { level: foundUser.level_number },
-    })
-    const nextLevel = await this.prisma.user_levels.findUnique({
-      where: { level: foundUser.level_number + 1 },
-    })
-
-    await this.prisma.users.update({
-      data: {
-        level_number: foundUser.level_number + 1,
-        experience: 0,
-      },
-      where: { id },
-    })
-
-    if (departmentId) {
-      const foundExperienceByDepartment =
-        await this.prisma.user_experience.findUnique({
-          where: {
-            user_id_department_id: { user_id: id, department_id: departmentId },
-          },
-        })
-
-      await this.prisma.user_experience.upsert({
-        where: {
-          user_id_department_id: { user_id: id, department_id: departmentId },
-        },
-        create: { user_id: id, department_id: departmentId, experience },
-        update: {
-          experience: foundExperienceByDepartment.experience + experience,
-        },
-      })
-    }
-
-    if (experience + foundUser.experience >= nextLevel.experience) {
-      const nextExperience =
-        experience + foundUser.experience - nextLevel.experience
-      const foundImage =
-        await this.commonModuleService.getFileStats('level_up.png')
-
-      this.notificationsGateway.sendNotification({
-        type: 'levelUp',
-        name: 'Новый уровень',
-        description: `Ваш уровень повышен до ${foundUser.level_number + 1}${currentLevel.name !== nextLevel.name ? `, теперь вы ${nextLevel.name}` : ''}`,
-        imageUrl: foundImage.url,
-      })
-
-      await this.addExperience(id, nextExperience, departmentId)
-    }
-  }
-
-  async addAchievement(id: number, achievementId: number) {
-    const userAchievements = await this.prisma.user_achievements.findMany({
-      where: { users: { some: { id } } },
-    })
-    const foundAchievement = await this.prisma.user_achievements.findUnique({
-      where: { id: achievementId },
-    })
-    const foundImage = await this.commonModuleService.getFileStatsById(
-      foundAchievement.image_id,
-    )
-
-    if (!userAchievements.find((a) => a.id === achievementId)) {
-      await this.prisma.users.update({
-        where: { id },
-        data: {
-          achievements: {
-            connect: { id: achievementId },
-          },
-        },
-      })
-
-      this.notificationsGateway.sendNotification({
-        type: 'achievement',
-        name: 'Получено достижение',
-        description: `Вы получили достижение ${foundAchievement.name}`,
-        imageUrl: foundImage.url,
-      })
-
-      await this.addExperience(id, foundAchievement.experience)
-    }
   }
 
   private async setRole(entity, roleId) {
