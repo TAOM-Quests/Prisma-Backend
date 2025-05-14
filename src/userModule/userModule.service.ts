@@ -184,6 +184,9 @@ export class UserModuleService {
     const foundLevel = await this.prisma.user_levels.findUnique({
       where: { level: foundUser.level_number },
     })
+    const foundNextLevel = await this.prisma.user_levels.findUnique({
+      where: { level: foundUser.level_number + 1 },
+    })
     const foundAchievements = await this.prisma.user_achievements.findMany({
       where: { users: { some: { id: foundUser.id } } },
     })
@@ -207,6 +210,7 @@ export class UserModuleService {
         name: foundLevel.name,
         number: foundLevel.level,
         experience: foundUser.experience,
+        experienceToNextLevel: foundNextLevel.experience,
       },
       achievements: await Promise.all(
         (await this.prisma.user_achievements.findMany()).map(async (ach) => ({

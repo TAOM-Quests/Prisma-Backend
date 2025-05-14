@@ -40,6 +40,7 @@ export class GetUserProfileSchema {
     name: string
     number: number
     experience: number
+    experienceToNextLevel: number
   }
   achievements: {
     id: number

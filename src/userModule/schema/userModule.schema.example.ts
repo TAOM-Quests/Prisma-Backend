@@ -49,6 +49,7 @@ export const getUserProfileSchemaExample: GetUserProfileSchema = {
     number: 1,
     name: 'Beginner',
     experience: 0,
+    experienceToNextLevel: 300,
   },
   achievements: [],
 }
