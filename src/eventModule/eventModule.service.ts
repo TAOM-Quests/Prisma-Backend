@@ -28,11 +28,13 @@ import {
 } from 'src/commonModule/schema/commonModule.schema'
 import { difference } from 'lodash'
 import { EventTag } from 'src/models/eventTag'
+import { GamingService } from 'src/userModule/gaming.service'
 
 @Injectable()
 export class EventModuleService {
   constructor(
     private prisma: PrismaService,
+    private gamingService: GamingService,
     private commonModuleService: CommonModuleService,
   ) {}
 
@@ -173,6 +175,10 @@ export class EventModuleService {
 
     for (let participantId of updateParticipants.add || []) {
       await this.addParticipantToEvent(event.id, participantId)
+      await this.gamingService.addAchievement(
+        participantId,
+        'FIRST_EVENT_REGISTER',
+      )
     }
 
     for (let participantId of updateParticipants.remove ?? []) {

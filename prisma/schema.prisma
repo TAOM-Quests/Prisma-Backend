@@ -76,14 +76,14 @@ model complete_quests {
 }
 
 model departments {
-  id                     Int                      @id @default(autoincrement())
-  name                   String
-  quest_groups           quest_groups[]
-  quest_tags             quest_tags[]
-  quests                 quests[]
-  users                  users[]
-  events                 events[]
-  event_tags             event_tags[]
+  id                        Int                         @id @default(autoincrement())
+  name                      String
+  quest_groups              quest_groups[]
+  quest_tags                quest_tags[]
+  quests                    quests[]
+  users                     users[]
+  events                    events[]
+  event_tags                event_tags[]
   game_wordle            game_wordle[]
   game_wordle_answers    game_wordle_answers[]
   user_experience_source user_experience_source[]
@@ -178,9 +178,10 @@ model quests {
 }
 
 model quest_difficulties {
-  id     Int      @id @default(autoincrement())
-  name   String
-  quests quests[]
+  id         Int      @id @default(autoincrement())
+  name       String
+  experience Int
+  quests     quests[]
 }
 
 model quest_groups {
@@ -241,6 +242,7 @@ model shared_files {
   events_where_file  shared_files_on_events[]
   quests             quests[]
   quest_results      quest_results[]
+  user_achievements  user_achievements[]
 }
 
 model shared_files_on_events {
@@ -268,6 +270,8 @@ model users {
   phone_number             String?
   telegram                 String?                       @unique
   telegram_chat_id         Int?
+  level_number             Int                           @default(1)
+  experience               Int                           @default(0)
   sex                      user_sex?
   complete_quests          complete_quests[]
   events_where_inspector   events[]
@@ -277,8 +281,10 @@ model users {
   image                    shared_files                  @relation(fields: [id_image_file], references: [id])
   position                 user_positions?               @relation(fields: [id_position], references: [id])
   role                     user_roles?                   @relation(fields: [id_role], references: [id])
+  level                    user_levels                   @relation(fields: [level_number], references: [level])
   quests                   quests[]
   comments                 comments[]
+  achievements             user_achievements[]
   game_wordle_attempts     game_wordle_attempts[]
   user_experience_source   user_experience_source[]
 }
@@ -315,7 +321,24 @@ model user_roles {
   users       users[]
 }
 
-model user_experience_source {
+model user_levels {
+  level      Int     @id @default(autoincrement())
+  name       String
+  experience Int
+  users      users[]
+}
+
+model user_achievements {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  experience  Int
+  image_id    Int
+  image       shared_files @relation(fields: [image_id], references: [id])
+  users       users[]
+}
+
+model user_experience {
   id            Int         @id @default(autoincrement())
   experience    Int
   source        String

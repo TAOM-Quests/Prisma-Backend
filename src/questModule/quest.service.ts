@@ -9,11 +9,13 @@ import {
 import { NotFoundError } from 'src/errors/notFound'
 import { CommonModuleService } from 'src/commonModule/commonModule.service'
 import { difference } from 'lodash'
+import { GamingService } from 'src/userModule/gaming.service'
 
 @Injectable()
 export class QuestService {
   constructor(
     private prisma: PrismaService,
+    private gamingService: GamingService,
     private commonModuleService: CommonModuleService,
   ) {}
 
@@ -163,31 +165,35 @@ export class QuestService {
     const newQuestQuestionsIds = quest.questions
       .filter((q) => q.id)
       .map((q) => q.id)
-    for (const questionIdToDisconnect of [
-      ...difference(oldQuestQuestionsIds, newQuestQuestionsIds),
-      ...difference(newQuestQuestionsIds, oldQuestQuestionsIds),
-    ]) {
-      await this.prisma.questions.delete({
-        where: { id: questionIdToDisconnect },
-      })
-    }
+    await this.prisma.questions.deleteMany({
+      where: {
+        id: {
+          in: [
+            ...difference(oldQuestQuestionsIds, newQuestQuestionsIds),
+            ...difference(newQuestQuestionsIds, oldQuestQuestionsIds),
+          ],
+        },
+      },
+    })
 
     const oldQuestResultsIds = (
       await this.prisma.quest_results.findMany({
         where: { quest: { id: quest.id } },
       })
-    ).map((q) => q.id)
+    ).map((r) => r.id)
     const newQuestResultsIds = quest.results
       .filter((r) => r.id)
       .map((r) => r.id)
-    for (const resultIdToDisconnect of [
-      ...difference(oldQuestResultsIds, newQuestResultsIds),
-      ...difference(newQuestResultsIds, oldQuestResultsIds),
-    ]) {
-      await this.prisma.quest_results.delete({
-        where: { id: resultIdToDisconnect },
-      })
-    }
+    await this.prisma.quest_results.deleteMany({
+      where: {
+        id: {
+          in: [
+            ...difference(oldQuestResultsIds, newQuestResultsIds),
+            ...difference(newQuestResultsIds, oldQuestResultsIds),
+          ],
+        },
+      },
+    })
 
     return this.saveQuest(quest)
   }
@@ -202,6 +208,40 @@ export class QuestService {
         quest_data: quest as unknown as Prisma.JsonObject,
       },
     })
+
+    const foundQuest = await this.prisma.quests.findUnique({
+      where: { id: quest.id },
+    })
+
+    if (foundQuest.id_difficult) {
+      const foundQuestDifficult =
+        await this.prisma.quest_difficulties.findUnique({
+          where: { id: foundQuest.id_difficult },
+        })
+
+      const isFirstTry =
+        Number(
+          (
+            await this.prisma.$queryRaw<{ count: bigint }>`
+              SELECT COUNT(*)
+              FROM complete_quests
+              WHERE id_user = ${userId}
+                AND (quest_data->>'id')::int  = ${quest.id}::int
+            `
+          )[0].count,
+        ) === 1
+
+      if (isFirstTry) {
+        this.gamingService.addExperience(
+          userId,
+          foundQuestDifficult.experience,
+          'quests',
+          foundQuest.id_department,
+        )
+      }
+    }
+
+    await this.gamingService.addAchievement(userId, 'FIRST_QUEST_COMPLETE')
   }
 
   private async saveQuest(quest: SaveQuestDto): Promise<GetQuestSchema> {

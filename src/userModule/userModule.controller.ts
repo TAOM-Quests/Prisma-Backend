@@ -1,5 +1,9 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
-import { GetUsersQuery, UpdateProfileDto, UserAuthDto } from './dto/userModule.dto'
+import {
+  GetUsersQuery,
+  UpdateProfileDto,
+  UserAuthDto,
+} from './dto/userModule.dto'
 import {
   AuthUserSchema,
   GetUserProfileSchema,
@@ -8,15 +12,18 @@ import {
 } from './schema/userModule.schema'
 import { UserModuleService } from './userModule.service'
 import { ApiResponse, ApiTags } from '@nestjs/swagger'
-import { authUserSchemaExample, getUserProfileSchemaExample, getUsersSchemaExample, updateUserProfileSchemaExample } from './schema/userModule.schema.example'
+import {
+  authUserSchemaExample,
+  getUserProfileSchemaExample,
+  getUsersSchemaExample,
+  updateUserProfileSchemaExample,
+} from './schema/userModule.schema.example'
 @ApiTags('userModule')
 @Controller('userModule')
 export class UserModuleController {
-  constructor(
-    private userModuleService: UserModuleService
-  ) {}
+  constructor(private userModuleService: UserModuleService) {}
 
-@ApiResponse({
+  @ApiResponse({
     status: 200,
     type: GetUsersSchema,
     example: getUsersSchemaExample,
@@ -42,8 +49,10 @@ export class UserModuleController {
     example: authUserSchemaExample,
   })
   @Get('/user/auth')
-  async authUserByToken(@Query('token') token: string): Promise<AuthUserSchema> {
-      return this.userModuleService.authUserByToken(token)
+  async authUserByToken(
+    @Query('token') token: string,
+  ): Promise<AuthUserSchema> {
+    return this.userModuleService.authUserByToken(token)
   }
 
   @ApiResponse({
@@ -52,8 +61,10 @@ export class UserModuleController {
     example: authUserSchemaExample,
   })
   @Post('/user/auth')
-  async authUserByEmailAndPassword(@Body() userAuth: UserAuthDto): Promise<AuthUserSchema> {
-      return this.userModuleService.authUserByEmailAndPassword(userAuth)
+  async authUserByEmailAndPassword(
+    @Body() userAuth: UserAuthDto,
+  ): Promise<AuthUserSchema> {
+    return this.userModuleService.authUserByEmailAndPassword(userAuth)
   }
 
   @ApiResponse({
@@ -74,7 +85,7 @@ export class UserModuleController {
   @Post('users/:id/profile')
   async updateUserProfile(
     @Param('id') id: string,
-    @Body() updateProfile: UpdateProfileDto
+    @Body() updateProfile: UpdateProfileDto,
   ): Promise<UpdateUserProfileSchema> {
     return this.userModuleService.updateUserProfile(+id, updateProfile)
   }
