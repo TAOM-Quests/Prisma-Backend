@@ -96,26 +96,31 @@ export class QuestService {
   async update(quest: SaveQuestDto): Promise<GetQuestSchema> {
     const oldQuestQuestionsIds = (
       await this.prisma.questions.findMany({
-        where: { quest: { id: { in: quest.questions.map((q) => q.id) } } },
+        where: { quest: { id: quest.id } },
       })
     ).map((q) => q.id)
-    const newQuestQuestionsIds = quest.questions.map((q) => q.id)
-    for (const questionIdToDisconnect of [
-      ...difference(oldQuestQuestionsIds, newQuestQuestionsIds),
-      ...difference(newQuestQuestionsIds, oldQuestQuestionsIds),
-    ]) {
-      await this.prisma.quests.update({
-        where: { id: questionIdToDisconnect },
-        data: { questions: { disconnect: { id: questionIdToDisconnect } } },
-      })
-    }
+    const newQuestQuestionsIds = quest.questions
+      .filter((q) => q.id)
+      .map((q) => q.id)
+    await this.prisma.questions.deleteMany({
+      where: {
+        id: {
+          in: [
+            ...difference(oldQuestQuestionsIds, newQuestQuestionsIds),
+            ...difference(newQuestQuestionsIds, oldQuestQuestionsIds),
+          ],
+        },
+      },
+    })
 
     const oldQuestResultsIds = (
       await this.prisma.quest_results.findMany({
-        where: { quest: { id: { in: quest.results.map((q) => q.id) } } },
+        where: { quest: { id: quest.id } },
       })
-    ).map((q) => q.id)
-    const newQuestResultsIds = quest.results.map((q) => q.id)
+    ).map((r) => r.id)
+    const newQuestResultsIds = quest.results
+      .filter((r) => r.id)
+      .map((r) => r.id)
     await this.prisma.quest_results.deleteMany({
       where: {
         id: {
