@@ -7,6 +7,7 @@ import { eventTypes } from './tables/event_types'
 import { departments } from './tables/departments'
 import { userLevels } from './tables/user_levels'
 import { userAchievements } from './tables/user_achievements'
+import { questDifficulties } from './tables/quest_difficulties'
 
 const prisma = new PrismaClient()
 
@@ -26,6 +27,9 @@ export const main = async (): Promise<void> => {
   //Данные для мероприятий
   await eventTypes()
   await eventStatuses()
+
+  //Данные для квестов
+  await questDifficulties()
 }
 
 main()
