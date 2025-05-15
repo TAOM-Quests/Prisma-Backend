@@ -84,6 +84,7 @@ model departments {
   users        users[]
   events       events[]
   event_tags   event_tags[]
+  game_wordle  game_wordle[]
 }
 
 model events {
@@ -129,6 +130,22 @@ model event_tags {
   department_id Int
   department    departments @relation(fields: [department_id], references: [id])
   events        events[]
+}
+
+model game_wordle {
+  id            Int         @id @default(autoincrement())
+  word          String
+  is_today_word Boolean
+  id_department Int
+  department    departments @relation(fields: [id_department], references: [id])
+}
+
+model game_wordle_attempts {
+  id      Int      @id @default(autoincrement())
+  word    String
+  day     DateTime @default(now())
+  user_id Int
+  user    users    @relation(fields: [user_id], references: [id])
 }
 
 model quests {
@@ -255,6 +272,8 @@ model users {
   role                     user_roles?                   @relation(fields: [id_role], references: [id])
   quests                   quests[]
   comments                 comments[]
+  game_wordle_attempts     game_wordle_attempts[]
+  user_experience_source   user_experience_source[]
 }
 
 model user_executors_on_events {
@@ -287,6 +306,14 @@ model user_roles {
   name        String
   description String?
   users       users[]
+}
+
+model user_experience_source {
+  id         Int    @id @default(autoincrement())
+  experience Int
+  source     String
+  user_id    Int
+  user       users  @relation(fields: [user_id], references: [id])
 }
 
 enum user_sex {
