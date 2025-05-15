@@ -144,23 +144,13 @@ export class GamingService {
     experience: number,
     departmentId: number,
   ) {
-    const foundExperienceByDepartment =
-      await this.prisma.user_experience.findUnique({
-        where: {
-          user_id_department_id: {
-            user_id: userId,
-            department_id: departmentId,
-          },
-        },
-      })
-
     await this.prisma.user_experience.upsert({
       where: {
         user_id_department_id: { user_id: userId, department_id: departmentId },
       },
       create: { user_id: userId, department_id: departmentId, experience },
       update: {
-        experience: foundExperienceByDepartment.experience + experience,
+        experience: { increment: experience },
       },
     })
   }

@@ -155,12 +155,12 @@ export class QuestService {
         Number(
           (
             await this.prisma.$queryRaw<{ count: bigint }>`
-          SELECT COUNT(*)
-          FROM complete_quests
-          WHERE id_user = ${userId}
-            AND quest_data->>'id' = ${quest.id}
-        `
-          ).count,
+              SELECT COUNT(*)
+              FROM complete_quests
+              WHERE id_user = ${userId}
+                AND (quest_data->>'id')::int  = ${quest.id}::int
+            `
+          )[0].count,
         ) === 1
 
       if (isFirstTry) {
