@@ -34,6 +34,7 @@ export class UserModuleService {
   async getUsers(getUsers: GetUsersQuery): Promise<GetUsersSchema[]> {
     const where: Prisma.usersWhereInput = {}
 
+    if (getUsers.id) where.id = getUsers.id
     if (getUsers.roleId) where.id_role = getUsers.roleId
     if (getUsers.positionId) where.id_position = getUsers.positionId
     if (getUsers.isAdmin) where.id_role = 1
@@ -129,6 +130,7 @@ export class UserModuleService {
 
     if (foundUser.id_role) {
       authUser.isEmployee = true
+      authUser.roleId = foundUser.id_role
       authUser.departmentId = foundUser.id_department
     }
 
@@ -161,6 +163,7 @@ export class UserModuleService {
 
       if (foundUser.id_role) {
         authUser.isEmployee = true
+        authUser.roleId = foundUser.id_role
         authUser.departmentId = foundUser.id_department
       }
 

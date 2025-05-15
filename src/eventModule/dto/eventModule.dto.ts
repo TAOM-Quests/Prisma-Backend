@@ -7,6 +7,7 @@ export interface GetEventsMinimizeQuery {
   name?: string
   type?: number
   dateEnd?: Date
+  status?: number
   dateStart?: Date
   executor?: number
   department?: number
@@ -115,6 +116,21 @@ export class SaveEventDto {
     required: false,
   })
   tags?: { name: string; id?: number }[]
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  inspectorId?: number
+
+  @ApiProperty({
+    example: [
+      { userId: 1, text: 'Изменить дату на 20.03.2025', id: 1 },
+      { userId: 1, text: 'Добавить в описание информацию о кафедре' },
+    ],
+    required: false,
+  })
+  inspectorComments?: { userId: number; text: string; id?: number }[]
 }
 
 export class CreateEventDto extends SaveEventDto {
