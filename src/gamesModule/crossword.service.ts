@@ -42,7 +42,7 @@ export class CrosswordService {
 
   async checkAnswer(
     answer: CheckCrosswordAnswerDto,
-  ): Promise<CheckCrosswordAnswerSchema> {
+  ): Promise<CheckCrosswordAnswerSchema[]> {
     const correctAnswers = await this.prisma.game_crossword_answers.findMany({
       where: {
         department_id: answer.departmentId,
@@ -92,8 +92,6 @@ export class CrosswordService {
       )
     }
 
-    return {
-      words: userAnswers,
-    }
+    return userAnswers
   }
 }

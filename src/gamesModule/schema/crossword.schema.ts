@@ -6,11 +6,9 @@ export interface GetCrosswordAnswerSchema {
 }
 
 export interface CheckCrosswordAnswerSchema {
-  words: {
-    x: number
-    y: number
-    word: string
-    direction: string
-    isCorrect: boolean
-  }[]
+  x: number
+  y: number
+  word: string
+  direction: string
+  isCorrect: boolean
 }

@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common'
 import { CrosswordService } from './crossword.service'
-import { GetCrosswordAnswerSchema } from './schema/crossword.schema'
+import {
+  CheckCrosswordAnswerSchema,
+  GetCrosswordAnswerSchema,
+} from './schema/crossword.schema'
 import { ApiQuery } from '@nestjs/swagger'
 import { CheckCrosswordAnswerDto } from './dto/crossword.dto'
 
@@ -27,7 +30,7 @@ export class CrosswordController {
   @Post('/')
   async checkAnswer(
     @Body() checkDto: CheckCrosswordAnswerDto,
-  ): Promise<unknown> {
+  ): Promise<CheckCrosswordAnswerSchema[]> {
     return this.crosswordService.checkAnswer(checkDto)
   }
 }
