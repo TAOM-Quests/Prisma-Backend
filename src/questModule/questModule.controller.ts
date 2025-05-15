@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common'
 import { QuestModuleService } from './questModule.service'
 import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 import {
@@ -16,12 +24,13 @@ import {
   getQuestTagsSchemaExample,
 } from './schema/questModule.schema.example'
 import {
+  GetCompleteQuestsMinimizeQuery,
   GetQuestGroupsQuery,
   GetQuestTagsQuery,
-  PostQuestDto,
   SaveQuestCompleteDto,
   SaveQuestDto,
 } from './dto/questModule.dto'
+import { isArray } from 'class-validator'
 
 @ApiTags('questModule')
 @Controller('questModule')
@@ -46,34 +55,38 @@ export class QuestModuleController {
   @ApiQuery({ name: 'completeBy', type: 'number', required: false })
   @Get('quests')
   async getQuests(
-    @Query('id') ids: string[],
-    @Query('department') departmentsIds: string[],
-    @Query('tag') tagsIds: string[],
-    @Query('executor') executorsIds: string[],
-    @Query('isComplete') isComplete: boolean,
+    @Query('id') ids: string | string[],
+    @Query('department') departmentsIds: string | string[],
+    @Query('tag') tagsIds: string | string[],
+    @Query('executor') executorsIds: string | string[],
+    @Query('isCompleted') isCompleted: boolean,
     @Query('completeBy') completeByUserId: string,
   ): Promise<GetQuestMinimizeSchema[]> {
-    // return isComplete
-    //   ? this.questModuleService.getCompleteQuests({
-    //     ids: ids.map(id => +id),
-    //     departmentsIds: departmentsIds.map(id => +id),
-    //     tagsIds: tagsIds.map(id => +id),
-    //     executorsIds: executorsIds.map(id => +id),
-    //     completeByUserId: +completeByUserId
-    //   })
-    //   : this.questModuleService.getQuests({
-    //     ids: ids.map(id => +id),
-    //     departmentsIds: departmentsIds.map(id => +id),
-    //     tagsIds: tagsIds.map(id => +id),
-    //     executorsIds: executorsIds.map(id => +id)
-    //   })
+    const getQuery: GetCompleteQuestsMinimizeQuery = {
+      ids: ids ? (isArray(ids) ? ids.map((id) => +id) : [+ids]) : [],
+      departmentsIds: departmentsIds
+        ? isArray(departmentsIds)
+          ? departmentsIds.map((id) => +id)
+          : [+departmentsIds]
+        : [],
+      tagsIds: tagsIds
+        ? isArray(tagsIds)
+          ? tagsIds.map((id) => +id)
+          : [+tagsIds]
+        : [],
+      executorsIds: executorsIds
+        ? isArray(executorsIds)
+          ? executorsIds.map((id) => +id)
+          : [+executorsIds]
+        : [],
+    }
 
-    return this.questModuleService.getQuests({
-      ids: ids.map((id) => +id),
-      departmentsIds: departmentsIds.map((id) => +id),
-      tagsIds: tagsIds.map((id) => +id),
-      executorsIds: executorsIds.map((id) => +id),
-    })
+    return isCompleted
+      ? this.questModuleService.getCompleteQuests({
+          ...getQuery,
+          completeByUserId: +completeByUserId,
+        })
+      : this.questModuleService.getQuests(getQuery)
   }
 
   @ApiResponse({
@@ -101,6 +114,16 @@ export class QuestModuleController {
     type: GetQuestSchema,
     example: getQuestSchemaExample,
   })
+  @Get('/quests/complete/:id')
+  async getCompleteQuest(@Param('id') id: string): Promise<GetQuestSchema> {
+    return this.questModuleService.getCompleteQuest(+id)
+  }
+
+  @ApiResponse({
+    status: 200,
+    type: GetQuestSchema,
+    example: getQuestSchemaExample,
+  })
   @Post('/quests/:id')
   async updateQuest(
     @Param('id') id: string,
@@ -116,6 +139,11 @@ export class QuestModuleController {
     @Body() quest: SaveQuestCompleteDto,
   ): Promise<void> {
     await this.questModuleService.saveCompleteQuest(quest, +userId)
+  }
+
+  @Delete('/quests/:id')
+  async deleteQuest(@Param('id') id: string): Promise<void> {
+    await this.questModuleService.deleteQuest(+id)
   }
 
   @ApiResponse({

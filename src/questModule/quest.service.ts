@@ -24,8 +24,18 @@ export class QuestService {
       throw new NotFoundError(`Quest with id ${id} not found`)
     }
 
+    const completedCount = Number(
+      (
+        await this.prisma.$queryRaw<{ count: bigint }[]>`
+          SELECT COUNT(*)
+          FROM complete_quests
+          WHERE (quest_data->>'id')::int = ${foundQuest.id}::int
+        `
+      )[0].count,
+    )
     const quest: GetQuestMinimizeSchema = {
       id: foundQuest.id,
+      completedCount: completedCount,
       tags: await this.prisma.quest_tags.findMany({
         where: { quests: { some: { id_quest: foundQuest.id } } },
       }),
@@ -87,6 +97,59 @@ export class QuestService {
     }
   }
 
+  async getMinimizeCompleteById(id: number): Promise<GetQuestMinimizeSchema> {
+    const foundCompleteRow = await this.prisma.complete_quests.findUnique({
+      where: { id },
+    })
+    const foundQuest =
+      foundCompleteRow.quest_data as unknown as SaveQuestCompleteDto
+
+    if (!foundQuest) {
+      throw new NotFoundError(`Quest with id ${id} not found`)
+    }
+
+    const quest: GetQuestMinimizeSchema = {
+      id: foundQuest.id,
+      tags: foundQuest.tags,
+      completeId: id,
+    }
+
+    if (foundQuest.name) quest.name = foundQuest.name
+    if (foundQuest.time) quest.time = foundQuest.time
+    if (foundQuest.difficult) quest.difficult = foundQuest.difficult
+    if (foundQuest.description) quest.description = foundQuest.description
+    if (foundQuest.imageId) {
+      quest.image = await this.commonModuleService.getFileStatsById(
+        foundQuest.imageId,
+      )
+    }
+
+    return quest
+  }
+
+  async getCompleteById(id: number): Promise<GetQuestSchema> {
+    const foundCompleteRow = await this.prisma.complete_quests.findUnique({
+      where: { id },
+    })
+    console.log(foundCompleteRow)
+    const foundQuest =
+      foundCompleteRow.quest_data as unknown as SaveQuestCompleteDto
+
+    const quest: GetQuestSchema = {
+      ...(await this.getMinimizeCompleteById(id)),
+      executor: foundQuest.executor,
+      questions: foundQuest.questions,
+      results: [
+        {
+          ...foundQuest.result,
+          minPoints: 0,
+        },
+      ],
+    }
+
+    return quest
+  }
+
   async create(quest: SaveQuestDto): Promise<GetQuestSchema> {
     return this.saveQuest(quest)
   }
@@ -94,36 +157,37 @@ export class QuestService {
   async update(quest: SaveQuestDto): Promise<GetQuestSchema> {
     const oldQuestQuestionsIds = (
       await this.prisma.questions.findMany({
-        where: { quest: { id: { in: quest.questions.map((q) => q.id) } } },
+        where: { quest: { id: quest.id } },
       })
     ).map((q) => q.id)
-    const newQuestQuestionsIds = quest.questions.map((q) => q.id)
+    const newQuestQuestionsIds = quest.questions
+      .filter((q) => q.id)
+      .map((q) => q.id)
     for (const questionIdToDisconnect of [
       ...difference(oldQuestQuestionsIds, newQuestQuestionsIds),
       ...difference(newQuestQuestionsIds, oldQuestQuestionsIds),
     ]) {
-      await this.prisma.quests.update({
+      await this.prisma.questions.delete({
         where: { id: questionIdToDisconnect },
-        data: { questions: { disconnect: { id: questionIdToDisconnect } } },
       })
     }
 
     const oldQuestResultsIds = (
       await this.prisma.quest_results.findMany({
-        where: { quest: { id: { in: quest.results.map((q) => q.id) } } },
+        where: { quest: { id: quest.id } },
       })
     ).map((q) => q.id)
-    const newQuestResultsIds = quest.results.map((q) => q.id)
-    await this.prisma.quest_results.deleteMany({
-      where: {
-        id: {
-          in: [
-            ...difference(oldQuestResultsIds, newQuestResultsIds),
-            ...difference(newQuestResultsIds, oldQuestResultsIds),
-          ],
-        },
-      },
-    })
+    const newQuestResultsIds = quest.results
+      .filter((r) => r.id)
+      .map((r) => r.id)
+    for (const resultIdToDisconnect of [
+      ...difference(oldQuestResultsIds, newQuestResultsIds),
+      ...difference(newQuestResultsIds, oldQuestResultsIds),
+    ]) {
+      await this.prisma.quest_results.delete({
+        where: { id: resultIdToDisconnect },
+      })
+    }
 
     return this.saveQuest(quest)
   }
@@ -204,5 +268,9 @@ export class QuestService {
     }
 
     return this.getById(savedQuest.id)
+  }
+
+  async delete(id: number): Promise<void> {
+    await this.prisma.quests.delete({ where: { id } })
   }
 }
