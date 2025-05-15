@@ -56,7 +56,7 @@ export class CommonModuleService {
         return {
           user,
           text: comment.text,
-          createdAt: comment.createdAt,
+          createdAt: comment.created_at,
         }
       }),
     )

@@ -12,7 +12,7 @@ import { WordleService } from './wordle.service'
 import {
   GetWordleUserAttemptSchema,
   GetWordleWordSchema,
-} from './schema/gamesModule.schema'
+} from './schema/wordle.schema'
 
 @Controller('games/wordle')
 export class WordleController {

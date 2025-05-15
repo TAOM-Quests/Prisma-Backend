@@ -11,6 +11,8 @@ import { CommonModuleService } from 'src/commonModule/commonModule.service'
 import { difference } from 'lodash'
 import { GamingService } from 'src/userModule/gaming.service'
 
+const EXPERIENCE_SOURCE = 'quests'
+
 @Injectable()
 export class QuestService {
   constructor(
@@ -235,7 +237,7 @@ export class QuestService {
         this.gamingService.addExperience(
           userId,
           foundQuestDifficult.experience,
-          'quests',
+          EXPERIENCE_SOURCE,
           foundQuest.id_department,
         )
       }

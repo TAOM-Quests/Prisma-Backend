@@ -4,7 +4,12 @@ import { PrismaService } from 'src/prisma/prisma.service'
 import { NotificationsGateway } from './notifications.gateway'
 import { capitalize } from 'lodash'
 
-type ExperienceSource = 'quests' | 'events' | 'games' | 'achievements'
+type ExperienceSource =
+  | 'quests'
+  | 'events'
+  | 'games:wordle'
+  | 'games:crossword'
+  | 'achievements'
 
 export const ACHIEVEMENTS_MAP = {
   FIRST_EVENT_REGISTER: 1,
