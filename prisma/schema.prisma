@@ -76,17 +76,19 @@ model complete_quests {
 }
 
 model departments {
-  id                  Int                   @id @default(autoincrement())
-  name                String
-  quest_groups        quest_groups[]
-  quest_tags          quest_tags[]
-  quests              quests[]
-  users               users[]
-  events              events[]
-  event_tags          event_tags[]
-  game_wordle         game_wordle[]
-  game_wordle_answers game_wordle_answers[]
-  user_experience     user_experience[]
+  id                     Int                      @id @default(autoincrement())
+  name                   String
+  quest_groups           quest_groups[]
+  quest_tags             quest_tags[]
+  quests                 quests[]
+  users                  users[]
+  events                 events[]
+  event_tags             event_tags[]
+  game_wordle            game_wordle[]
+  game_wordle_answers    game_wordle_answers[]
+  user_experience        user_experience[]
+  game_crossword_words   game_crossword_words[]
+  game_crossword_answers game_crossword_answers[]
 }
 
 model events {
@@ -132,6 +134,33 @@ model event_tags {
   department_id Int
   department    departments @relation(fields: [department_id], references: [id])
   events        events[]
+}
+
+model game_crossword_words {
+  id            Int                         @id @default(autoincrement())
+  question      String
+  word          String
+  id_difficulty Int
+  department_id Int
+  difficulty    game_crossword_difficulties @relation(fields: [id_difficulty], references: [id])
+  department    departments                 @relation(fields: [department_id], references: [id])
+}
+
+model game_crossword_difficulties {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  experience           Int
+  game_crossword_words game_crossword_words[]
+}
+
+model game_crossword_answers {
+  id            Int         @id @default(autoincrement())
+  day           DateTime    @default(now())
+  word          String
+  x             Int
+  y             Int
+  department_id Int
+  department    departments @relation(fields: [department_id], references: [id])
 }
 
 model game_wordle {
