@@ -6,6 +6,8 @@ import { CommonModuleService } from 'src/commonModule/commonModule.service'
 import { QuestService } from './quest.service'
 import { QuestionService } from './question.service'
 import { ResultService } from './result.service'
+import { NotificationsGateway } from 'src/userModule/notifications.gateway'
+import { UserModule } from 'src/userModule/userModule.module'
 
 @Module({
   controllers: [QuestModuleController],
@@ -17,5 +19,6 @@ import { ResultService } from './result.service'
     QuestModuleService,
     CommonModuleService,
   ],
+  imports: [UserModule],
 })
 export class QuestModule {}

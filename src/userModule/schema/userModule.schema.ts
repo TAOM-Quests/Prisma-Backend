@@ -36,6 +36,20 @@ export class GetUserProfileSchema {
   phoneNumber?: string
   department?: Department
   position?: UserPosition
+  level: {
+    name: string
+    number: number
+    experience: number
+    experienceToNextLevel: number
+  }
+  achievements: {
+    id: number
+    name: string
+    experience: number
+    description: string
+    image: GetFileStatsSchema
+    isReceived?: boolean
+  }[]
 }
 
 export class UpdateUserProfileSchema {

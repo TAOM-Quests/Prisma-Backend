@@ -45,6 +45,13 @@ export const getUserProfileSchemaExample: GetUserProfileSchema = {
     extension: 'png',
     url: 'https://localhost:3000/commonModule/file?fileName=image.png',
   },
+  level: {
+    number: 1,
+    name: 'Beginner',
+    experience: 0,
+    experienceToNextLevel: 300,
+  },
+  achievements: [],
 }
 
 export const updateUserProfileSchemaExample: UpdateUserProfileSchema = {
