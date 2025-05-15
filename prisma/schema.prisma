@@ -151,6 +151,7 @@ model game_crossword_difficulties {
   name                 String
   experience           Int
   game_crossword_words game_crossword_words[]
+  game_crossword_answers game_crossword_answers[]
 }
 
 model game_crossword_answers {
@@ -159,7 +160,9 @@ model game_crossword_answers {
   word          String
   x             Int
   y             Int
+  difficulty_id Int
   department_id Int
+  difficulty    game_crossword_difficulties @relation(fields: [difficulty_id], references: [id])
   department    departments @relation(fields: [department_id], references: [id])
 }
 
