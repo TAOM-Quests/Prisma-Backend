@@ -1,4 +1,4 @@
-import moment from 'moment'
+import * as moment from 'moment'
 import { wordleWarp } from './wordle/wordleWarp'
 
 // Обновляем игры каждый 24 часа

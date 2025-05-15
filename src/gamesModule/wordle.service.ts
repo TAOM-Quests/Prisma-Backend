@@ -2,12 +2,17 @@ import { Injectable } from '@nestjs/common'
 import moment from 'moment'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { GetWordleUserAttemptSchema } from './schema/gamesModule.schema'
+import { GamingService } from 'src/userModule/gaming.service'
 
+const EXPERIENCE_SOURCE = 'games'
 const EXPERIENCE_CORRECT_ANSWER = 100
 
 @Injectable()
 export class WordleService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private gamingService: GamingService,
+  ) {}
 
   async getUserAttempts(
     userId: number,
@@ -48,11 +53,16 @@ export class WordleService {
     if (
       attemptResult.letters.filter((l) => l.status === 'correct').length === 5
     ) {
-      //Добавить опыт
+      await this.gamingService.addExperience(
+        userId,
+        EXPERIENCE_CORRECT_ANSWER,
+        EXPERIENCE_SOURCE,
+        departmentId,
+      )
 
-      await this.prisma.user_experience_source.create({
+      await this.prisma.user_experience.create({
         data: {
-          source: 'games',
+          source: EXPERIENCE_SOURCE,
           user: { connect: { id: userId } },
           experience: EXPERIENCE_CORRECT_ANSWER,
           department: { connect: { id: departmentId } },

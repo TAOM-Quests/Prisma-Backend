@@ -76,17 +76,17 @@ model complete_quests {
 }
 
 model departments {
-  id                        Int                         @id @default(autoincrement())
-  name                      String
-  quest_groups              quest_groups[]
-  quest_tags                quest_tags[]
-  quests                    quests[]
-  users                     users[]
-  events                    events[]
-  event_tags                event_tags[]
-  game_wordle            game_wordle[]
-  game_wordle_answers    game_wordle_answers[]
-  user_experience_source user_experience_source[]
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  quest_groups        quest_groups[]
+  quest_tags          quest_tags[]
+  quests              quests[]
+  users               users[]
+  events              events[]
+  event_tags          event_tags[]
+  game_wordle         game_wordle[]
+  game_wordle_answers game_wordle_answers[]
+  user_experience     user_experience[]
 }
 
 model events {
@@ -286,7 +286,7 @@ model users {
   comments                 comments[]
   achievements             user_achievements[]
   game_wordle_attempts     game_wordle_attempts[]
-  user_experience_source   user_experience_source[]
+  user_experience          user_experience[]
 }
 
 model user_executors_on_events {
