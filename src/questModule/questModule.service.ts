@@ -1,29 +1,22 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 import {
+  GetCompleteQuestsMinimizeQuery,
   GetQuestGroupsQuery,
   GetQuestsMinimizeQuery,
   GetQuestTagsQuery,
-  PostQuestDto,
   SaveQuestCompleteDto,
   SaveQuestDto,
-  SaveQuestionDto,
 } from './dto/questModule.dto'
 import { Prisma } from '@prisma/client'
 import {
   GetQuestDifficultiesSchema,
   GetQuestGroupsSchema,
   GetQuestMinimizeSchema,
-  GetQuestQuestionSchema,
   GetQuestSchema,
   GetQuestTagsSchema,
-  GetQuestResultSchema,
 } from './schema/questModule.schema'
-import { QuestQuestion } from 'src/models/questQuestion'
-import { QuestAnswer } from 'src/models/questAnswer'
-import { NotFoundError } from 'src/errors/notFound'
 import { CommonModuleService } from 'src/commonModule/commonModule.service'
-import { QuestResult } from 'src/models/questResult'
 import { QuestService } from './quest.service'
 import { QuestionService } from './question.service'
 import { ResultService } from './result.service'
@@ -43,12 +36,12 @@ export class QuestModuleService {
   ): Promise<GetQuestMinimizeSchema[]> {
     const where: Prisma.questsWhereInput = {}
 
-    if (getQuestsQuery.ids) where.id = { in: getQuestsQuery.ids }
-    if (getQuestsQuery.tagsIds)
+    if (getQuestsQuery.ids.length) where.id = { in: getQuestsQuery.ids }
+    if (getQuestsQuery.tagsIds.length)
       where.tags = { some: { id_tag: { in: getQuestsQuery.tagsIds } } }
-    if (getQuestsQuery.executorsIds)
+    if (getQuestsQuery.executorsIds.length)
       where.id_executor = { in: getQuestsQuery.executorsIds }
-    if (getQuestsQuery.departmentsIds)
+    if (getQuestsQuery.departmentsIds.length)
       where.id_department = { in: getQuestsQuery.departmentsIds }
 
     const foundQuests = await this.prisma.quests.findMany({ where })
@@ -60,9 +53,55 @@ export class QuestModuleService {
     )
   }
 
-  // async getCompleteQuests(getQuestsQuery: GetCompleteQuestsMinimizeQuery): Promise<GetQuestMinimizeSchema[]> {
+  async getCompleteQuests(
+    getQuestsQuery: GetCompleteQuestsMinimizeQuery,
+  ): Promise<GetQuestMinimizeSchema[]> {
+    const conditions: Prisma.Sql[] = []
 
-  // }
+    if (getQuestsQuery.completeByUserId) {
+      conditions.push(
+        Prisma.sql`id_user = ${getQuestsQuery.completeByUserId}::int`,
+      )
+    }
+    if (getQuestsQuery.ids.length) {
+      conditions.push(
+        Prisma.sql`(quest_data->>'id') = ANY (${Prisma.join(getQuestsQuery.ids)})`,
+      )
+    }
+    if (getQuestsQuery.tagsIds.length)
+      conditions.push(
+        Prisma.sql`
+        EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements(quest_data->'tags') AS tag
+          WHERE (tag->>'id') = ANY (${Prisma.join(getQuestsQuery.tagsIds)})
+        )`,
+      )
+    if (getQuestsQuery.executorsIds.length)
+      conditions.push(
+        Prisma.sql`(quest_data->>'executor'->>'id') = ANY (${Prisma.join(getQuestsQuery.executorsIds)})`,
+      )
+    if (getQuestsQuery.departmentsIds.length)
+      conditions.push(
+        Prisma.sql`(quest_data->>'department'->>'id') = ANY (${Prisma.join(getQuestsQuery.departmentsIds)})`,
+      )
+
+    const whereClause =
+      conditions.length > 0
+        ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+        : Prisma.empty
+    const foundQuests = await this.prisma.$queryRaw<{ id: number }[]>`
+        SELECT id
+        FROM complete_quests
+        ${whereClause}
+      `
+
+    return await Promise.all(
+      foundQuests.map(
+        async (quest) => await this.questService.getCompleteById(quest.id),
+      ),
+    )
+  }
 
   async getQuest(id: number): Promise<GetQuestSchema> {
     const quest = await this.questService.getById(id)
@@ -70,6 +109,10 @@ export class QuestModuleService {
     quest.results = await this.resultService.getByQuestId(id)
 
     return quest
+  }
+
+  async getCompleteQuest(id: number): Promise<GetQuestSchema> {
+    return this.questService.getCompleteById(id)
   }
 
   async createQuest(quest: SaveQuestDto): Promise<GetQuestSchema> {
@@ -139,6 +182,10 @@ export class QuestModuleService {
       id: group.id,
       name: group.name,
     }))
+  }
+
+  async deleteQuest(id: number): Promise<void> {
+    await this.questService.delete(id)
   }
 
   async getTags(

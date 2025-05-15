@@ -174,7 +174,7 @@ model quest_results {
   min_points  Int
   id_image    Int?
   id_quest    Int
-  quest       quests        @relation(fields: [id_quest], references: [id])
+  quest       quests        @relation(fields: [id_quest], references: [id], onDelete: Cascade)
   image       shared_files? @relation(fields: [id_image], references: [id])
 }
 
@@ -189,7 +189,7 @@ model quest_tags {
 model quest_tags_on_quests {
   id_tag   Int
   id_quest Int
-  quest    quests     @relation(fields: [id_quest], references: [id])
+  quest    quests     @relation(fields: [id_quest], references: [id], onDelete: Cascade)
   tag      quest_tags @relation(fields: [id_tag], references: [id])
 
   @@id([id_quest, id_tag])
@@ -202,7 +202,7 @@ model questions {
   id_quest  Int
   id_answer Int?
   answer    answers? @relation(fields: [id_answer], references: [id])
-  quest     quests   @relation(fields: [id_quest], references: [id])
+  quest     quests   @relation(fields: [id_quest], references: [id], onDelete: Cascade)
 }
 
 model shared_files {
