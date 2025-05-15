@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import moment from 'moment'
+import * as moment from 'moment'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { GetWordleUserAttemptSchema } from './schema/gamesModule.schema'
 import { GamingService } from 'src/userModule/gaming.service'
+import { NotFoundError } from 'src/errors/notFound'
+import { upperCase } from 'lodash'
 
 const EXPERIENCE_SOURCE = 'games'
 const EXPERIENCE_CORRECT_ANSWER = 100
@@ -16,19 +18,21 @@ export class WordleService {
 
   async getUserAttempts(
     userId: number,
-    date: Date,
+    date: string,
     departmentId: number,
   ): Promise<GetWordleUserAttemptSchema[]> {
-    const day = moment(date).startOf('day').toDate()
+    const day = moment(date).startOf('day')
     const attempts = await this.prisma.game_wordle_attempts.findMany({
       where: {
         user: { id: userId },
         day: {
-          gte: day,
-          lte: moment(date).add(1, 'day').toDate(),
+          gte: day.toDate(),
+          lte: day.add(1, 'day').toDate(),
         },
       },
+      orderBy: { day: 'asc' },
     })
+
     const todayWord = await this.getWordByDate(date, departmentId)
 
     return Promise.all(
@@ -43,7 +47,16 @@ export class WordleService {
     userId: number,
     departmentId: number,
   ): Promise<GetWordleUserAttemptSchema> {
-    const todayWord = await this.getWordByDate(new Date(), departmentId)
+    const isWordExist = await this.prisma.game_wordle.findFirst({
+      where: { word: upperCase(attempt) },
+    })
+
+    if (!isWordExist) throw new NotFoundError('Word does not exist')
+
+    const todayWord = await this.getWordByDate(
+      moment().format('YYYY-MM-DD'),
+      departmentId,
+    )
     const attemptResult = await this.checkAttempt(todayWord, attempt)
 
     await this.prisma.game_wordle_attempts.create({
@@ -59,15 +72,6 @@ export class WordleService {
         EXPERIENCE_SOURCE,
         departmentId,
       )
-
-      await this.prisma.user_experience.create({
-        data: {
-          source: EXPERIENCE_SOURCE,
-          user: { connect: { id: userId } },
-          experience: EXPERIENCE_CORRECT_ANSWER,
-          department: { connect: { id: departmentId } },
-        },
-      })
     }
 
     return attemptResult
@@ -116,15 +120,15 @@ export class WordleService {
   }
 
   private async getWordByDate(
-    date: Date,
+    date: string,
     departmentId: number,
   ): Promise<string> {
-    const day = moment(date).startOf('day').toDate()
+    const day = moment(date).startOf('day')
     const { word } = await this.prisma.game_wordle_answers.findFirst({
       where: {
         day: {
-          gte: day,
-          lte: moment(date).add(1, 'day').toDate(),
+          gte: day.toDate(),
+          lte: day.add(1, 'day').toDate(),
         },
         department_id: departmentId,
       },

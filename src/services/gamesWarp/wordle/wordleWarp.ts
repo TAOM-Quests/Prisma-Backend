@@ -8,10 +8,12 @@ export const wordleWarp = async () => {
   for (let departmentId of departments.map((d) => d.id)) {
     const word = await getRandomWordByDepartmentId(departmentId)
 
+    if (!word) continue
+
     await prisma.game_wordle_answers.create({
       data: {
         word,
-        department_id: departmentId,
+        department: { connect: { id: departmentId } },
       },
     })
   }
@@ -20,7 +22,9 @@ export const wordleWarp = async () => {
 async function getRandomWordByDepartmentId(
   departmentId: number,
 ): Promise<string | null> {
-  const count = await prisma.game_wordle.count()
+  const count = await prisma.game_wordle.count({
+    where: { department_id: departmentId },
+  })
 
   if (count === 0) return null
 

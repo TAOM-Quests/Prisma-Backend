@@ -15,11 +15,7 @@ export class WordleController {
     @Query('date') date: string,
     @Query('departmentId') departmentId: string,
   ): Promise<GetWordleUserAttemptSchema[]> {
-    return this.wordleService.getUserAttempts(
-      +userId,
-      new Date(date),
-      +departmentId,
-    )
+    return this.wordleService.getUserAttempts(+userId, date, +departmentId)
   }
 
   @ApiQuery({ name: 'date', required: true })
@@ -28,7 +24,7 @@ export class WordleController {
   async createAttempt(
     @Param('userId') userId: string,
     @Query('departmentId') departmentId: string,
-    @Body() attempt: string,
+    @Body('attempt') attempt: string,
   ): Promise<GetWordleUserAttemptSchema> {
     return this.wordleService.createAttempt(attempt, +userId, +departmentId)
   }
