@@ -22,34 +22,19 @@ export const crosswordWarp = async () => {
   }
 }
 
-async function getRandomWord(
-  departmentId: number,
-  difficultyId: number,
-): Promise<string | null> {
-  const count = await prisma.game_crossword_words.count({
-    where: { department_id: departmentId, id_difficulty: difficultyId },
-  })
-
-  if (count === 0) return null
-
-  const randomIndex = Math.floor(Math.random() * count)
-  const rows = await prisma.game_crossword_words.findFirst({
-    skip: randomIndex,
-    where: { department_id: departmentId, id_difficulty: difficultyId },
-  })
-
-  return rows.word
-}
-
 async function createCrossword(
   departmentId: number,
   difficultyId: number,
   wordsCount: number,
 ): Promise<void> {
   const words: string[] = []
+  const questions: string[] = []
 
   for (let i = 0; i < wordsCount; i++) {
-    const word = await getRandomWord(departmentId, difficultyId)
+    const { word, question } = await getRandomWordAndQuestion(
+      departmentId,
+      difficultyId,
+    )
 
     if (!word) {
       console.log(
@@ -60,21 +45,44 @@ async function createCrossword(
 
     if (!words.includes(word)) {
       words.push(word)
+      questions.push(question)
     }
   }
 
   const crossword = buildCrossword(words)
 
-  for (const answer of crossword) {
+  crossword.forEach(async (answer, index) => {
     await prisma.game_crossword_answers.create({
       data: {
         x: answer.x,
         y: answer.y,
         word: answer.word,
         direction: answer.direction,
+        question: questions[index],
         department: { connect: { id: departmentId } },
         difficulty: { connect: { id: difficultyId } },
       },
     })
-  }
+  })
+}
+
+async function getRandomWordAndQuestion(
+  departmentId: number,
+  difficultyId: number,
+): Promise<{ word: string; question: string } | null> {
+  const count = await prisma.game_crossword_words.count({
+    where: { department_id: departmentId, id_difficulty: difficultyId },
+  })
+
+  if (count === 0) return null
+
+  const randomIndex = Math.floor(Math.random() * count)
+  const row = await prisma.game_crossword_words.findFirst({
+    skip: randomIndex,
+    where: { department_id: departmentId, id_difficulty: difficultyId },
+  })
+
+  if (!row) return null
+
+  return { word: row.word, question: row.question }
 }
