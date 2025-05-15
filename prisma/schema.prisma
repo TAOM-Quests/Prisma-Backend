@@ -147,23 +147,24 @@ model game_crossword_words {
 }
 
 model game_crossword_difficulties {
-  id                   Int                    @id @default(autoincrement())
-  name                 String
-  experience           Int
-  game_crossword_words game_crossword_words[]
+  id                     Int                      @id @default(autoincrement())
+  name                   String
+  experience             Int
+  game_crossword_words   game_crossword_words[]
   game_crossword_answers game_crossword_answers[]
 }
 
 model game_crossword_answers {
-  id            Int         @id @default(autoincrement())
-  day           DateTime    @default(now())
+  id            Int                         @id @default(autoincrement())
+  day           DateTime                    @default(now())
   word          String
   x             Int
   y             Int
+  direction     String
   difficulty_id Int
   department_id Int
   difficulty    game_crossword_difficulties @relation(fields: [difficulty_id], references: [id])
-  department    departments @relation(fields: [department_id], references: [id])
+  department    departments                 @relation(fields: [department_id], references: [id])
 }
 
 model game_wordle {
