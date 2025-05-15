@@ -23,6 +23,7 @@ export class WordleController {
   }
 
   @ApiQuery({ name: 'date', required: true })
+  @ApiQuery({ name: 'departmentId', required: true })
   @Post('/attempts/:userId')
   async createAttempt(
     @Param('userId') userId: string,
