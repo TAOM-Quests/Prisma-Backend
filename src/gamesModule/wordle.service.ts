@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import * as moment from 'moment'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { GetWordleUserAttemptSchema } from './schema/gamesModule.schema'
+import {
+  GetWordleUserAttemptSchema,
+  GetWordleWordSchema,
+} from './schema/gamesModule.schema'
 import { GamingService } from 'src/userModule/gaming.service'
 import { NotFoundError } from 'src/errors/notFound'
 import { upperCase } from 'lodash'
+import { SaveWordleWordDto } from './dto/gamesModule.dto'
 
 const EXPERIENCE_SOURCE = 'games'
 const EXPERIENCE_CORRECT_ANSWER = 100
@@ -77,6 +81,35 @@ export class WordleService {
     return attemptResult
   }
 
+  async getWordByDepartment(
+    departmentId: number,
+  ): Promise<GetWordleWordSchema[]> {
+    const foundWords = await this.prisma.game_wordle.findMany({
+      where: { department_id: departmentId },
+    })
+
+    return foundWords.map((word) => ({
+      id: word.id,
+      word: word.word,
+      departmentId: word.department_id,
+    }))
+  }
+
+  async createWord(
+    word: string,
+    departmentId: number,
+  ): Promise<GetWordleWordSchema> {
+    return await this.saveWord({ word, departmentId })
+  }
+
+  async updateWord(word: string, id: number): Promise<GetWordleWordSchema> {
+    return await this.saveWord({ word, id })
+  }
+
+  async deleteWord(id: number): Promise<void> {
+    await this.prisma.game_wordle.delete({ where: { id } })
+  }
+
   private async checkAttempt(
     solution: string,
     attempt: string,
@@ -135,5 +168,23 @@ export class WordleService {
     })
 
     return word
+  }
+
+  private async saveWord({
+    word,
+    departmentId,
+    id,
+  }: SaveWordleWordDto): Promise<GetWordleWordSchema> {
+    const savedWord = await this.prisma.game_wordle.upsert({
+      where: { id: id ?? -1 },
+      create: { word, department: { connect: { id: departmentId ?? -1 } } },
+      update: { word },
+    })
+
+    return {
+      id: savedWord.id,
+      word: savedWord.word,
+      departmentId: savedWord.department_id,
+    }
   }
 }

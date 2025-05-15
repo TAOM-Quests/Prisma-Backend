@@ -4,3 +4,9 @@ export class GetWordleUserAttemptSchema {
     status: 'correct' | 'present' | 'absent'
   }[]
 }
+
+export class GetWordleWordSchema {
+  id: number
+  word: string
+  departmentId: number
+}
