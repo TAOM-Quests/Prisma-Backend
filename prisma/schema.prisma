@@ -76,15 +76,17 @@ model complete_quests {
 }
 
 model departments {
-  id           Int            @id @default(autoincrement())
-  name         String
-  quest_groups quest_groups[]
-  quest_tags   quest_tags[]
-  quests       quests[]
-  users        users[]
-  events       events[]
-  event_tags   event_tags[]
-  game_wordle  game_wordle[]
+  id                     Int                      @id @default(autoincrement())
+  name                   String
+  quest_groups           quest_groups[]
+  quest_tags             quest_tags[]
+  quests                 quests[]
+  users                  users[]
+  events                 events[]
+  event_tags             event_tags[]
+  game_wordle            game_wordle[]
+  game_wordle_answers    game_wordle_answers[]
+  user_experience_source user_experience_source[]
 }
 
 model events {
@@ -135,9 +137,16 @@ model event_tags {
 model game_wordle {
   id            Int         @id @default(autoincrement())
   word          String
-  is_today_word Boolean
-  id_department Int
-  department    departments @relation(fields: [id_department], references: [id])
+  department_id Int
+  department    departments @relation(fields: [department_id], references: [id])
+}
+
+model game_wordle_answers {
+  id            Int         @id @default(autoincrement())
+  word          String
+  day           DateTime    @default(now())
+  department_id Int
+  department    departments @relation(fields: [department_id], references: [id])
 }
 
 model game_wordle_attempts {
@@ -230,10 +239,8 @@ model shared_files {
   users              users[]
   events_where_image events[]
   events_where_file  shared_files_on_events[]
-
-  quests quests[]
-
-  quest_results quest_results[]
+  quests             quests[]
+  quest_results      quest_results[]
 }
 
 model shared_files_on_events {
@@ -309,11 +316,13 @@ model user_roles {
 }
 
 model user_experience_source {
-  id         Int    @id @default(autoincrement())
-  experience Int
-  source     String
-  user_id    Int
-  user       users  @relation(fields: [user_id], references: [id])
+  id            Int         @id @default(autoincrement())
+  experience    Int
+  source        String
+  user_id       Int
+  department_id Int
+  user          users       @relation(fields: [user_id], references: [id])
+  department    departments @relation(fields: [department_id], references: [id])
 }
 
 enum user_sex {
