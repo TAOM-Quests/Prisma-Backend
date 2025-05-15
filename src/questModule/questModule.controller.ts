@@ -27,7 +27,6 @@ import {
   GetCompleteQuestsMinimizeQuery,
   GetQuestGroupsQuery,
   GetQuestTagsQuery,
-  PostQuestDto,
   SaveQuestCompleteDto,
   SaveQuestDto,
 } from './dto/questModule.dto'
