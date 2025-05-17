@@ -1,6 +1,7 @@
 export interface GetCrosswordAnswerSchema {
   x: number
   y: number
+  length: number
   question: string
   direction: string
 }

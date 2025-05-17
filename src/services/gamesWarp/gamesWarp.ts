@@ -22,7 +22,7 @@ export const gamesWarp = () => {
   setTimeout(() => {
     warp()
     setInterval(() => warp(), WARP_INTERVAL)
-  }, timeToNextSend)
+  }, 1)
 }
 
 const warp = () => {

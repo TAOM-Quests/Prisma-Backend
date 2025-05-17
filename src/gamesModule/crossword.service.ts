@@ -36,6 +36,7 @@ export class CrosswordService {
       x: word.x,
       y: word.y,
       question: word.question,
+      length: word.word.length,
       direction: word.direction,
     }))
   }

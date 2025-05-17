@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client'
+import { generateCrossword, PlacedWord } from './crosswordCreate'
 
-const WORD_COUNT_INTERVAL_START = 7
-const WORD_COUNT_INTERVAL_END = 12
+const WORD_COUNT_INTERVAL_START = 10
+const WORD_COUNT_INTERVAL_END = 15
 
 const prisma = new PrismaClient()
 
@@ -27,29 +28,23 @@ async function createCrossword(
   difficultyId: number,
   wordsCount: number,
 ): Promise<void> {
-  const words: string[] = []
-  const questions: string[] = []
+  let questions: string[] = []
+  let crossword: PlacedWord[] = []
 
-  for (let i = 0; i < wordsCount; i++) {
-    const { word, question } = await getRandomWordAndQuestion(
-      departmentId,
-      difficultyId,
-    )
+  const randomPairs = await getRandomWordsAndQuestions(
+    departmentId,
+    difficultyId,
+    wordsCount,
+  )
 
-    if (!word) {
-      console.log(
-        `[CROSSWORD_WARP] No such words for department ${departmentId}, difficulty ${difficultyId}`,
-      )
-      return
-    }
+  if (!randomPairs) return
 
-    if (!words.includes(word)) {
-      words.push(word)
-      questions.push(question)
-    }
-  }
+  console.log('randomPairs', randomPairs)
 
-  const crossword = buildCrossword(words)
+  questions = randomPairs.questions
+  crossword = generateCrossword(randomPairs.words)
+
+  console.log('CROSSWORD', crossword)
 
   crossword.forEach(async (answer, index) => {
     await prisma.game_crossword_answers.create({
@@ -64,6 +59,38 @@ async function createCrossword(
       },
     })
   })
+}
+
+async function getRandomWordsAndQuestions(
+  departmentId: number,
+  difficultyId: number,
+  wordsCount: number,
+) {
+  const words: string[] = []
+  const questions: string[] = []
+
+  for (let i = 0; i < wordsCount; i++) {
+    const randomWord = await getRandomWordAndQuestion(
+      departmentId,
+      difficultyId,
+    )
+
+    if (!randomWord) {
+      console.log(
+        `[CROSSWORD_WARP] No such words for department ${departmentId}, difficulty ${difficultyId}`,
+      )
+      return
+    }
+
+    const { word, question } = randomWord
+
+    if (!words.includes(word)) {
+      words.push(word)
+      questions.push(question)
+    }
+  }
+
+  return { words, questions }
 }
 
 async function getRandomWordAndQuestion(
