@@ -1,23 +1,49 @@
-type Direction = 'horizontal' | 'vertical'
-
-export interface PlacedWord {
-  word: string
-  x: number // координата первой буквы
-  y: number // координата первой буквы
-  direction: Direction
-  number?: number // для нумерации (опционально)
-}
+import { CrosswordWord, CrosswordDirection } from 'src/models/crosswordWord'
 
 interface GridCell {
   letter: string
-  placedWords: Set<number> // индексы PlacedWord
+  CrosswordWords: Set<number> // индексы Omit<CrosswordWord, 'question'>
 }
 
 type Grid = Map<string, GridCell> // key = `${x},${y}`
 
+// --- Маппинг визуально одинаковых букв (латиница <-> кириллица) ---
+const letterMap: Record<string, string> = {
+  A: 'A',
+  А: 'A',
+  B: 'B',
+  В: 'B',
+  C: 'C',
+  С: 'C',
+  E: 'E',
+  Е: 'E',
+  H: 'H',
+  Н: 'H',
+  K: 'K',
+  К: 'K',
+  M: 'M',
+  М: 'M',
+  O: 'O',
+  О: 'O',
+  P: 'P',
+  Р: 'P',
+  T: 'T',
+  Т: 'T',
+  X: 'X',
+  Х: 'X',
+}
+function normalizeLetter(ch: string): string {
+  return letterMap[ch] || ch
+}
+function lettersEqual(a: string, b: string): boolean {
+  return normalizeLetter(a) === normalizeLetter(b)
+}
+
 // --- Основной алгоритм ---
 
-export function generateCrossword(words: string[]): PlacedWord[] {
+export function generateCrossword(
+  words: string[],
+): Omit<CrosswordWord, 'question'>[] {
   // Сортировка по длине и "пересекаемости"
   const sortedWords = [...words].sort(
     (a, b) =>
@@ -25,58 +51,61 @@ export function generateCrossword(words: string[]): PlacedWord[] {
       intersectionScore(b, words) - intersectionScore(a, words),
   )
   const grid: Grid = new Map()
-  const placedWords: PlacedWord[] = []
+  const CrosswordWords: Omit<CrosswordWord, 'question'>[] = []
 
   // Размещаем первое слово по центру
-  placeWordOnGrid(grid, placedWords, sortedWords[0], 0, 0, 'horizontal')
+  placeWordOnGrid(grid, CrosswordWords, sortedWords[0], 0, 0, 'horizontal')
 
   // Рекурсивно размещаем остальные
-  if (!placeRemainingWords(grid, placedWords, sortedWords.slice(1))) {
+  if (!placeRemainingWords(grid, CrosswordWords, sortedWords.slice(1))) {
     throw new Error(
       'Не удалось сгенерировать кроссворд для данного набора слов',
     )
   }
 
-  // Присваиваем номера словам
-  assignNumbers(placedWords)
-
-  return placedWords
+  return CrosswordWords
 }
 
 // --- Вспомогательные функции ---
 
 // Оцениваем "пересекаемость" слова
 function intersectionScore(word: string, words: string[]): number {
-  const letters = new Set(word)
+  const letters = new Set(Array.from(word).map(normalizeLetter))
   return words.reduce((score, w) => {
     if (w === word) return score
-    return score + Array.from(w).filter((l) => letters.has(l)).length
+    return (
+      score +
+      Array.from(w).filter((l) => letters.has(normalizeLetter(l))).length
+    )
   }, 0)
 }
 
 // Размещаем слово на сетке
 function placeWordOnGrid(
   grid: Grid,
-  placedWords: PlacedWord[],
+  CrosswordWords: Omit<CrosswordWord, 'question'>[],
   word: string,
   x: number,
   y: number,
-  direction: Direction,
+  direction: CrosswordDirection,
 ) {
-  const wordIndex = placedWords.length
+  const wordIndex = CrosswordWords.length
   for (let i = 0; i < word.length; i++) {
     const [cx, cy] = direction === 'horizontal' ? [x + i, y] : [x, y + i]
     const key = `${cx},${cy}`
     if (!grid.has(key))
-      grid.set(key, { letter: word[i], placedWords: new Set([wordIndex]) })
-    else grid.get(key)!.placedWords.add(wordIndex)
+      grid.set(key, { letter: word[i], CrosswordWords: new Set([wordIndex]) })
+    else grid.get(key)!.CrosswordWords.add(wordIndex)
   }
-  placedWords.push({ word, x, y, direction })
+  CrosswordWords.push({ word, x, y, direction })
 }
 
 // Удаляем слово с сетки (для backtracking)
-function removeWordFromGrid(grid: Grid, placedWords: PlacedWord[]) {
-  const word = placedWords.pop()!
+function removeWordFromGrid(
+  grid: Grid,
+  CrosswordWords: Omit<CrosswordWord, 'question'>[],
+) {
+  const word = CrosswordWords.pop()!
   for (let i = 0; i < word.word.length; i++) {
     const [cx, cy] =
       word.direction === 'horizontal'
@@ -84,25 +113,25 @@ function removeWordFromGrid(grid: Grid, placedWords: PlacedWord[]) {
         : [word.x, word.y + i]
     const key = `${cx},${cy}`
     const cell = grid.get(key)!
-    cell.placedWords.delete(placedWords.length)
-    if (cell.placedWords.size === 0) grid.delete(key)
+    cell.CrosswordWords.delete(CrosswordWords.length)
+    if (cell.CrosswordWords.size === 0) grid.delete(key)
   }
 }
 
 // Рекурсивное размещение оставшихся слов
 function placeRemainingWords(
   grid: Grid,
-  placedWords: PlacedWord[],
+  CrosswordWords: Omit<CrosswordWord, 'question'>[],
   words: string[],
 ): boolean {
   if (words.length === 0) return true
   const word = words[0]
-  const candidates = findAllValidPlacements(grid, placedWords, word)
+  const candidates = findAllValidPlacements(grid, CrosswordWords, word)
 
   for (const { x, y, direction } of candidates) {
-    placeWordOnGrid(grid, placedWords, word, x, y, direction)
-    if (placeRemainingWords(grid, placedWords, words.slice(1))) return true
-    removeWordFromGrid(grid, placedWords) // backtrack
+    placeWordOnGrid(grid, CrosswordWords, word, x, y, direction)
+    if (placeRemainingWords(grid, CrosswordWords, words.slice(1))) return true
+    removeWordFromGrid(grid, CrosswordWords) // backtrack
   }
   return false
 }
@@ -110,16 +139,16 @@ function placeRemainingWords(
 // Поиск всех возможных пересечений для слова
 function findAllValidPlacements(
   grid: Grid,
-  placedWords: PlacedWord[],
+  CrosswordWords: Omit<CrosswordWord, 'question'>[],
   word: string,
-): PlacedWord[] {
-  const candidates: PlacedWord[] = []
+): Omit<CrosswordWord, 'question'>[] {
+  const candidates: Omit<CrosswordWord, 'question'>[] = []
   // Для каждого уже размещенного слова ищем пересечения
-  for (const placed of placedWords) {
+  for (const placed of CrosswordWords) {
     for (let i = 0; i < placed.word.length; i++) {
       const placedLetter = placed.word[i]
       for (let j = 0; j < word.length; j++) {
-        if (word[j] !== placedLetter) continue
+        if (!lettersEqual(word[j], placedLetter)) continue
         // Пробуем пересечь горизонтальное слово вертикальным и наоборот
         if (placed.direction === 'horizontal') {
           const x = placed.x + i
@@ -138,7 +167,7 @@ function findAllValidPlacements(
     }
   }
   // Если нет пересечений, пробуем добавить слово "в стороне" (только если сетка пуста)
-  if (placedWords.length === 0) {
+  if (CrosswordWords.length === 0) {
     candidates.push({ word, x: 0, y: 0, direction: 'horizontal' })
   }
   return candidates
@@ -150,14 +179,14 @@ function isValidPlacement(
   word: string,
   x: number,
   y: number,
-  direction: Direction,
+  direction: CrosswordDirection,
 ): boolean {
   for (let i = 0; i < word.length; i++) {
     const [cx, cy] = direction === 'horizontal' ? [x + i, y] : [x, y + i]
     const key = `${cx},${cy}`
     const cell = grid.get(key)
     if (cell) {
-      if (cell.letter !== word[i]) return false // несовпадение буквы
+      if (!lettersEqual(cell.letter, word[i])) return false // несовпадение буквы
     } else {
       // Проверяем отсутствие "случайных" примыканий по бокам
       if (direction === 'horizontal') {
@@ -177,15 +206,4 @@ function isValidPlacement(
       : `${x},${y + word.length}`
   if (grid.has(before) || grid.has(after)) return false
   return true
-}
-
-// Нумерация слов по правилам (слева-направо, сверху-вниз)
-function assignNumbers(placedWords: PlacedWord[]) {
-  // Определяем уникальные стартовые позиции
-  const starts = placedWords
-    .map((w, idx) => ({ idx, x: w.x, y: w.y }))
-    .sort((a, b) => a.y - b.y || a.x - b.x)
-  for (let i = 0; i < starts.length; i++) {
-    placedWords[starts[i].idx].number = i + 1
-  }
 }

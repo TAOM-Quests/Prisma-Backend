@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client'
-import { generateCrossword, PlacedWord } from './crosswordCreate'
+import { generateCrossword } from './crosswordCreate'
+import { CrosswordWord } from 'src/models/crosswordWord'
 
+const MAX_TRY_COUNT_TO_GENERATE = 10
 const WORD_COUNT_INTERVAL_START = 10
 const WORD_COUNT_INTERVAL_END = 15
 
@@ -28,32 +30,48 @@ async function createCrossword(
   difficultyId: number,
   wordsCount: number,
 ): Promise<void> {
+  let tryCount = 1
+  let words: string[] = []
   let questions: string[] = []
-  let crossword: PlacedWord[] = []
+  let crossword: Omit<CrosswordWord, 'question'>[] = []
 
-  const randomPairs = await getRandomWordsAndQuestions(
-    departmentId,
-    difficultyId,
-    wordsCount,
-  )
+  while (
+    tryCount < MAX_TRY_COUNT_TO_GENERATE &&
+    crossword.length < WORD_COUNT_INTERVAL_START
+  ) {
+    const randomPairs = await getRandomWordsAndQuestions(
+      departmentId,
+      difficultyId,
+      wordsCount,
+    )
 
-  if (!randomPairs) return
+    if (!randomPairs) return
 
-  console.log('randomPairs', randomPairs)
+    try {
+      words = randomPairs.words
+      questions = randomPairs.questions
+      crossword = generateCrossword(randomPairs.words)
+    } catch {
+      tryCount++
+    }
+  }
 
-  questions = randomPairs.questions
-  crossword = generateCrossword(randomPairs.words)
+  if (crossword.length < WORD_COUNT_INTERVAL_START) return
 
-  console.log('CROSSWORD', crossword)
+  crossword.forEach(async (answer) => {
+    if (!words.includes(answer.word)) return
 
-  crossword.forEach(async (answer, index) => {
+    const question = questions[words.indexOf(answer.word)]
+
+    console.log(question, answer.word)
+
     await prisma.game_crossword_answers.create({
       data: {
         x: answer.x,
         y: answer.y,
         word: answer.word,
+        question: question,
         direction: answer.direction,
-        question: questions[index],
         department: { connect: { id: departmentId } },
         difficulty: { connect: { id: difficultyId } },
       },
