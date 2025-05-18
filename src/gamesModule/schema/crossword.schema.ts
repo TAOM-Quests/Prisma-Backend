@@ -13,3 +13,16 @@ export interface CheckCrosswordAnswerSchema {
   direction: string
   isCorrect: boolean
 }
+
+export interface GetCrosswordWordSchema {
+  id: number
+  word: string
+  question: string
+  departmentId: number
+  difficultyId: number
+}
+
+export interface GetCrosswordDifficultySchema {
+  id: number
+  name: string
+}
