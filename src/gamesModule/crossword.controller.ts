@@ -15,7 +15,6 @@ import {
 import { ApiQuery } from '@nestjs/swagger'
 import {
   CheckCrosswordAnswerDto,
-  GetCrosswordWordsQuery,
   SaveCrosswordWordDto,
 } from './dto/crossword.dto'
 

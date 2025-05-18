@@ -17,6 +17,31 @@ import { GamingService } from 'src/userModule/gaming.service'
 import { Prisma } from '@prisma/client'
 
 const EXPERIENCE_SOURCE = 'games:crossword'
+// --- Маппинг визуально одинаковых букв (латиница <-> кириллица) ---
+const letterMap: Record<string, string> = {
+  A: 'A',
+  А: 'A',
+  B: 'B',
+  В: 'B',
+  C: 'C',
+  С: 'C',
+  E: 'E',
+  Е: 'E',
+  H: 'H',
+  Н: 'H',
+  K: 'K',
+  К: 'K',
+  M: 'M',
+  М: 'M',
+  O: 'O',
+  О: 'O',
+  P: 'P',
+  Р: 'P',
+  T: 'T',
+  Т: 'T',
+  X: 'X',
+  Х: 'X',
+}
 
 @Injectable()
 export class CrosswordService {
@@ -58,7 +83,7 @@ export class CrosswordService {
         difficulty_id: answer.difficultyId,
       },
     })
-    const userAnswers = answer.words.map((word, index) => ({
+    const userAnswers = answer.words.map((word) => ({
       x: word.x,
       y: word.y,
       word: word.word,
@@ -67,8 +92,8 @@ export class CrosswordService {
         (a) =>
           a.x === word.x &&
           a.y === word.y &&
-          a.word === word.word &&
-          a.direction === word.direction,
+          a.direction === word.direction &&
+          this.isWordsEqual(a.word, word.word),
       ),
     }))
 
@@ -152,6 +177,21 @@ export class CrosswordService {
       id: difficult.id,
       name: difficult.name,
     }))
+  }
+
+  private isWordsEqual(word1: string, word2: string): boolean {
+    return (
+      word1.length === word2.length &&
+      word1
+        .split('')
+        .map(
+          (letter, index) =>
+            letterMap[letter] ??
+            letter === letterMap[word2[index]] ??
+            word2[index],
+        )
+        .filter((isEqual) => isEqual).length === word1.length
+    )
   }
 
   private async saveWord(
