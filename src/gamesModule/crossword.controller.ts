@@ -11,6 +11,7 @@ import { CrosswordService } from './crossword.service'
 import {
   CheckCrosswordAnswerSchema,
   GetCrosswordAnswerSchema,
+  GetCrosswordDifficultySchema,
 } from './schema/crossword.schema'
 import { ApiQuery } from '@nestjs/swagger'
 import {
@@ -21,6 +22,14 @@ import {
 @Controller('games/crossword')
 export class CrosswordController {
   constructor(private crosswordService: CrosswordService) {}
+
+  @ApiQuery({ name: 'userId', type: 'number', required: true })
+  @Get('/allowed')
+  async getAllowedDifficulties(
+    @Query('userId') userId: string,
+  ): Promise<GetCrosswordDifficultySchema[]> {
+    return this.crosswordService.getAllowedDifficulties(+userId)
+  }
 
   @ApiQuery({ name: 'day', type: 'string', required: true })
   @ApiQuery({ name: 'departmentId', type: 'number', required: true })

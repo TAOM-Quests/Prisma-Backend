@@ -50,6 +50,23 @@ export class CrosswordService {
     private gamingService: GamingService,
   ) {}
 
+  async getAllowedDifficulties(
+    userId: number,
+  ): Promise<GetCrosswordDifficultySchema[]> {
+    const foundCompleteCrosswords = await this.prisma.user_experience.count({
+      where: { user_id: userId, source: EXPERIENCE_SOURCE },
+    })
+    const foundDifficulties =
+      await this.prisma.game_crossword_difficulties.findMany({
+        where: { id: { lte: foundCompleteCrosswords + 1 } },
+      })
+
+    return foundDifficulties.map((difficult) => ({
+      id: difficult.id,
+      name: difficult.name,
+    }))
+  }
+
   async getCrossword(
     query: GetCrosswordQuery,
   ): Promise<GetCrosswordAnswerSchema[]> {
