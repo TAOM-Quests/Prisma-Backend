@@ -2,13 +2,16 @@ import * as moment from 'moment'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { sendEmail } from '../common/sendEmail'
 import { sendTelegram } from '../common/sendTelegram'
+import { PrismaClient } from '@prisma/client'
 
 // Проверяем наличие мероприятий для уведомления раз в день
 const SEND_INTERVAL = 24 * 60 * 60 * 1000
 // Время отправки уведомления - 8:00
 const SEND_HOUR = 8
 
-export const eventsNotifier = async (prisma: PrismaService) => {
+const prisma = new PrismaClient()
+
+export const eventsNotifier = async () => {
   const nextSendTime = moment()
     .set('hour', SEND_HOUR)
     .set('minute', 0)
@@ -21,12 +24,12 @@ export const eventsNotifier = async (prisma: PrismaService) => {
   const timeToNextSend = nextSendTime.diff(moment())
 
   setTimeout(() => {
-    sendTomorrowEventsNotifications(prisma)
-    setInterval(() => sendTomorrowEventsNotifications(prisma), SEND_INTERVAL)
+    sendTomorrowEventsNotifications()
+    setInterval(() => sendTomorrowEventsNotifications(), SEND_INTERVAL)
   }, timeToNextSend)
 }
 
-const sendTomorrowEventsNotifications = async (prisma: PrismaService) => {
+const sendTomorrowEventsNotifications = async () => {
   const tomorrowStart = moment().add(1, 'day').startOf('day').toISOString()
   const tomorrowEnd = moment().add(1, 'day').endOf('day').toISOString()
   const tomorrowEvents = await prisma.events.findMany({
