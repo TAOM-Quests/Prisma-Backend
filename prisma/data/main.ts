@@ -8,6 +8,8 @@ import { departments } from './tables/departments'
 import { userLevels } from './tables/user_levels'
 import { userAchievements } from './tables/user_achievements'
 import { questDifficulties } from './tables/quest_difficulties'
+import { crosswordWords } from './tables/game_crossword_words'
+import { crosswordDifficulties } from './tables/game_crossword_difficulties'
 
 const prisma = new PrismaClient()
 
@@ -23,6 +25,8 @@ export const main = async (): Promise<void> => {
   //Данные для геймификации
   await userLevels()
   await userAchievements()
+  await crosswordWords()
+  await crosswordDifficulties()
 
   //Данные для мероприятий
   await eventTypes()
