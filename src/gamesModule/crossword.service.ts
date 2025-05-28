@@ -100,16 +100,13 @@ export class CrosswordService {
         difficulty_id: answer.difficultyId,
       },
     })
+
     const userAnswers = answer.words.map((word) => ({
-      x: word.x,
-      y: word.y,
-      word: word.word,
-      direction: word.direction,
+      ...word,
       isCorrect: !!correctAnswers.find(
         (a) =>
           a.x === word.x &&
           a.y === word.y &&
-          a.direction === word.direction &&
           this.isWordsEqual(a.word, word.word),
       ),
     }))
@@ -126,8 +123,7 @@ export class CrosswordService {
           },
         },
       })) >= answer.difficultyId
-    const isCorrectAnswer =
-      userAnswers.filter((a) => a.isCorrect).length === answer.words.length
+    const isCorrectAnswer = userAnswers.every((a) => a.isCorrect)
 
     if (isFirstComplete && isCorrectAnswer) {
       const foundDifficulty =
@@ -197,15 +193,23 @@ export class CrosswordService {
   }
 
   private isWordsEqual(word1: string, word2: string): boolean {
+    console.log(word1, word2)
+    console.log(
+      word1
+        .split('')
+        .map(
+          (letter, index) =>
+            word1[index] === word2[index] || letterMap[letter] === word2[index],
+        ),
+    )
+
     return (
       word1.length === word2.length &&
       word1
         .split('')
         .map(
           (letter, index) =>
-            letterMap[letter] ??
-            letter === letterMap[word2[index]] ??
-            word2[index],
+            word1[index] === word2[index] || letterMap[letter] === word2[index],
         )
         .filter((isEqual) => isEqual).length === word1.length
     )
