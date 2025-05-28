@@ -11,7 +11,7 @@ import { upperCase } from 'lodash'
 import { SaveWordleWordDto } from './dto/wordle.dto'
 
 const EXPERIENCE_CORRECT_ANSWER = 100
-const EXPERIENCE_SOURCE = 'games:wordle'
+const EXPERIENCE_SOURCE = 'games_wordle'
 
 @Injectable()
 export class WordleService {

@@ -16,7 +16,7 @@ import * as moment from 'moment'
 import { GamingService } from 'src/userModule/gaming.service'
 import { Prisma } from '@prisma/client'
 
-const EXPERIENCE_SOURCE = 'games:crossword'
+const EXPERIENCE_SOURCE = 'games_crossword'
 // --- Маппинг визуально одинаковых букв (латиница <-> кириллица) ---
 const letterMap: Record<string, string> = {
   A: 'A',
@@ -118,11 +118,11 @@ export class CrosswordService {
           source: EXPERIENCE_SOURCE,
           department_id: answer.departmentId,
           created_at: {
-            gte: moment().startOf('day').subtract(1, 'day').toDate(),
-            lte: moment().startOf('day').toDate(),
+            gte: moment().startOf('day').toDate(),
+            lte: moment().endOf('day').toDate(),
           },
         },
-      })) >= answer.difficultyId
+      })) < answer.difficultyId
     const isCorrectAnswer = userAnswers.every((a) => a.isCorrect)
 
     if (isFirstComplete && isCorrectAnswer) {
@@ -193,16 +193,6 @@ export class CrosswordService {
   }
 
   private isWordsEqual(word1: string, word2: string): boolean {
-    console.log(word1, word2)
-    console.log(
-      word1
-        .split('')
-        .map(
-          (letter, index) =>
-            word1[index] === word2[index] || letterMap[letter] === word2[index],
-        ),
-    )
-
     return (
       word1.length === word2.length &&
       word1

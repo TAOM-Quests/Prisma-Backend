@@ -7,8 +7,8 @@ import { capitalize } from 'lodash'
 type ExperienceSource =
   | 'quests'
   | 'events'
-  | 'games:wordle'
-  | 'games:crossword'
+  | 'games_wordle'
+  | 'games_crossword'
   | 'achievements'
 
 export const ACHIEVEMENTS_MAP = {
