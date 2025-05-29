@@ -29,6 +29,7 @@ export class WordleService {
     const attempts = await this.prisma.game_wordle_attempts.findMany({
       where: {
         user: { id: userId },
+        department: { id: departmentId },
         day: {
           gte: day.toDate(),
           lte: day.add(1, 'day').toDate(),
@@ -64,7 +65,11 @@ export class WordleService {
     const attemptResult = await this.checkAttempt(todayWord, attempt)
 
     await this.prisma.game_wordle_attempts.create({
-      data: { user: { connect: { id: userId } }, word: attempt },
+      data: {
+        word: attempt,
+        user: { connect: { id: userId } },
+        department: { connect: { id: departmentId } },
+      },
     })
 
     if (

@@ -86,6 +86,7 @@ model departments {
   event_tags          event_tags[]
   game_wordle         game_wordle[]
   game_wordle_answers game_wordle_answers[]
+  game_wordle_attempts game_wordle_attempts[]
   user_experience     user_experience[]
 }
 
@@ -154,7 +155,9 @@ model game_wordle_attempts {
   word    String
   day     DateTime @default(now())
   user_id Int
+  department_id Int
   user    users    @relation(fields: [user_id], references: [id])
+  department    departments @relation(fields: [department_id], references: [id])
 }
 
 model quests {
