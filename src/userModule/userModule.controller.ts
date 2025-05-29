@@ -110,7 +110,7 @@ export class UserModuleController {
     example: getRolesSchemaExample,
     status: 200,
   })
-  @Get('users/roles')
+  @Get('roles')
   async getRoles(): Promise<GetRolesSchema[]> {
     return this.userModuleService.getRoles()
   }
@@ -120,7 +120,7 @@ export class UserModuleController {
     example: getPositionsSchemaExample,
     status: 200,
   })
-  @Get('users/positions')
+  @Get('positions')
   async getPositions(): Promise<GetPositionsSchema[]> {
     return this.userModuleService.getPositions()
   }
