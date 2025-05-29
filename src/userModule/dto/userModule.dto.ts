@@ -11,6 +11,7 @@ export class GetUsersQuery {
   isAdmin?: boolean
   positionId?: number
   isEmployee?: boolean
+  departmentId?: number
 }
 
 export class UserAuthDto {

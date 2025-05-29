@@ -35,6 +35,7 @@ export class UserModuleController {
   @ApiQuery({ name: 'id', type: 'number', required: false })
   @ApiQuery({ name: 'roleId', type: 'number', required: false })
   @ApiQuery({ name: 'positionId', type: 'number', required: false })
+  @ApiQuery({ name: 'departmentId', type: 'number', required: false })
   @ApiQuery({ name: 'isAdmin', type: 'boolean', required: false })
   @ApiQuery({ name: 'isEmployee', type: 'boolean', required: false })
   @ApiQuery({ name: 'limit', type: 'number', required: false })

@@ -41,6 +41,7 @@ export class UserModuleService {
     if (getUsers.id) where.id = getUsers.id
     if (getUsers.roleId) where.id_role = getUsers.roleId
     if (getUsers.positionId) where.id_position = getUsers.positionId
+    if (getUsers.departmentId) where.id_department = getUsers.departmentId
     if (getUsers.isAdmin) where.id_role = 1
     if (getUsers.isEmployee) where.id_role = { not: null }
 
