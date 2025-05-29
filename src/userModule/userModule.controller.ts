@@ -6,14 +6,18 @@ import {
 } from './dto/userModule.dto'
 import {
   AuthUserSchema,
+  GetPositionsSchema,
+  GetRolesSchema,
   GetUserProfileSchema,
   GetUsersSchema,
   UpdateUserProfileSchema,
 } from './schema/userModule.schema'
 import { UserModuleService } from './userModule.service'
-import { ApiResponse, ApiTags } from '@nestjs/swagger'
+import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 import {
   authUserSchemaExample,
+  getPositionsSchemaExample,
+  getRolesSchemaExample,
   getUserProfileSchemaExample,
   getUsersSchemaExample,
   updateUserProfileSchemaExample,
@@ -28,8 +32,18 @@ export class UserModuleController {
     type: GetUsersSchema,
     example: getUsersSchemaExample,
   })
+  @ApiQuery({ name: 'id', type: 'number', required: false })
+  @ApiQuery({ name: 'roleId', type: 'number', required: false })
+  @ApiQuery({ name: 'positionId', type: 'number', required: false })
+  @ApiQuery({ name: 'isAdmin', type: 'boolean', required: false })
+  @ApiQuery({ name: 'isEmployee', type: 'boolean', required: false })
+  @ApiQuery({ name: 'limit', type: 'number', required: false })
+  @ApiQuery({ name: 'offset', type: 'number', required: false })
   @Get('/users')
   async getUsers(@Query() query: GetUsersQuery): Promise<GetUsersSchema[]> {
+    if (!query.limit) query.limit = 10
+    if (!query.offset) query.offset = 0
+
     return this.userModuleService.getUsers(query)
   }
 
@@ -88,5 +102,25 @@ export class UserModuleController {
     @Body() updateProfile: UpdateProfileDto,
   ): Promise<UpdateUserProfileSchema> {
     return this.userModuleService.updateUserProfile(+id, updateProfile)
+  }
+
+  @ApiResponse({
+    type: GetRolesSchema,
+    example: getRolesSchemaExample,
+    status: 200,
+  })
+  @Get('users/roles')
+  async getRoles(): Promise<GetRolesSchema[]> {
+    return this.userModuleService.getRoles()
+  }
+
+  @ApiResponse({
+    type: GetPositionsSchema,
+    example: getPositionsSchemaExample,
+    status: 200,
+  })
+  @Get('users/positions')
+  async getPositions(): Promise<GetPositionsSchema[]> {
+    return this.userModuleService.getPositions()
   }
 }

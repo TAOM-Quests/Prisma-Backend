@@ -4,6 +4,8 @@ import { IsEmail } from 'class-validator'
 type USER_SEX = 'Мужской' | 'Женский'
 
 export class GetUsersQuery {
+  limit: number
+  offset: number
   id?: number
   roleId?: number
   isAdmin?: boolean
@@ -80,4 +82,22 @@ export class UpdateProfileDto {
     required: false,
   })
   imageId: number
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  roleId: number
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  positionId: number
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  departmentId: number
 }

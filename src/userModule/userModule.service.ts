@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 import {
   AuthUserSchema,
+  GetPositionsSchema,
+  GetRolesSchema,
   GetUserProfileSchema,
   GetUsersSchema,
   UpdateUserProfileSchema,
@@ -23,6 +25,8 @@ const USER_SEX = {
   FEMALE: 'Женский',
 }
 
+const ROLE_ADMIN_ID = 1
+
 @Injectable()
 export class UserModuleService {
   constructor(
@@ -40,7 +44,11 @@ export class UserModuleService {
     if (getUsers.isAdmin) where.id_role = 1
     if (getUsers.isEmployee) where.id_role = { not: null }
 
-    const users = await this.prisma.users.findMany({ where })
+    const users = await this.prisma.users.findMany({
+      where,
+      take: getUsers.limit,
+      skip: getUsers.offset,
+    })
 
     return Promise.all(
       users.map(async (user) => {
@@ -129,6 +137,7 @@ export class UserModuleService {
     }
 
     if (foundUser.id_role) {
+      authUser.isAdmin = foundUser.id_role === ROLE_ADMIN_ID
       authUser.isEmployee = true
       authUser.roleId = foundUser.id_role
       authUser.departmentId = foundUser.id_department
@@ -162,6 +171,7 @@ export class UserModuleService {
       }
 
       if (foundUser.id_role) {
+        authUser.isAdmin = foundUser.id_role === ROLE_ADMIN_ID
         authUser.isEmployee = true
         authUser.roleId = foundUser.id_role
         authUser.departmentId = foundUser.id_department
@@ -293,6 +303,24 @@ export class UserModuleService {
     return result
   }
 
+  async getRoles(): Promise<GetRolesSchema[]> {
+    const foundRoles = await this.prisma.user_roles.findMany()
+
+    return foundRoles.map((role) => ({
+      id: role.id,
+      name: role.name,
+    }))
+  }
+
+  async getPositions(): Promise<GetPositionsSchema[]> {
+    const foundPositions = await this.prisma.user_positions.findMany()
+
+    return foundPositions.map((position) => ({
+      id: position.id,
+      name: position.name,
+    }))
+  }
+
   private async setRole(entity, roleId) {
     const role = await this.prisma.user_roles.findUnique({
       where: {
@@ -345,6 +373,15 @@ export class UserModuleService {
     }
     if (updatedFields.includes('imageId')) {
       result.image = { connect: { id: updateProfile.imageId ?? 1 } }
+    }
+    if (updatedFields.includes('roleId')) {
+      result.role = { connect: { id: updateProfile.roleId } }
+    }
+    if (updatedFields.includes('positionId')) {
+      result.position = { connect: { id: updateProfile.positionId } }
+    }
+    if (updatedFields.includes('departmentId')) {
+      result.department = { connect: { id: updateProfile.departmentId } }
     }
 
     return result
