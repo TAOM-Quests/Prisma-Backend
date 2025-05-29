@@ -140,6 +140,8 @@ model game_wordle {
   word          String
   department_id Int
   department    departments @relation(fields: [department_id], references: [id])
+  
+  @@unique([word, department_id])
 }
 
 model game_wordle_answers {
