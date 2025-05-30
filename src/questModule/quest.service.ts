@@ -7,16 +7,16 @@ import {
   GetQuestSchema,
 } from './schema/questModule.schema'
 import { NotFoundError } from 'src/errors/notFound'
-import { CommonModuleService } from 'src/commonModule/commonModule.service'
 import { difference } from 'lodash'
 import { GamingService } from 'src/userModule/gaming.service'
+import { FilesService } from 'src/commonModule/files/files.service'
 
 @Injectable()
 export class QuestService {
   constructor(
     private prisma: PrismaService,
+    private filesService: FilesService,
     private gamingService: GamingService,
-    private commonModuleService: CommonModuleService,
   ) {}
 
   async getMinimizeById(id: number): Promise<GetQuestMinimizeSchema> {
@@ -47,7 +47,7 @@ export class QuestService {
     if (foundQuest.time) quest.time = foundQuest.time
     if (foundQuest.description) quest.description = foundQuest.description
     if (foundQuest.id_image) {
-      quest.image = await this.commonModuleService.getFileStatsById(
+      quest.image = await this.filesService.getFileStatsById(
         foundQuest.id_image,
       )
     }
@@ -121,9 +121,7 @@ export class QuestService {
     if (foundQuest.difficult) quest.difficult = foundQuest.difficult
     if (foundQuest.description) quest.description = foundQuest.description
     if (foundQuest.imageId) {
-      quest.image = await this.commonModuleService.getFileStatsById(
-        foundQuest.imageId,
-      )
+      quest.image = await this.filesService.getFileStatsById(foundQuest.imageId)
     }
 
     return quest

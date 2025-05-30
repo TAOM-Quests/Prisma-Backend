@@ -1,4 +1,4 @@
-import { GetFileStatsSchema } from 'src/commonModule/schema/commonModule.schema'
+import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
 import { Department } from 'src/models/department'
 import { UserPosition } from 'src/models/userPosition'
 import { UserRole } from 'src/models/userRole'

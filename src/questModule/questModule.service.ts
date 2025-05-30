@@ -16,7 +16,6 @@ import {
   GetQuestSchema,
   GetQuestTagsSchema,
 } from './schema/questModule.schema'
-import { CommonModuleService } from 'src/commonModule/commonModule.service'
 import { QuestService } from './quest.service'
 import { QuestionService } from './question.service'
 import { ResultService } from './result.service'
@@ -28,7 +27,6 @@ export class QuestModuleService {
     private questService: QuestService,
     private resultService: ResultService,
     private questionService: QuestionService,
-    private commonModuleService: CommonModuleService,
   ) {}
 
   async getQuests(

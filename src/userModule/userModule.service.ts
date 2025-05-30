@@ -16,7 +16,7 @@ import { JwtService } from '@nestjs/jwt'
 import { NotFoundError } from 'src/errors/notFound'
 import { BadRequestError } from 'src/errors/badRequest'
 import { Prisma, user_sex } from '@prisma/client'
-import { CommonModuleService } from 'src/commonModule/commonModule.service'
+import { FilesService } from 'src/commonModule/files/files.service'
 
 const USER_SEX = {
   MALE: 'Мужской',
@@ -28,7 +28,7 @@ export class UserModuleService {
   constructor(
     private jwt: JwtService,
     private prisma: PrismaService,
-    private commonModuleService: CommonModuleService,
+    private filesService: FilesService,
   ) {}
 
   async getUsers(getUsers: GetUsersQuery): Promise<GetUsersSchema[]> {
@@ -47,9 +47,7 @@ export class UserModuleService {
         const resultUser: GetUsersSchema = {
           id: user.id,
           name: (user.first_name + ' ' + user.last_name).trim(),
-          image: await this.commonModuleService.getFileStatsById(
-            user.id_image_file,
-          ),
+          image: await this.filesService.getFileStatsById(user.id_image_file),
         }
 
         if (user.id_position) {
@@ -101,7 +99,7 @@ export class UserModuleService {
       id: createdUser.id,
       email: createdUser.email,
       token,
-      image: await this.commonModuleService.getFileStatsById(
+      image: await this.filesService.getFileStatsById(
         createdUser.id_image_file,
       ),
     }
@@ -123,9 +121,7 @@ export class UserModuleService {
       email: foundUser.email,
       token: foundUser.token,
       name: `${foundUser.first_name ?? ''} ${foundUser.last_name ?? ''}`.trim(),
-      image: await this.commonModuleService.getFileStatsById(
-        foundUser.id_image_file,
-      ),
+      image: await this.filesService.getFileStatsById(foundUser.id_image_file),
     }
 
     if (foundUser.id_role) {
@@ -156,7 +152,7 @@ export class UserModuleService {
         email: foundUser.email,
         token: foundUser.token,
         name: `${foundUser.first_name ?? ''} ${foundUser.last_name ?? ''}`.trim(),
-        image: await this.commonModuleService.getFileStatsById(
+        image: await this.filesService.getFileStatsById(
           foundUser.id_image_file,
         ),
       }
@@ -203,9 +199,7 @@ export class UserModuleService {
       sex: USER_SEX[foundUser.sex],
       phoneNumber: foundUser.phone_number,
       telegram: foundUser.telegram,
-      image: await this.commonModuleService.getFileStatsById(
-        foundUser.id_image_file,
-      ),
+      image: await this.filesService.getFileStatsById(foundUser.id_image_file),
       level: {
         name: foundLevel.name,
         number: foundLevel.level,
@@ -218,7 +212,7 @@ export class UserModuleService {
           name: ach.name,
           experience: ach.experience,
           description: ach.description,
-          image: await this.commonModuleService.getFileStatsById(ach.image_id),
+          image: await this.filesService.getFileStatsById(ach.image_id),
           isReceived: !!foundAchievements.find((a) => a.id === ach.id),
         })),
       ),
@@ -285,7 +279,7 @@ export class UserModuleService {
       sex: updatedUser.sex,
       phoneNumber: updatedUser.phone_number,
       telegram: updatedUser.telegram,
-      image: await this.commonModuleService.getFileStatsById(
+      image: await this.filesService.getFileStatsById(
         updatedUser.id_image_file,
       ),
     }
