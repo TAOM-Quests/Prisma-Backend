@@ -132,6 +132,25 @@ model event_tags {
   events        events[]
 }
 
+model feedback_forms {
+  id               Int                @id @default(autoincrement())
+  entity_name      String
+  entity_id        Int
+  questions        Json
+  feedback_answers feedback_answers[]
+
+  @@unique([entity_name, entity_id])
+}
+
+model feedback_answers {
+  id      Int            @id @default(autoincrement())
+  answers String[]
+  user_id Int
+  form_id Int
+  user    users          @relation(fields: [user_id], references: [id])
+  form    feedback_forms @relation(fields: [form_id], references: [id])
+}
+
 model quests {
   id            Int                    @id @default(autoincrement())
   id_department Int
@@ -261,6 +280,7 @@ model users {
   comments                 comments[]
   user_experience          user_experience[]
   achievements             user_achievements[]
+  feedback_answers         feedback_answers[]
 }
 
 model user_executors_on_events {
