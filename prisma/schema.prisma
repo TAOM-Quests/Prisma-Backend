@@ -134,9 +134,11 @@ model event_tags {
 
 model feedback_forms {
   id               Int                @id @default(autoincrement())
+  name             String
+  description      String
   entity_name      String
   entity_id        Int
-  questions        Json
+  questions        Json[]
   feedback_answers feedback_answers[]
 
   @@unique([entity_name, entity_id])

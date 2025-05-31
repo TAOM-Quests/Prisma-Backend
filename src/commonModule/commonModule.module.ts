@@ -8,6 +8,7 @@ import { CommentsService } from './comments/comments.service'
 import { DepartmentsService } from './departments/department.service'
 import { FeedbackService } from './feedback/feedback.service'
 import { FilesService } from './files/files.service'
+import { FeedbackController } from './feedback/feedback.controller'
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { FilesService } from './files/files.service'
       },
     }),
   ],
-  controllers: [DepartmentsController, FilesController],
+  controllers: [DepartmentsController, FeedbackController, FilesController],
   providers: [
     FilesService,
     PrismaService,
@@ -36,5 +37,6 @@ import { FilesService } from './files/files.service'
     FeedbackService,
     DepartmentsService,
   ],
+  exports: [FilesService, CommentsService, FeedbackService, DepartmentsService],
 })
 export class CommonModule {}
