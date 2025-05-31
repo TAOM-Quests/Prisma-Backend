@@ -376,13 +376,25 @@ export class UserModuleService {
       result.image = { connect: { id: updateProfile.imageId ?? 1 } }
     }
     if (updatedFields.includes('roleId')) {
-      result.role = { connect: { id: updateProfile.roleId } }
+      if (updateProfile.roleId) {
+        result.role = { connect: { id: updateProfile.roleId } }
+      } else {
+        result.role = { disconnect: true }
+      }
     }
     if (updatedFields.includes('positionId')) {
-      result.position = { connect: { id: updateProfile.positionId } }
+      if (updateProfile.positionId) {
+        result.position = { connect: { id: updateProfile.positionId } }
+      } else {
+        result.position = { disconnect: true }
+      }
     }
     if (updatedFields.includes('departmentId')) {
-      result.department = { connect: { id: updateProfile.departmentId } }
+      if (updateProfile.departmentId) {
+        result.department = { connect: { id: updateProfile.departmentId } }
+      } else {
+        result.department = { disconnect: true }
+      }
     }
 
     return result
