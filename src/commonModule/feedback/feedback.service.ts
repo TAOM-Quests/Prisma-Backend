@@ -5,6 +5,9 @@ import { GetFormSchema } from './schema/GetFormSchema'
 import { GetFormQuestionSchema } from './schema/GetFormQuestionSchema'
 import { SaveFormDto } from './dto/SaveFormDto'
 import { Prisma } from '@prisma/client'
+import { GetAnswerQuery } from './dto/GetAnswerQuery'
+import { GetAnswerSchema } from './schema/GetAnswerSchema'
+import { SaveAnswerDto } from './dto/SaveAnswerDto'
 
 @Injectable()
 export class FeedbackService {
@@ -39,6 +42,35 @@ export class FeedbackService {
     return this.saveForm(form)
   }
 
+  async getAnswer(query: GetAnswerQuery): Promise<GetAnswerSchema[]> {
+    const where: Prisma.feedback_answersWhereInput = {}
+
+    if (query.id) where.id = query.id
+    if (query.userId) where.user_id = query.userId
+    if (query.entityId && query.entityName) {
+      const foundForm = await this.prisma.feedback_forms.findFirst({
+        where: {
+          entity_id: query.entityId,
+          entity_name: query.entityName,
+        },
+      })
+
+      where.form_id = foundForm.id
+    }
+
+    const foundAnswers = await this.prisma.feedback_answers.findMany({ where })
+
+    return foundAnswers.map((answer) => ({
+      id: answer.id,
+      userId: answer.user_id,
+      answers: answer.answers,
+    }))
+  }
+
+  async createAnswer(answer: SaveAnswerDto): Promise<GetAnswerSchema> {
+    return this.saveAnswer(answer)
+  }
+
   private async saveForm(form: SaveFormDto): Promise<GetFormSchema> {
     const upsertForm: Prisma.feedback_formsUpsertArgs = {
       where: { id: form.id ?? -1 },
@@ -67,5 +99,27 @@ export class FeedbackService {
       entityId: form.entityId,
       entityName: form.entityName,
     })
+  }
+
+  private async saveAnswer(answer: SaveAnswerDto): Promise<GetAnswerSchema> {
+    const upsertAnswer: Prisma.feedback_answersUpsertArgs = {
+      where: { id: answer.id ?? -1 },
+      create: {
+        user_id: answer.userId,
+        form_id: answer.formId,
+      },
+      update: {},
+    }
+    const upsertData: Prisma.feedback_answersUpdateInput = {}
+
+    if (answer.answers) upsertData.answers = answer.answers
+
+    upsertAnswer.create = Object.assign(upsertAnswer.create, upsertData)
+    upsertAnswer.update = upsertData
+
+    const savedAnswer = await this.prisma.feedback_answers.upsert(upsertAnswer)
+    const [foundAnswer] = await this.getAnswer({ id: savedAnswer.id })
+
+    return foundAnswer
   }
 }
