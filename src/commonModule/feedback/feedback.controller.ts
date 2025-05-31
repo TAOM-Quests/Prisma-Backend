@@ -18,7 +18,7 @@ export class FeedbackController {
     type: GetFormSchema,
     example: getFormSchemaExample,
   })
-  @Get('form/:entity/:id')
+  @Get('forms/:entity/:id')
   async getForm(@Param('id') id: string, @Param('entity') entity: string) {
     return this.feedbackService.getForm({
       entityId: +id,
@@ -31,7 +31,7 @@ export class FeedbackController {
     type: GetFormSchema,
     example: getFormSchemaExample,
   })
-  @Post('form/:entity/:id')
+  @Post('forms/:entity/:id')
   async createForm(
     @Param('id') id: string,
     @Param('entity') entity: string,
@@ -49,7 +49,7 @@ export class FeedbackController {
     type: GetFormSchema,
     example: getFormSchemaExample,
   })
-  @Post('form/:id')
+  @Post('forms/:id')
   async updateForm(
     @Param('id') id: string,
     @Body() body: Omit<SaveFormDto, 'id'>,
@@ -65,7 +65,7 @@ export class FeedbackController {
   @ApiQuery({ name: 'userId', type: 'number', required: false })
   @ApiQuery({ name: 'entityId', type: 'number', required: false })
   @ApiQuery({ name: 'entityName', type: 'string', required: false })
-  @Get('answer')
+  @Get('answers')
   async getAnswer(
     @Query('userId') userId: string,
     @Query('entityId') entityId: string,
@@ -83,7 +83,7 @@ export class FeedbackController {
     type: GetAnswerSchema,
     example: getAnswerSchemaExample,
   })
-  @Post('answer')
+  @Post('answers')
   async createAnswer(@Body() body: SaveAnswerDto) {
     return this.feedbackService.createAnswer(body)
   }
