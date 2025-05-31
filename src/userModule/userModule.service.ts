@@ -364,7 +364,11 @@ export class UserModuleService {
       result.birth_date = updateProfile.birthDate
     }
     if (updatedFields.includes('sex')) {
-      result.sex = userSex as user_sex
+      if (updateProfile.sex) {
+        result.sex = userSex as user_sex
+      } else {
+        result.sex = null
+      }
     }
     if (updatedFields.includes('phoneNumber')) {
       result.phone_number = updateProfile.phoneNumber
