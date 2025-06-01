@@ -30,6 +30,8 @@ import {
   getEventTypeSchemaExample,
 } from './schema/eventModule.schema.example'
 import { EventModuleService } from './eventModule.service'
+import { GetUserProfileSchema } from 'src/userModule/schema/userModule.schema'
+import { getUserProfileSchemaExample } from 'src/userModule/schema/userModule.schema.example'
 
 @ApiTags('eventModule')
 @Controller('eventModule')
@@ -106,6 +108,18 @@ export class EventModuleController {
   @Delete('/events/:id')
   async deleteEvent(@Param('id') id: string): Promise<void> {
     return this.eventModuleService.deleteEvent(+id)
+  }
+
+  @ApiResponse({
+    status: 200,
+    type: [GetUserProfileSchema],
+    example: [getUserProfileSchemaExample],
+  })
+  @Get('/events/:id/participants')
+  async getParticipants(
+    @Param('id') id: string,
+  ): Promise<GetUserProfileSchema[]> {
+    return this.eventModuleService.getParticipantsProfiles(+id)
   }
 
   @ApiResponse({ status: 200 })
