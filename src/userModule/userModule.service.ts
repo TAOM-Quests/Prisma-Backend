@@ -286,22 +286,7 @@ export class UserModuleService {
       },
     })
 
-    const result: UpdateUserProfileSchema = {
-      id: updatedUser.id,
-      email: updatedUser.email,
-      firstName: updatedUser.first_name,
-      lastName: updatedUser.last_name,
-      patronymic: updatedUser.patronymic,
-      birthDate: updatedUser.birth_date,
-      sex: updatedUser.sex,
-      phoneNumber: updatedUser.phone_number,
-      telegram: updatedUser.telegram,
-      image: await this.commonModuleService.getFileStatsById(
-        updatedUser.id_image_file,
-      ),
-    }
-
-    return result
+    return this.getUserProfileById(id)
   }
 
   async getRoles(): Promise<GetRolesSchema[]> {
