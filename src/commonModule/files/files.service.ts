@@ -1,10 +1,12 @@
 import { Injectable, StreamableFile } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { GetFileStatsSchema } from './schema/GetFileStatsSchema'
-import { createReadStream } from 'fs'
+import { createReadStream, stat, statSync } from 'fs'
 import { join } from 'path'
 import { NotFoundError } from 'rxjs'
 import * as mime from 'mime-types'
+import { CreateExcelDto } from './dto/CreateExcelDto'
+import * as ExcelJS from 'exceljs'
 
 const BASE_FILE_URL = `http://${process.env.SERVER_HOSTNAME ?? 'localhost:' + process.env.PORT ?? 3000}/api/v1/commonModule/file`
 
@@ -70,5 +72,40 @@ export class FilesService {
         path: file.path,
       },
     })
+  }
+
+  async createExcelFile({
+    data,
+    columns,
+    fileName,
+  }: CreateExcelDto): Promise<StreamableFile> {
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet(fileName)
+
+    worksheet.columns = columns
+
+    for (let row of data) {
+      worksheet.addRow(row)
+    }
+
+    const generatedFileName = `${fileName}_${new Date().getTime()}`
+    const extension = 'xlsx'
+    const path = join(process.cwd(), `public/${generatedFileName}.${extension}`)
+
+    await workbook.xlsx.writeFile(path)
+
+    const { size } = statSync(path)
+
+    await this.prisma.shared_files.create({
+      data: {
+        name: generatedFileName,
+        original_name: fileName,
+        extension,
+        path,
+        size,
+      },
+    })
+
+    return this.getFile(generatedFileName)
   }
 }
