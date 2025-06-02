@@ -64,3 +64,13 @@ export class UpdateUserProfileSchema {
   patronymic?: string
   phoneNumber?: string
 }
+
+export class GetRolesSchema {
+  id: number
+  name: string
+}
+
+export class GetPositionsSchema {
+  id: number
+  name: string
+}

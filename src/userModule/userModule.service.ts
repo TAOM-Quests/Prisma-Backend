@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 import {
   AuthUserSchema,
+  GetPositionsSchema,
+  GetRolesSchema,
   GetUserProfileSchema,
   GetUsersSchema,
   UpdateUserProfileSchema,
@@ -23,6 +25,8 @@ const USER_SEX = {
   FEMALE: 'Женский',
 }
 
+const ROLE_ADMIN_ID = 1
+
 @Injectable()
 export class UserModuleService {
   constructor(
@@ -37,10 +41,15 @@ export class UserModuleService {
     if (getUsers.id) where.id = getUsers.id
     if (getUsers.roleId) where.id_role = getUsers.roleId
     if (getUsers.positionId) where.id_position = getUsers.positionId
+    if (getUsers.departmentId) where.id_department = getUsers.departmentId
     if (getUsers.isAdmin) where.id_role = 1
     if (getUsers.isEmployee) where.id_role = { not: null }
 
-    const users = await this.prisma.users.findMany({ where })
+    const users = await this.prisma.users.findMany({
+      where,
+      take: getUsers.limit,
+      skip: getUsers.offset,
+    })
 
     return Promise.all(
       users.map(async (user) => {
@@ -125,6 +134,7 @@ export class UserModuleService {
     }
 
     if (foundUser.id_role) {
+      authUser.isAdmin = foundUser.id_role === ROLE_ADMIN_ID
       authUser.isEmployee = true
       authUser.roleId = foundUser.id_role
       authUser.departmentId = foundUser.id_department
@@ -158,6 +168,7 @@ export class UserModuleService {
       }
 
       if (foundUser.id_role) {
+        authUser.isAdmin = foundUser.id_role === ROLE_ADMIN_ID
         authUser.isEmployee = true
         authUser.roleId = foundUser.id_role
         authUser.departmentId = foundUser.id_department
@@ -284,7 +295,25 @@ export class UserModuleService {
       ),
     }
 
-    return result
+    return this.getUserProfileById(id)
+  }
+
+  async getRoles(): Promise<GetRolesSchema[]> {
+    const foundRoles = await this.prisma.user_roles.findMany()
+
+    return foundRoles.map((role) => ({
+      id: role.id,
+      name: role.name,
+    }))
+  }
+
+  async getPositions(): Promise<GetPositionsSchema[]> {
+    const foundPositions = await this.prisma.user_positions.findMany()
+
+    return foundPositions.map((position) => ({
+      id: position.id,
+      name: position.name,
+    }))
   }
 
   private async setRole(entity, roleId) {
@@ -329,7 +358,11 @@ export class UserModuleService {
       result.birth_date = updateProfile.birthDate
     }
     if (updatedFields.includes('sex')) {
-      result.sex = userSex as user_sex
+      if (updateProfile.sex) {
+        result.sex = userSex as user_sex
+      } else {
+        result.sex = null
+      }
     }
     if (updatedFields.includes('phoneNumber')) {
       result.phone_number = updateProfile.phoneNumber
@@ -339,6 +372,27 @@ export class UserModuleService {
     }
     if (updatedFields.includes('imageId')) {
       result.image = { connect: { id: updateProfile.imageId ?? 1 } }
+    }
+    if (updatedFields.includes('roleId')) {
+      if (updateProfile.roleId) {
+        result.role = { connect: { id: updateProfile.roleId } }
+      } else {
+        result.role = { disconnect: true }
+      }
+    }
+    if (updatedFields.includes('positionId')) {
+      if (updateProfile.positionId) {
+        result.position = { connect: { id: updateProfile.positionId } }
+      } else {
+        result.position = { disconnect: true }
+      }
+    }
+    if (updatedFields.includes('departmentId')) {
+      if (updateProfile.departmentId) {
+        result.department = { connect: { id: updateProfile.departmentId } }
+      } else {
+        result.department = { disconnect: true }
+      }
     }
 
     return result

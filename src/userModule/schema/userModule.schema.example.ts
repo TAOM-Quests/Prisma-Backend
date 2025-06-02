@@ -1,4 +1,6 @@
 import {
+  GetPositionsSchema,
+  GetRolesSchema,
   GetUserProfileSchema,
   UpdateUserProfileSchema,
 } from './userModule.schema'
@@ -71,4 +73,14 @@ export const updateUserProfileSchemaExample: UpdateUserProfileSchema = {
     extension: 'png',
     url: 'https://localhost:3000/commonModule/file?fileName=image.png',
   },
+}
+
+export const getRolesSchemaExample: GetRolesSchema = {
+  id: 1,
+  name: 'Admin',
+}
+
+export const getPositionsSchemaExample: GetPositionsSchema = {
+  id: 1,
+  name: 'President of Academy',
 }
