@@ -93,7 +93,16 @@ export class FeedbackService {
     upsertForm.create = Object.assign(upsertForm.create, upsertData)
     upsertForm.update = upsertData
 
-    await this.prisma.feedback_forms.upsert(upsertForm)
+    if (form.id) {
+      await this.prisma.feedback_forms.update({
+        where: { id: form.id },
+        data: upsertForm.update,
+      })
+    } else {
+      await this.prisma.feedback_forms.create({
+        data: upsertForm.create,
+      })
+    }
 
     return this.getForm({
       entityId: form.entityId,
@@ -117,7 +126,15 @@ export class FeedbackService {
     upsertAnswer.create = Object.assign(upsertAnswer.create, upsertData)
     upsertAnswer.update = upsertData
 
-    const savedAnswer = await this.prisma.feedback_answers.upsert(upsertAnswer)
+    const savedAnswer = answer.id
+      ? await this.prisma.feedback_answers.update({
+          where: { id: answer.id },
+          data: upsertAnswer.update,
+        })
+      : await this.prisma.feedback_answers.create({
+          data: upsertAnswer.create,
+        })
+
     const [foundAnswer] = await this.getAnswer({ id: savedAnswer.id })
 
     return foundAnswer
