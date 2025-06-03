@@ -91,7 +91,10 @@ export class FeedbackService {
     if (form.description) upsertData.description = form.description
 
     upsertForm.create = Object.assign(upsertForm.create, upsertData)
-    upsertForm.update = upsertData
+    upsertForm.update = Object.assign(upsertForm.update, upsertData)
+
+    console.log('FORM', form)
+    console.log('UPSERT', upsertForm)
 
     if (form.id) {
       await this.prisma.feedback_forms.update({
