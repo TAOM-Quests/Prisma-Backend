@@ -1,66 +1,16 @@
 import { Injectable, StreamableFile } from '@nestjs/common'
+import { PrismaService } from 'src/prisma/prisma.service'
+import { GetFileStatsSchema } from './schema/GetFileStatsSchema'
 import { createReadStream } from 'fs'
 import { join } from 'path'
+import { NotFoundError } from 'rxjs'
 import * as mime from 'mime-types'
-import {
-  GetCommentsSchema,
-  GetDepartmentsSchema,
-  GetFileStatsSchema,
-} from './schema/commonModule.schema'
-import { PrismaService } from 'src/prisma/prisma.service'
-import { NotFoundError } from 'src/errors/notFound'
-import { GetCommentsQuery } from './dto/commonModule.dto'
-import { Prisma } from '@prisma/client'
-import { GetUsersSchema } from 'src/userModule/schema/userModule.schema'
 
 const BASE_FILE_URL = `http://${process.env.SERVER_HOSTNAME ?? 'localhost:' + process.env.PORT ?? 3000}/api/v1/commonModule/file`
 
 @Injectable()
-export class CommonModuleService {
+export class FilesService {
   constructor(private prisma: PrismaService) {}
-
-  async getDepartments(): Promise<GetDepartmentsSchema[]> {
-    const foundDepartments = await this.prisma.departments.findMany()
-
-    return foundDepartments.map((department) => ({
-      id: department.id,
-      name: department.name,
-    }))
-  }
-
-  async getComments(query: GetCommentsQuery): Promise<GetCommentsSchema[]> {
-    const where: Prisma.commentsWhereInput = {}
-
-    if (query.userId) where.user_id = query.userId
-    if (query.entityId) where.entity_id = query.entityId
-    if (query.entityName) where.entity_name = query.entityName
-
-    const foundComments = await this.prisma.comments.findMany({ where })
-
-    return Promise.all(
-      foundComments.map(async (comment) => {
-        const foundUser = await this.prisma.users.findUnique({
-          where: { id: comment.user_id },
-        })
-        const foundPosition = await this.prisma.user_positions.findUnique({
-          where: { id: foundUser.id_position },
-        })
-
-        const user: GetUsersSchema = {
-          id: foundUser.id,
-          name: foundUser.first_name + ' ' + foundUser.last_name,
-          image: await this.getFileStatsById(foundUser.id_image_file),
-          position: foundPosition.name,
-        }
-
-        return {
-          user,
-          text: comment.text,
-          createdAt: comment.createdAt,
-        }
-      }),
-    )
-  }
 
   async getFile(fileName: string): Promise<StreamableFile> {
     const file = createReadStream(join(process.cwd(), `public/${fileName}`))

@@ -1,7 +1,5 @@
-import {
-  GetCommentsSchema,
-  GetFileStatsSchema,
-} from 'src/commonModule/schema/commonModule.schema'
+import { GetCommentsSchema } from 'src/commonModule/comments/schema/GetCommentsSchema'
+import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
 import { Department } from 'src/models/department'
 import { PlaceOffline, PlaceOnline, ScheduleItem } from 'src/models/event'
 import { EventStatus } from 'src/models/eventStatus'

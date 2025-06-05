@@ -1,4 +1,4 @@
-import { GetFileStatsSchema } from 'src/commonModule/schema/commonModule.schema'
+import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
 import { QuestAnswer } from 'src/models/questAnswer'
 import { Employee } from 'src/models/users'
 
