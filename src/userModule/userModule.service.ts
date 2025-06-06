@@ -9,6 +9,8 @@ import {
   UpdateUserProfileSchema,
 } from './schema/userModule.schema'
 import {
+  ConfirmEmailCodeDto,
+  CreateEmailConfirmCodeDto,
   GetUsersQuery,
   UpdateProfileDto,
   UserAuthDto,
@@ -19,6 +21,8 @@ import { NotFoundError } from 'src/errors/notFound'
 import { BadRequestError } from 'src/errors/badRequest'
 import { Prisma, user_sex } from '@prisma/client'
 import { FilesService } from 'src/commonModule/files/files.service'
+import { sendEmail } from 'src/services/notifier/common/sendEmail'
+import * as moment from 'moment'
 
 const USER_SEX = {
   MALE: 'Мужской',
@@ -26,6 +30,7 @@ const USER_SEX = {
 }
 
 const ROLE_ADMIN_ID = 1
+const EMAIL_CONFIRM_TIMEOUT = 1000 * 60 * 60 //Минута
 
 @Injectable()
 export class UserModuleService {
@@ -73,6 +78,40 @@ export class UserModuleService {
         return resultUser
       }),
     )
+  }
+
+  async sendConfirmationEmail({
+    email,
+  }: CreateEmailConfirmCodeDto): Promise<void> {
+    const code = Math.floor(Math.random() * 10000)
+
+    await this.prisma.user_email_confirm.create({
+      data: {
+        email,
+        code,
+      },
+    })
+
+    await sendEmail({
+      to: email,
+      subject: 'Confirmation code',
+      text: code.toString(),
+      html: code.toString(),
+    })
+  }
+
+  async confirmEmail({ email, code }: ConfirmEmailCodeDto): Promise<boolean> {
+    const foundCode = await this.prisma.user_email_confirm.findFirst({
+      where: {
+        email,
+        created_at: {
+          gte: moment().subtract(EMAIL_CONFIRM_TIMEOUT).toDate(),
+          lte: moment().toDate(),
+        },
+      },
+    })
+
+    return foundCode?.code === code
   }
 
   async createUser(userAuth: UserAuthDto): Promise<AuthUserSchema> {

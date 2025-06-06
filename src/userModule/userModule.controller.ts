@@ -1,5 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import {
+  ConfirmEmailCodeDto,
+  CreateEmailConfirmCodeDto,
   GetUsersQuery,
   UpdateProfileDto,
   UserAuthDto,
@@ -46,6 +48,26 @@ export class UserModuleController {
     if (!query.offset) query.offset = 0
 
     return this.userModuleService.getUsers(query)
+  }
+
+  @ApiResponse({
+    status: 200,
+  })
+  @Post('email/confirm/send')
+  async sendConfirmationEmail(
+    @Body() createCode: CreateEmailConfirmCodeDto,
+  ): Promise<void> {
+    return this.userModuleService.sendConfirmationEmail(createCode)
+  }
+
+  @ApiResponse({
+    status: 200,
+    type: 'boolean',
+    example: true,
+  })
+  @Post('email/confirm')
+  async confirmEmail(@Body() code: ConfirmEmailCodeDto): Promise<boolean> {
+    return this.userModuleService.confirmEmail(code)
   }
 
   @ApiResponse({

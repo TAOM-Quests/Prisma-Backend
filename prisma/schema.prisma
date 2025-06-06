@@ -283,15 +283,23 @@ model users {
   user_experience          user_experience[]
   achievements             user_achievements[]
   feedback_answers         feedback_answers[]
-  user_email_confirm       user_email_confirm[]
+}
+
+model user_achievements {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  experience  Int
+  image_id    Int
+  image       shared_files @relation(fields: [image_id], references: [id])
+  users       users[]
 }
 
 model user_email_confirm {
   id         Int      @id @default(autoincrement())
   email      String
+  code       Int
   created_at DateTime @default(now())
-  user_id    Int
-  user       users    @relation(fields: [user_id], references: [id])
 }
 
 model user_executors_on_events {
@@ -301,6 +309,23 @@ model user_executors_on_events {
   executor    users  @relation(fields: [id_executor], references: [id])
 
   @@id([id_event, id_executor])
+}
+
+model user_experience {
+  user_id       Int
+  department_id Int
+  experience    Int
+  user          users       @relation(fields: [user_id], references: [id])
+  department    departments @relation(fields: [department_id], references: [id])
+
+  @@id([user_id, department_id])
+}
+
+model user_levels {
+  level      Int     @id @default(autoincrement())
+  name       String
+  experience Int
+  users      users[]
 }
 
 model user_participants_on_events {
@@ -323,33 +348,6 @@ model user_roles {
   id          Int     @id @default(autoincrement())
   name        String
   description String?
-  users       users[]
-}
-
-model user_levels {
-  level      Int     @id @default(autoincrement())
-  name       String
-  experience Int
-  users      users[]
-}
-
-model user_experience {
-  user_id       Int
-  department_id Int
-  experience    Int
-  user          users       @relation(fields: [user_id], references: [id])
-  department    departments @relation(fields: [department_id], references: [id])
-
-  @@id([user_id, department_id])
-}
-
-model user_achievements {
-  id          Int          @id @default(autoincrement())
-  name        String
-  description String
-  experience  Int
-  image_id    Int
-  image       shared_files @relation(fields: [image_id], references: [id])
   users       users[]
 }
 
