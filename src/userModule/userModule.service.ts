@@ -109,6 +109,9 @@ export class UserModuleService {
           lte: moment().toDate(),
         },
       },
+      orderBy: {
+        created_at: 'desc',
+      },
     })
 
     return foundCode?.code === code
