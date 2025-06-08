@@ -44,6 +44,7 @@ export class UserModuleService {
     const where: Prisma.usersWhereInput = {}
 
     if (getUsers.id) where.id = getUsers.id
+    if (getUsers.email) where.email = getUsers.email
     if (getUsers.roleId) where.id_role = getUsers.roleId
     if (getUsers.positionId) where.id_position = getUsers.positionId
     if (getUsers.departmentId) where.id_department = getUsers.departmentId

@@ -7,6 +7,7 @@ export class GetUsersQuery {
   limit: number
   offset: number
   id?: number
+  email?: string
   roleId?: number
   isAdmin?: boolean
   positionId?: number
