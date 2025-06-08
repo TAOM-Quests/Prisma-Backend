@@ -101,4 +101,10 @@ export class UpdateProfileDto {
     required: false,
   })
   departmentId: number
+
+  @ApiProperty({
+    example: 'password',
+    required: false,
+  })
+  password: string
 }

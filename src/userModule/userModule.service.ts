@@ -76,9 +76,7 @@ export class UserModuleService {
   }
 
   async createUser(userAuth: UserAuthDto): Promise<AuthUserSchema> {
-    const saltRounds = 10
-    const salt = genSaltSync(saltRounds)
-    const hashedPassword = hashSync(userAuth.password, salt)
+    const hashedPassword = this.cryptPassword(userAuth.password)
 
     const token = await this.jwt.signAsync({
       sun: userAuth.email,
@@ -271,7 +269,7 @@ export class UserModuleService {
       throw new NotFoundError(`User with id ${id} not found`)
     }
 
-    const updatedUser = await this.prisma.users.update({
+    await this.prisma.users.update({
       data: {
         ...this.requestUpdateProfileToDbFields(updateProfile),
       },
@@ -299,6 +297,12 @@ export class UserModuleService {
       id: position.id,
       name: position.name,
     }))
+  }
+
+  private cryptPassword(password: string): string {
+    const saltRounds = 10
+    const salt = genSaltSync(saltRounds)
+    return hashSync(password, salt)
   }
 
   private async setRole(entity, roleId) {
@@ -354,6 +358,9 @@ export class UserModuleService {
     }
     if (updatedFields.includes('telegram')) {
       result.telegram = updateProfile.telegram
+    }
+    if (updatedFields.includes('password')) {
+      result.password = this.cryptPassword(updateProfile.password)
     }
     if (updatedFields.includes('imageId')) {
       result.image = { connect: { id: updateProfile.imageId ?? 1 } }
