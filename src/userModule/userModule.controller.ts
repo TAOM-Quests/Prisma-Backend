@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import {
   GetUsersQuery,
+  UpdateNotificationsSettingsDto,
   UpdateProfileDto,
   UserAuthDto,
 } from './dto/userModule.dto'
@@ -8,6 +9,7 @@ import {
   AuthUserSchema,
   GetPositionsSchema,
   GetRolesSchema,
+  GetUserNotificationSettingsItemSchema,
   GetUserProfileSchema,
   GetUsersSchema,
   UpdateUserProfileSchema,
@@ -18,6 +20,7 @@ import {
   authUserSchemaExample,
   getPositionsSchemaExample,
   getRolesSchemaExample,
+  getUserNotificationSettingsItemSchemaExample,
   getUserProfileSchemaExample,
   getUsersSchemaExample,
   updateUserProfileSchemaExample,
@@ -123,5 +126,22 @@ export class UserModuleController {
   @Get('positions')
   async getPositions(): Promise<GetPositionsSchema[]> {
     return this.userModuleService.getPositions()
+  }
+
+  @ApiResponse({
+    type: GetUserNotificationSettingsItemSchema,
+    example: getUserNotificationSettingsItemSchemaExample,
+    status: 200,
+  })
+  @Post('users/:id/notifications/settings')
+  async updateNotificationsSettings(
+    @Param('id') id: string,
+    @Body()
+    updateSetting: UpdateNotificationsSettingsDto,
+  ): Promise<GetUserNotificationSettingsItemSchema[]> {
+    return this.userModuleService.updateNotificationsSettings(
+      +id,
+      updateSetting,
+    )
   }
 }

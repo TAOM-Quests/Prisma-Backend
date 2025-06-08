@@ -108,3 +108,23 @@ export class UpdateProfileDto {
   })
   password: string
 }
+
+export class UpdateNotificationsSettingsDto {
+  @ApiProperty({
+    example: 1,
+    required: true,
+  })
+  typeId: number
+
+  @ApiProperty({
+    example: true,
+    required: false,
+  })
+  email?: boolean
+
+  @ApiProperty({
+    example: true,
+    required: false,
+  })
+  telegram?: boolean
+}

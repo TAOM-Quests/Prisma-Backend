@@ -4,12 +4,14 @@ import {
   AuthUserSchema,
   GetPositionsSchema,
   GetRolesSchema,
+  GetUserNotificationSettingsItemSchema,
   GetUserProfileSchema,
   GetUsersSchema,
   UpdateUserProfileSchema,
 } from './schema/userModule.schema'
 import {
   GetUsersQuery,
+  UpdateNotificationsSettingsDto,
   UpdateProfileDto,
   UserAuthDto,
 } from './dto/userModule.dto'
@@ -225,6 +227,10 @@ export class UserModuleService {
           isReceived: !!foundAchievements.find((a) => a.id === ach.id),
         })),
       ),
+      notificationsSettings: await this.getNotificationsSettings(
+        foundUser.id,
+        foundUser.id_role,
+      ),
     }
 
     if (isEmployee) {
@@ -297,6 +303,39 @@ export class UserModuleService {
       id: position.id,
       name: position.name,
     }))
+  }
+
+  async updateNotificationsSettings(
+    userId: number,
+    updateSetting: UpdateNotificationsSettingsDto,
+  ): Promise<GetUserNotificationSettingsItemSchema[]> {
+    const newSettings: Prisma.user_notifications_settingsUpdateInput = {}
+
+    const foundUser = await this.prisma.users.findUnique({
+      where: { id: userId },
+    })
+
+    if (Object.keys(updateSetting).includes('email')) {
+      newSettings.email = updateSetting.email
+    }
+    if (Object.keys(updateSetting).includes('telegram')) {
+      newSettings.telegram = updateSetting.telegram
+    }
+
+    await this.prisma.user_notifications_settings.upsert({
+      where: {
+        user_id_type_id: { user_id: userId, type_id: updateSetting.typeId },
+      },
+      update: newSettings,
+      create: {
+        user_id: userId,
+        type_id: updateSetting.typeId,
+        email: updateSetting.email ?? false,
+        telegram: updateSetting.telegram ?? false,
+      },
+    })
+
+    return this.getNotificationsSettings(userId, foundUser.id_role)
   }
 
   private cryptPassword(password: string): string {
@@ -388,5 +427,28 @@ export class UserModuleService {
     }
 
     return result
+  }
+
+  private async getNotificationsSettings(
+    userId: number,
+    roleId?: number,
+  ): Promise<GetUserNotificationSettingsItemSchema[]> {
+    const foundTypes = await this.prisma.user_notifications_types.findMany()
+    const foundSettings =
+      await this.prisma.user_notifications_settings.findMany({
+        where: {
+          user_id: userId,
+        },
+      })
+
+    return foundTypes
+      .filter((type) => !type.roles.length || type.roles.includes(roleId))
+      .map((type) => ({
+        name: type.name,
+        typeId: type.id,
+        email: foundSettings.find((s) => s.type_id === type.id)?.email ?? false,
+        telegram:
+          foundSettings.find((s) => s.type_id === type.id)?.telegram ?? false,
+      }))
   }
 }
