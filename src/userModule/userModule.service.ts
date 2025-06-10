@@ -23,6 +23,8 @@ import { Prisma, user_sex } from '@prisma/client'
 import { FilesService } from 'src/commonModule/files/files.service'
 import { sendEmail } from 'src/services/notifier/common/sendEmail'
 import * as moment from 'moment'
+import { readFileSync } from 'fs'
+import * as path from 'path'
 
 const USER_SEX = {
   MALE: 'Мужской',
@@ -85,6 +87,14 @@ export class UserModuleService {
     email,
   }: CreateEmailConfirmCodeDto): Promise<void> {
     const code = Math.floor(Math.random() * 10000)
+    const letterText = readFileSync(
+      path.join(process.cwd(), 'src/views/email/emailConfirmView.txt'),
+      'utf8',
+    ).replace('%confirmation_code%', code.toString())
+    const letterHtml = readFileSync(
+      path.join(process.cwd(), 'src/views/email/emailConfirmView.html'),
+      'utf8',
+    ).replace('%confirmation_code%', code.toString())
 
     await this.prisma.user_email_confirm.create({
       data: {
@@ -96,8 +106,8 @@ export class UserModuleService {
     await sendEmail({
       to: email,
       subject: 'Confirmation code',
-      text: code.toString(),
-      html: code.toString(),
+      text: letterText,
+      html: letterHtml,
     })
   }
 
