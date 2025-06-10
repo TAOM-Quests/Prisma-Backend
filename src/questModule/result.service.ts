@@ -40,9 +40,9 @@ export class ResultService {
     }
 
     if (foundResult.id_image) {
-      result.image = await this.filesService.getFileStatsById(
-        foundResult.id_image,
-      )
+      result.image = await this.filesService.getFileStats({
+        id: foundResult.id_image,
+      })
     }
 
     return result

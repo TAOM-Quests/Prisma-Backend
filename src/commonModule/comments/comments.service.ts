@@ -34,9 +34,9 @@ export class CommentsService {
         const user: GetUsersSchema = {
           id: foundUser.id,
           name: foundUser.first_name + ' ' + foundUser.last_name,
-          image: await this.filesService.getFileStatsById(
-            foundUser.id_image_file,
-          ),
+          image: await this.filesService.getFileStats({
+            id: foundUser.id_image_file,
+          }),
           position: foundPosition.name,
         }
 

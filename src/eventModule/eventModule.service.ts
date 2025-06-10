@@ -349,7 +349,7 @@ export class EventModuleService {
       where: { id: event.id_image_file },
     })
 
-    return await this.filesService.getFileStats(foundFile.name)
+    return await this.filesService.getFileStats({ id: foundFile.id })
   }
 
   private async getFiles(event): Promise<GetFileStatsSchema[]> {
@@ -359,7 +359,7 @@ export class EventModuleService {
 
     return Promise.all(
       files.map(
-        async (file) => await this.filesService.getFileStats(file.name),
+        async (file) => await this.filesService.getFileStats({ id: file.id }),
       ),
     )
   }

@@ -3,10 +3,10 @@ import { PrismaService } from 'src/prisma/prisma.service'
 import { GetFileStatsSchema } from './schema/GetFileStatsSchema'
 import { createReadStream } from 'fs'
 import { join } from 'path'
-import { NotFoundError } from 'rxjs'
 import * as mime from 'mime-types'
 import { Prisma } from '@prisma/client'
 import { GetFileDto } from './dto/GetFileDto'
+import { NotFoundError } from 'src/errors/notFound'
 
 const BASE_FILE_URL = `http://${process.env.SERVER_HOSTNAME ?? 'localhost:' + process.env.PORT ?? 3000}/api/v1/commonModule/file`
 
@@ -26,11 +26,12 @@ export class FilesService {
 
     const file = createReadStream(join(process.cwd(), sharedFile.path))
     const stream = new StreamableFile(file)
+    const fileName = encodeURIComponent(
+      `${sharedFile.original_name}.${sharedFile.extension}`,
+    )
 
     stream.options.type = mime.lookup(sharedFile.extension)
-    stream.options.disposition = `
-      attachment; filename="${encodeURIComponent(`${sharedFile.original_name}.${sharedFile.extension}
-    `)}"`
+    stream.options.disposition = `attachment; filename="${fileName}"`
 
     return stream
   }
