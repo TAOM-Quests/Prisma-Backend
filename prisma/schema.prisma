@@ -253,7 +253,7 @@ model shared_files_on_events {
 model users {
   id                       Int                           @id @default(autoincrement())
   email                    String                        @unique
-  id_image_file            Int                           @default(1)
+  id_image_file            Int                           @default(10000)
   password                 String
   id_role                  Int?
   id_department            Int?
