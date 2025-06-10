@@ -298,7 +298,7 @@ model user_achievements {
 model user_email_confirm {
   id         Int      @id @default(autoincrement())
   email      String
-  code       Int
+  code       String
   created_at DateTime @default(now())
 }
 

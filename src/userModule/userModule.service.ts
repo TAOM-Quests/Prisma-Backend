@@ -87,14 +87,16 @@ export class UserModuleService {
     email,
   }: CreateEmailConfirmCodeDto): Promise<void> {
     const code = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, '0')
     const letterText = readFileSync(
       path.join(process.cwd(), 'src/views/email/emailConfirmView.txt'),
       'utf8',
-    ).replace('%confirmation_code%', code.toString())
+    ).replace('%confirmation_code%', code)
     const letterHtml = readFileSync(
       path.join(process.cwd(), 'src/views/email/emailConfirmView.html'),
       'utf8',
-    ).replace('%confirmation_code%', code.toString())
+    ).replace('%confirmation_code%', code)
 
     await this.prisma.user_email_confirm.create({
       data: {
@@ -125,7 +127,7 @@ export class UserModuleService {
       },
     })
 
-    return foundCode?.code === code
+    return foundCode?.code === code.toString().padStart(4, '0')
   }
 
   async createUser(userAuth: UserAuthDto): Promise<AuthUserSchema> {
