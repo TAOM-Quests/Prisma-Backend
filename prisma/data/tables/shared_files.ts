@@ -16,7 +16,9 @@ const SHARED_FILES: { id: number; name: string }[] = [
 export const sharedFiles = async (): Promise<void> => {
   await prisma.$transaction(async (tx) => {
     for (let file of SHARED_FILES) {
-      const foundFile = await statSync(`${process.cwd()}/public/${file.name}`)
+      const foundFile = await statSync(
+        `${process.cwd()}/public/default/${file.name}`,
+      )
       const fileData: Prisma.shared_filesCreateManyInput = {
         id: file.id,
         name: file.name,
