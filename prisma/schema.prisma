@@ -135,6 +135,27 @@ model event_tags {
   events        events[]
 }
 
+model feedback_forms {
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String
+  entity_name      String
+  entity_id        Int
+  questions        Json[]
+  feedback_answers feedback_answers[]
+
+  @@unique([entity_name, entity_id])
+}
+
+model feedback_answers {
+  id      Int            @id @default(autoincrement())
+  answers String[]
+  user_id Int
+  form_id Int
+  user    users          @relation(fields: [user_id], references: [id])
+  form    feedback_forms @relation(fields: [form_id], references: [id])
+}
+
 model game_wordle {
   id            Int         @id @default(autoincrement())
   word          String
@@ -292,6 +313,24 @@ model users {
   achievements             user_achievements[]
   game_wordle_attempts     game_wordle_attempts[]
   user_experience          user_experience[]
+  feedback_answers         feedback_answers[]
+}
+
+model user_achievements {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  experience  Int
+  image_id    Int
+  image       shared_files @relation(fields: [image_id], references: [id])
+  users       users[]
+}
+
+model user_email_confirm {
+  id         Int      @id @default(autoincrement())
+  email      String
+  code       String
+  created_at DateTime @default(now())
 }
 
 model user_executors_on_events {
@@ -301,6 +340,23 @@ model user_executors_on_events {
   executor    users  @relation(fields: [id_executor], references: [id])
 
   @@id([id_event, id_executor])
+}
+
+model user_experience {
+  user_id       Int
+  department_id Int
+  experience    Int
+  user          users       @relation(fields: [user_id], references: [id])
+  department    departments @relation(fields: [department_id], references: [id])
+
+  @@id([user_id, department_id])
+}
+
+model user_levels {
+  level      Int     @id @default(autoincrement())
+  name       String
+  experience Int
+  users      users[]
 }
 
 model user_participants_on_events {
@@ -333,16 +389,6 @@ model user_levels {
   users      users[]
 }
 
-model user_achievements {
-  id          Int          @id @default(autoincrement())
-  name        String
-  description String
-  experience  Int
-  image_id    Int
-  image       shared_files @relation(fields: [image_id], references: [id])
-  users       users[]
-}
-
 model user_experience {
   id            Int         @id @default(autoincrement())
   experience    Int
@@ -351,6 +397,16 @@ model user_experience {
   department_id Int
   user          users       @relation(fields: [user_id], references: [id])
   department    departments @relation(fields: [department_id], references: [id])
+}
+
+model user_achievements {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  experience  Int
+  image_id    Int
+  image       shared_files @relation(fields: [image_id], references: [id])
+  users       users[]
 }
 
 enum user_sex {

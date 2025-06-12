@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common'
-import { CommonModuleController } from './commonModule.controller'
-import { CommonModuleService } from './commonModule.service'
 import { MulterModule } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { UserModuleService } from 'src/userModule/userModule.service'
+import { DepartmentsController } from './departments/departments.controller'
+import { FilesController } from './files/files.controller'
+import { CommentsService } from './comments/comments.service'
+import { DepartmentsService } from './departments/department.service'
+import { FeedbackService } from './feedback/feedback.service'
+import { FilesService } from './files/files.service'
+import { FeedbackController } from './feedback/feedback.controller'
 
 @Module({
   imports: [
@@ -25,7 +29,14 @@ import { UserModuleService } from 'src/userModule/userModule.service'
       },
     }),
   ],
-  controllers: [CommonModuleController],
-  providers: [CommonModuleService, PrismaService],
+  controllers: [DepartmentsController, FeedbackController, FilesController],
+  providers: [
+    FilesService,
+    PrismaService,
+    CommentsService,
+    FeedbackService,
+    DepartmentsService,
+  ],
+  exports: [FilesService, CommentsService, FeedbackService, DepartmentsService],
 })
 export class CommonModule {}

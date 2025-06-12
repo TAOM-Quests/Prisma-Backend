@@ -3,9 +3,9 @@ import { UserModuleController } from './userModule.controller'
 import { UserModuleService } from './userModule.service'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { JwtModule } from '@nestjs/jwt'
-import { CommonModuleService } from 'src/commonModule/commonModule.service'
 import { NotificationsGateway } from './notifications.gateway'
 import { GamingService } from './gaming.service'
+import { CommonModule } from 'src/commonModule/commonModule.module'
 
 @Module({
   imports: [
@@ -14,13 +14,13 @@ import { GamingService } from './gaming.service'
       secret: 'SUPER_SECRET',
       signOptions: { expiresIn: '60s' },
     }),
+    CommonModule,
   ],
   controllers: [UserModuleController],
   providers: [
     GamingService,
     PrismaService,
     UserModuleService,
-    CommonModuleService,
     NotificationsGateway,
   ],
   exports: [UserModuleService, NotificationsGateway, GamingService],

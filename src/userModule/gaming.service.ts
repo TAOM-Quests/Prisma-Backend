@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { CommonModuleService } from 'src/commonModule/commonModule.service'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { NotificationsGateway } from './notifications.gateway'
 import { capitalize } from 'lodash'
+import { FilesService } from 'src/commonModule/files/files.service'
 
 type ExperienceSource = 'quests' | 'events' | 'games' | 'achievements'
 
@@ -15,7 +15,7 @@ export const ACHIEVEMENTS_MAP = {
 export class GamingService {
   constructor(
     private prisma: PrismaService,
-    private commonModuleService: CommonModuleService,
+    private filesService: FilesService,
     private notificationsGateway: NotificationsGateway,
   ) {}
 
@@ -28,7 +28,7 @@ export class GamingService {
     const foundUser = await this.prisma.users.findUnique({
       where: { id: userId },
     })
-    const foundImage = await this.commonModuleService.getFileStats(
+    const foundImage = await this.filesService.getFileStats(
       `${capitalize(experienceSource)}_experience.png`,
     )
 
@@ -85,7 +85,7 @@ export class GamingService {
     const foundAchievement = await this.prisma.user_achievements.findUnique({
       where: { id: achievementId },
     })
-    const foundImage = await this.commonModuleService.getFileStatsById(
+    const foundImage = await this.filesService.getFileStatsById(
       foundAchievement.image_id,
     )
 
@@ -131,8 +131,7 @@ export class GamingService {
       },
     })
 
-    const foundImage =
-      await this.commonModuleService.getFileStats('Level_up.png')
+    const foundImage = await this.filesService.getFileStats('Level_up.png')
 
     this.notificationsGateway.sendNotification({
       userId,

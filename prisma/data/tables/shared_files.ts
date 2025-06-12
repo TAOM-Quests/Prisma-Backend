@@ -32,5 +32,7 @@ export const sharedFiles = async (): Promise<void> => {
         create: fileData,
       })
     }
+
+    await tx.$executeRaw`ALTER SEQUENCE shared_files_id_seq RESTART WITH 10001;`
   })
 }

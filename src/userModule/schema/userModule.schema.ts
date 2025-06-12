@@ -1,4 +1,4 @@
-import { GetFileStatsSchema } from 'src/commonModule/schema/commonModule.schema'
+import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
 import { Department } from 'src/models/department'
 import { UserPosition } from 'src/models/userPosition'
 import { UserRole } from 'src/models/userRole'
@@ -63,4 +63,14 @@ export class UpdateUserProfileSchema {
   firstName?: string
   patronymic?: string
   phoneNumber?: string
+}
+
+export class GetRolesSchema {
+  id: number
+  name: string
+}
+
+export class GetPositionsSchema {
+  id: number
+  name: string
 }
