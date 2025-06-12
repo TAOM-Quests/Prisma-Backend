@@ -20,6 +20,7 @@ export class AuthUserSchema {
   rolesIds?: number[]
   isEmployee?: boolean
   departmentId?: number
+  isInspector?: boolean
   isGameMaster?: boolean
 }
 

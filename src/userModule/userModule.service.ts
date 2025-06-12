@@ -33,6 +33,7 @@ const USER_SEX = {
 }
 
 const ROLE_ADMIN_ID = 1
+const ROLES_INSPECTOR_IDS = [2]
 const ROLES_EMPLOYEE_IDS = [2, 3]
 const ROLES_GAME_MASTER_IDS = [4]
 const EMAIL_CONFIRM_TIMEOUT = 1000 * 60 * 60 //Минута
@@ -206,6 +207,8 @@ export class UserModuleService {
       authUser.isEmployee = !!intersection(rolesIds, ROLES_EMPLOYEE_IDS).length
       authUser.isGameMaster = !!intersection(rolesIds, ROLES_GAME_MASTER_IDS)
         .length
+      authUser.isInspector = !!intersection(rolesIds, ROLES_INSPECTOR_IDS)
+        .length
     }
 
     return authUser
@@ -248,6 +251,8 @@ export class UserModuleService {
         authUser.isEmployee = !!intersection(rolesIds, ROLES_EMPLOYEE_IDS)
           .length
         authUser.isGameMaster = !!intersection(rolesIds, ROLES_GAME_MASTER_IDS)
+          .length
+        authUser.isInspector = !!intersection(rolesIds, ROLES_INSPECTOR_IDS)
           .length
       }
 
