@@ -84,7 +84,7 @@ model departments {
   users                users[]
   events               events[]
   event_tags           event_tags[]
-  game_wordle          game_wordle[]
+  game_wordle_words          game_wordle_words[]
   game_wordle_answers  game_wordle_answers[]
   game_wordle_attempts game_wordle_attempts[]
   user_experience      user_experience[]
@@ -156,7 +156,7 @@ model feedback_answers {
   form    feedback_forms @relation(fields: [form_id], references: [id])
 }
 
-model game_wordle {
+model game_wordle_words {
   id            Int         @id @default(autoincrement())
   word          String
   department_id Int

@@ -22,14 +22,14 @@ export const wordleWarp = async () => {
 async function getRandomWordByDepartmentId(
   departmentId: number,
 ): Promise<string | null> {
-  const count = await prisma.game_wordle.count({
+  const count = await prisma.game_wordle_words.count({
     where: { department_id: departmentId },
   })
 
   if (count === 0) return null
 
   const randomIndex = Math.floor(Math.random() * count)
-  const rows = await prisma.game_wordle.findFirst({
+  const rows = await prisma.game_wordle_words.findFirst({
     skip: randomIndex,
     where: { department_id: departmentId },
   })

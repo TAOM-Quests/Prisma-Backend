@@ -52,7 +52,7 @@ export class WordleService {
     userId: number,
     departmentId: number,
   ): Promise<GetWordleUserAttemptSchema> {
-    const isWordExist = await this.prisma.game_wordle.findFirst({
+    const isWordExist = await this.prisma.game_wordle_words.findFirst({
       where: { word: upperCase(attempt) },
     })
 
@@ -89,7 +89,7 @@ export class WordleService {
   async getWordByDepartment(
     departmentId: number,
   ): Promise<GetWordleWordSchema[]> {
-    const foundWords = await this.prisma.game_wordle.findMany({
+    const foundWords = await this.prisma.game_wordle_words.findMany({
       where: { department_id: departmentId },
     })
 
@@ -112,7 +112,7 @@ export class WordleService {
   }
 
   async deleteWord(id: number): Promise<void> {
-    await this.prisma.game_wordle.delete({ where: { id } })
+    await this.prisma.game_wordle_words.delete({ where: { id } })
   }
 
   private async checkAttempt(
@@ -180,7 +180,7 @@ export class WordleService {
     departmentId,
     id,
   }: SaveWordleWordDto): Promise<GetWordleWordSchema> {
-    const isWordExist = await this.prisma.game_wordle.findFirst({
+    const isWordExist = await this.prisma.game_wordle_words.findFirst({
       where: { word: upperCase(word), department_id: departmentId ?? -1 },
     })
 
@@ -188,7 +188,7 @@ export class WordleService {
       throw new BadRequestException('Word already exists')
     }
 
-    const savedWord = await this.prisma.game_wordle.upsert({
+    const savedWord = await this.prisma.game_wordle_words.upsert({
       where: { id: id ?? -1 },
       create: { word, department: { connect: { id: departmentId ?? -1 } } },
       update: { word },
