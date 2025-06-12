@@ -25,6 +25,7 @@ import { sendEmail } from 'src/services/notifier/common/sendEmail'
 import * as moment from 'moment'
 import { readFileSync } from 'fs'
 import * as path from 'path'
+import { intersection } from 'lodash'
 
 const USER_SEX = {
   MALE: 'Мужской',
@@ -32,6 +33,8 @@ const USER_SEX = {
 }
 
 const ROLE_ADMIN_ID = 1
+const ROLES_EMPLOYEE_IDS = [2, 3]
+const ROLES_GAME_MASTER_IDS = [4]
 const EMAIL_CONFIRM_TIMEOUT = 1000 * 60 * 60 //Минута
 
 @Injectable()
@@ -47,11 +50,13 @@ export class UserModuleService {
 
     if (getUsers.id) where.id = getUsers.id
     if (getUsers.email) where.email = getUsers.email
-    if (getUsers.roleId) where.id_role = getUsers.roleId
+    if (getUsers.rolesIds)
+      where.roles = { some: { id: { in: getUsers.rolesIds } } }
     if (getUsers.positionId) where.id_position = getUsers.positionId
     if (getUsers.departmentId) where.id_department = getUsers.departmentId
-    if (getUsers.isAdmin) where.id_role = 1
-    if (getUsers.isEmployee) where.id_role = { not: null }
+    if (getUsers.isAdmin) where.roles = { some: { id: ROLE_ADMIN_ID } }
+    if (getUsers.isEmployee)
+      where.roles = { some: { id: { in: ROLES_EMPLOYEE_IDS } } }
 
     const users = await this.prisma.users.findMany({
       where,
@@ -188,11 +193,19 @@ export class UserModuleService {
       image: await this.filesService.getFileStatsById(foundUser.id_image_file),
     }
 
-    if (foundUser.id_role) {
-      authUser.isAdmin = foundUser.id_role === ROLE_ADMIN_ID
-      authUser.isEmployee = true
-      authUser.roleId = foundUser.id_role
+    const foundRoles = await this.prisma.user_roles.findMany({
+      where: { users: { some: { id: foundUser.id } } },
+    })
+
+    if (foundRoles.length) {
+      const rolesIds = foundRoles.map((role) => role.id)
+
+      authUser.rolesIds = rolesIds
       authUser.departmentId = foundUser.id_department
+      authUser.isAdmin = rolesIds.includes(ROLE_ADMIN_ID)
+      authUser.isEmployee = !!intersection(rolesIds, ROLES_EMPLOYEE_IDS).length
+      authUser.isGameMaster = !!intersection(rolesIds, ROLES_GAME_MASTER_IDS)
+        .length
     }
 
     return authUser
@@ -222,11 +235,20 @@ export class UserModuleService {
         ),
       }
 
-      if (foundUser.id_role) {
-        authUser.isAdmin = foundUser.id_role === ROLE_ADMIN_ID
-        authUser.isEmployee = true
-        authUser.roleId = foundUser.id_role
+      const foundRoles = await this.prisma.user_roles.findMany({
+        where: { users: { some: { id: foundUser.id } } },
+      })
+
+      if (foundRoles.length) {
+        const rolesIds = foundRoles.map((role) => role.id)
+
+        authUser.rolesIds = rolesIds
         authUser.departmentId = foundUser.id_department
+        authUser.isAdmin = rolesIds.includes(ROLE_ADMIN_ID)
+        authUser.isEmployee = !!intersection(rolesIds, ROLES_EMPLOYEE_IDS)
+          .length
+        authUser.isGameMaster = !!intersection(rolesIds, ROLES_GAME_MASTER_IDS)
+          .length
       }
 
       return authUser
@@ -252,8 +274,9 @@ export class UserModuleService {
     const foundAchievements = await this.prisma.user_achievements.findMany({
       where: { users: { some: { id: foundUser.id } } },
     })
-
-    const isEmployee = !!foundUser.id_role
+    const foundRoles = await this.prisma.user_roles.findMany({
+      where: { users: { some: { id: foundUser.id } } },
+    })
 
     const profile: GetUserProfileSchema = {
       id: foundUser.id,
@@ -284,8 +307,11 @@ export class UserModuleService {
       ),
     }
 
-    if (isEmployee) {
-      this.setRole(profile, foundUser.id_role)
+    if (foundRoles.length) {
+      profile.roles = foundRoles.map((role) => ({
+        id: role.id,
+        name: role.name,
+      }))
 
       const foundDepartment = await this.prisma.departments.findUnique({
         where: {
@@ -356,19 +382,6 @@ export class UserModuleService {
     }))
   }
 
-  private async setRole(entity, roleId) {
-    const role = await this.prisma.user_roles.findUnique({
-      where: {
-        id: roleId,
-      },
-    })
-
-    entity.role = {
-      id: role.id,
-      name: role.name,
-    }
-  }
-
   private requestUpdateProfileToDbFields(
     updateProfile: UpdateProfileDto,
   ): Prisma.usersUpdateInput {
@@ -413,12 +426,8 @@ export class UserModuleService {
     if (updatedFields.includes('imageId')) {
       result.image = { connect: { id: updateProfile.imageId ?? 1 } }
     }
-    if (updatedFields.includes('roleId')) {
-      if (updateProfile.roleId) {
-        result.role = { connect: { id: updateProfile.roleId } }
-      } else {
-        result.role = { disconnect: true }
-      }
+    if (updatedFields.includes('rolesIds')) {
+      result.roles = { set: updateProfile.rolesIds.map((id) => ({ id })) }
     }
     if (updatedFields.includes('positionId')) {
       if (updateProfile.positionId) {

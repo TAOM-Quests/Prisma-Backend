@@ -8,9 +8,9 @@ export class GetUsersQuery {
   offset: number
   id?: number
   email?: string
-  roleId?: number
   isAdmin?: boolean
   positionId?: number
+  rolesIds?: number[]
   isEmployee?: boolean
   departmentId?: number
 }
@@ -110,10 +110,10 @@ export class UpdateProfileDto {
   imageId: number
 
   @ApiProperty({
-    example: 1,
+    example: [1, 2],
     required: false,
   })
-  roleId: number
+  rolesIds: number[]
 
   @ApiProperty({
     example: 1,

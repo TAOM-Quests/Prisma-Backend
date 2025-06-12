@@ -16,10 +16,11 @@ export class AuthUserSchema {
   token: string
   image: GetFileStatsSchema
   name?: string
-  roleId?: number
   isAdmin?: boolean
+  rolesIds?: number[]
   isEmployee?: boolean
   departmentId?: number
+  isGameMaster?: boolean
 }
 
 export class GetUserProfileSchema {
@@ -27,11 +28,11 @@ export class GetUserProfileSchema {
   email: string
   image: GetFileStatsSchema
   sex?: string
-  role?: UserRole
   birthDate?: Date
   lastName?: string
   telegram?: string
   firstName?: string
+  roles?: UserRole[]
   patronymic?: string
   phoneNumber?: string
   department?: Department

@@ -76,18 +76,18 @@ model complete_quests {
 }
 
 model departments {
-  id                  Int                   @id @default(autoincrement())
-  name                String
-  quest_groups        quest_groups[]
-  quest_tags          quest_tags[]
-  quests              quests[]
-  users               users[]
-  events              events[]
-  event_tags          event_tags[]
-  game_wordle         game_wordle[]
-  game_wordle_answers game_wordle_answers[]
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  quest_groups         quest_groups[]
+  quest_tags           quest_tags[]
+  quests               quests[]
+  users                users[]
+  events               events[]
+  event_tags           event_tags[]
+  game_wordle          game_wordle[]
+  game_wordle_answers  game_wordle_answers[]
   game_wordle_attempts game_wordle_attempts[]
-  user_experience     user_experience[]
+  user_experience      user_experience[]
 }
 
 model events {
@@ -161,7 +161,7 @@ model game_wordle {
   word          String
   department_id Int
   department    departments @relation(fields: [department_id], references: [id])
-  
+
   @@unique([word, department_id])
 }
 
@@ -174,12 +174,12 @@ model game_wordle_answers {
 }
 
 model game_wordle_attempts {
-  id      Int      @id @default(autoincrement())
-  word    String
-  day     DateTime @default(now())
-  user_id Int
+  id            Int         @id @default(autoincrement())
+  word          String
+  day           DateTime    @default(now())
+  user_id       Int
   department_id Int
-  user    users    @relation(fields: [user_id], references: [id])
+  user          users       @relation(fields: [user_id], references: [id])
   department    departments @relation(fields: [department_id], references: [id])
 }
 
@@ -285,7 +285,6 @@ model users {
   email                    String                        @unique
   id_image_file            Int                           @default(1)
   password                 String
-  id_role                  Int?
   id_department            Int?
   token                    String                        @unique
   birth_date               DateTime?
@@ -301,12 +300,12 @@ model users {
   sex                      user_sex?
   complete_quests          complete_quests[]
   events_where_inspector   events[]
+  roles                    user_roles[]
   events_where_executor    user_executors_on_events[]
   events_where_participant user_participants_on_events[]
   department               departments?                  @relation(fields: [id_department], references: [id])
   image                    shared_files                  @relation(fields: [id_image_file], references: [id])
   position                 user_positions?               @relation(fields: [id_position], references: [id])
-  role                     user_roles?                   @relation(fields: [id_role], references: [id])
   level                    user_levels                   @relation(fields: [level_number], references: [level])
   quests                   quests[]
   comments                 comments[]
@@ -343,13 +342,13 @@ model user_executors_on_events {
 }
 
 model user_experience {
+  id            Int         @id @default(autoincrement())
+  experience    Int
+  source        String
   user_id       Int
   department_id Int
-  experience    Int
   user          users       @relation(fields: [user_id], references: [id])
   department    departments @relation(fields: [department_id], references: [id])
-
-  @@id([user_id, department_id])
 }
 
 model user_levels {
@@ -379,33 +378,6 @@ model user_roles {
   id          Int     @id @default(autoincrement())
   name        String
   description String?
-  users       users[]
-}
-
-model user_levels {
-  level      Int     @id @default(autoincrement())
-  name       String
-  experience Int
-  users      users[]
-}
-
-model user_experience {
-  id            Int         @id @default(autoincrement())
-  experience    Int
-  source        String
-  user_id       Int
-  department_id Int
-  user          users       @relation(fields: [user_id], references: [id])
-  department    departments @relation(fields: [department_id], references: [id])
-}
-
-model user_achievements {
-  id          Int          @id @default(autoincrement())
-  name        String
-  description String
-  experience  Int
-  image_id    Int
-  image       shared_files @relation(fields: [image_id], references: [id])
   users       users[]
 }
 
