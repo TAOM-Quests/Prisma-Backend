@@ -131,7 +131,6 @@ export class QuestService {
     const foundCompleteRow = await this.prisma.complete_quests.findUnique({
       where: { id },
     })
-    console.log(foundCompleteRow)
     const foundQuest =
       foundCompleteRow.quest_data as unknown as SaveQuestCompleteDto
 
@@ -156,14 +155,14 @@ export class QuestService {
 
   async update(quest: SaveQuestDto): Promise<GetQuestSchema> {
     const oldQuestQuestionsIds = (
-      await this.prisma.questions.findMany({
+      await this.prisma.quest_questions.findMany({
         where: { quest: { id: quest.id } },
       })
     ).map((q) => q.id)
     const newQuestQuestionsIds = quest.questions
       .filter((q) => q.id)
       .map((q) => q.id)
-    await this.prisma.questions.deleteMany({
+    await this.prisma.quest_questions.deleteMany({
       where: {
         id: {
           in: [
