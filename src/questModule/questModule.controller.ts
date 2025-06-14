@@ -43,26 +43,28 @@ export class QuestModuleController {
     example: getQuestSchemaMinimizeExample,
   })
   @ApiQuery({ name: 'id', type: 'number', required: false })
-  @ApiQuery({ name: 'department', type: 'number', required: false })
-  @ApiQuery({ name: 'tag', type: 'number', isArray: true, required: false })
-  @ApiQuery({
-    name: 'executor',
-    type: 'number',
-    isArray: true,
-    required: false,
-  })
-  @ApiQuery({ name: 'isComplete', type: 'boolean', required: false })
+  @ApiQuery({ name: 'tag', type: 'number', required: false })
+  @ApiQuery({ name: 'name', type: 'string', required: false })
+  @ApiQuery({ name: 'group', type: 'number', required: false })
+  @ApiQuery({ name: 'executor', type: 'number', required: false })
+  @ApiQuery({ name: 'difficult', type: 'number', required: false })
   @ApiQuery({ name: 'completeBy', type: 'number', required: false })
+  @ApiQuery({ name: 'department', type: 'number', required: false })
+  @ApiQuery({ name: 'isCompleted', type: 'boolean', required: false })
   @Get('quests')
   async getQuests(
+    @Query('name') name: string,
     @Query('id') ids: string | string[],
-    @Query('department') departmentsIds: string | string[],
     @Query('tag') tagsIds: string | string[],
-    @Query('executor') executorsIds: string | string[],
     @Query('isCompleted') isCompleted: boolean,
+    @Query('group') groupsIds: string | string[],
     @Query('completeBy') completeByUserId: string,
+    @Query('executor') executorsIds: string | string[],
+    @Query('difficult') difficultIds: string | string[],
+    @Query('department') departmentsIds: string | string[],
   ): Promise<GetQuestMinimizeSchema[]> {
     const getQuery: GetCompleteQuestsMinimizeQuery = {
+      name,
       ids: ids ? (isArray(ids) ? ids.map((id) => +id) : [+ids]) : [],
       departmentsIds: departmentsIds
         ? isArray(departmentsIds)
@@ -78,6 +80,16 @@ export class QuestModuleController {
         ? isArray(executorsIds)
           ? executorsIds.map((id) => +id)
           : [+executorsIds]
+        : [],
+      difficultiesIds: difficultIds
+        ? isArray(difficultIds)
+          ? difficultIds.map((id) => +id)
+          : [+difficultIds]
+        : [],
+      groupsIds: groupsIds
+        ? isArray(groupsIds)
+          ? groupsIds.map((id) => +id)
+          : [+groupsIds]
         : [],
     }
 
