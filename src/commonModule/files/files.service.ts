@@ -78,7 +78,7 @@ export class FilesService {
     data,
     columns,
     fileName,
-  }: CreateExcelDto): Promise<StreamableFile> {
+  }: CreateExcelDto): Promise<GetFileStatsSchema> {
     const workbook = new ExcelJS.Workbook()
     const worksheet = workbook.addWorksheet(fileName)
 
@@ -88,7 +88,27 @@ export class FilesService {
       worksheet.addRow(row)
     }
 
-    const generatedFileName = `${fileName}_${new Date().getTime()}`
+    const headerRow = worksheet.getRow(1)
+    headerRow.eachCell(
+      (cell) =>
+        (cell.style = {
+          font: { bold: true },
+          alignment: { horizontal: 'center' },
+          border: {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+          fill: {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFD3D3D3' },
+          },
+        }),
+    )
+
+    const generatedFileName = `${Date.now() + '-' + Math.round(Math.random() * 1e9)}`
     const extension = 'xlsx'
     const path = join(process.cwd(), `public/${generatedFileName}.${extension}`)
 
@@ -96,9 +116,9 @@ export class FilesService {
 
     const { size } = statSync(path)
 
-    await this.prisma.shared_files.create({
+    const savedFile = await this.prisma.shared_files.create({
       data: {
-        name: generatedFileName,
+        name: `${generatedFileName}.${extension}`,
         original_name: fileName,
         extension,
         path,
@@ -106,6 +126,6 @@ export class FilesService {
       },
     })
 
-    return this.getFile(generatedFileName)
+    return this.getFileStatsById(savedFile.id)
   }
 }
