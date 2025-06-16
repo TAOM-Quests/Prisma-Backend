@@ -3,14 +3,14 @@ import { statSync } from 'fs'
 
 const prisma = new PrismaClient()
 const SHARED_FILES: { id: number; name: string }[] = [
-  { id: 1, name: 'Level_up.png' },
-  { id: 2, name: 'Events_experience.png' },
-  { id: 3, name: 'Quests_experience.png' },
-  { id: 4, name: 'Games_experience.png' },
-  { id: 5, name: 'Achievements_experience.png' },
-  { id: 6, name: 'First_event_achievement.png' },
-  { id: 7, name: 'First_quest_achievement.png' },
-  { id: 10000, name: 'Default_avatar.png' },
+  { id: 1, name: 'Default_avatar.png' },
+  { id: 2, name: 'Level_up.png' },
+  { id: 3, name: 'Events_experience.png' },
+  { id: 4, name: 'Quests_experience.png' },
+  { id: 5, name: 'Games_experience.png' },
+  { id: 6, name: 'Achievements_experience.png' },
+  { id: 7, name: 'First_event_achievement.png' },
+  { id: 8, name: 'First_quest_achievement.png' },
 ]
 
 export const sharedFiles = async (): Promise<void> => {
@@ -32,5 +32,7 @@ export const sharedFiles = async (): Promise<void> => {
         create: fileData,
       })
     }
+
+    await tx.$executeRaw`ALTER SEQUENCE shared_files_id_seq RESTART WITH 10001;`
   })
 }
