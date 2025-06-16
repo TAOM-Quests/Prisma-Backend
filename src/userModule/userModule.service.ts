@@ -163,6 +163,7 @@ export class UserModuleService {
       id: createdUser.id,
       email: createdUser.email,
       token,
+      name: `${createdUser.first_name ?? ''} ${createdUser.last_name ?? ''}`.trim(),
       image: await this.filesService.getFileStatsById(
         createdUser.id_image_file,
       ),
