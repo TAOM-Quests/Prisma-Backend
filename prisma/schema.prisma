@@ -259,9 +259,9 @@ model users {
   id_department            Int?
   token                    String                        @unique
   birth_date               DateTime?
-  first_name               String?                       @default("Пользователь")
+  first_name               String?                       @default("Новый")
   id_position              Int?
-  last_name                String?                       @default("Новый")
+  last_name                String?                       @default("Пользователь")
   patronymic               String?
   phone_number             String?
   telegram                 String?                       @unique
