@@ -17,6 +17,7 @@ const SHARED_FILES: { id: number; name: string }[] = [
   { id: 12, name: 'Design_department.png' },
   { id: 13, name: 'Logo.png' },
   { id: 14, name: 'Taom_login.png' },
+  { id: 15, name: 'Banner_event.png' },
   { id: 10000, name: 'Default_avatar.png' },
 ]
 
