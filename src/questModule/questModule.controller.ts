@@ -162,6 +162,8 @@ export class QuestModuleController {
     example: getQuestGroupsSchemaExample,
   })
   @ApiQuery({ name: 'departmentId', type: 'number', required: false })
+  @ApiQuery({ name: 'offset', type: 'number', required: false })
+  @ApiQuery({ name: 'limit', type: 'number', required: false })
   @Get('/groups')
   async getGroups(
     @Query('departmentId') departmentId: string,
@@ -171,6 +173,8 @@ export class QuestModuleController {
     if (departmentId) {
       getQuestGroups.departmentId = +departmentId
     }
+    if (getQuestGroups.offset) getQuestGroups.offset = +getQuestGroups.offset
+    if (getQuestGroups.limit) getQuestGroups.limit = +getQuestGroups.limit
 
     return this.questModuleService.getGroups(getQuestGroups)
   }

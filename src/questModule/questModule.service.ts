@@ -41,6 +41,8 @@ export class QuestModuleService {
       where.id_executor = { in: getQuestsQuery.executorsIds }
     if (getQuestsQuery.departmentsIds.length)
       where.id_department = { in: getQuestsQuery.departmentsIds }
+    if (getQuestsQuery.groupsIds.length)
+      where.id_group = { in: getQuestsQuery.groupsIds }
 
     const foundQuests = await this.prisma.quests.findMany({ where })
 
@@ -173,6 +175,8 @@ export class QuestModuleService {
     if (getGroupsQuery.departmentId) {
       groupsFindParams.where = { id_department: getGroupsQuery.departmentId }
     }
+    if (getGroupsQuery.offset) groupsFindParams.skip = getGroupsQuery.offset
+    if (getGroupsQuery.limit) groupsFindParams.take = getGroupsQuery.limit
 
     const groups = await this.prisma.quest_groups.findMany(groupsFindParams)
 
