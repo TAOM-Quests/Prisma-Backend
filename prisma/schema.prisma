@@ -112,8 +112,8 @@ model departments {
   users                  users[]
   events                 events[]
   event_tags             event_tags[]
-  game_wordle            game_wordle[]
-  game_wordle_answers    game_wordle_answers[]
+  game_wordle_words            game_wordle_words[]
+  game_wordle_words_answers    game_wordle_words_answers[]
   user_experience        user_experience[]
   game_crossword_words   game_crossword_words[]
   game_crossword_answers game_crossword_answers[]
@@ -219,7 +219,7 @@ model game_crossword_answers {
   department departments                 @relation(fields: [department_id], references: [id])
 }
 
-model game_wordle {
+model game_wordle_words {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
@@ -229,7 +229,7 @@ model game_wordle {
   department departments @relation(fields: [department_id], references: [id])
 }
 
-model game_wordle_answers {
+model game_wordle_words_answers {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
@@ -240,7 +240,7 @@ model game_wordle_answers {
   department departments @relation(fields: [department_id], references: [id])
 }
 
-model game_wordle_attempts {
+model game_wordle_words_attempts {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
@@ -413,7 +413,7 @@ model users {
   quests                   quests[]
   comments                 comments[]
   achievements             user_achievements[]
-  game_wordle_attempts     game_wordle_attempts[]
+  game_wordle_words_attempts     game_wordle_words_attempts[]
   user_experience          user_experience[]
 }
 
