@@ -7,12 +7,14 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
+  Body,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiTags, ApiConsumes, ApiBody, ApiResponse } from '@nestjs/swagger'
 import { FilesService } from './files.service'
 import { GetFileStatsSchema } from './schema/GetFileStatsSchema'
 import { getFileStatsSchemaExample } from './schema/example/getFileStatsSchemaExample'
+import { CreateExcelDto } from './dto/CreateExcelDto'
 
 @ApiTags('commonModule')
 @Controller('commonModule/file')
@@ -52,5 +54,10 @@ export class FilesController {
   ): Promise<GetFileStatsSchema> {
     await this.filesService.uploadFile(file)
     return this.filesService.getFileStats(file.filename)
+  }
+
+  @Post('excel')
+  async createExcelFile(@Body() excelData: CreateExcelDto) {
+    return this.filesService.createExcelFile(excelData)
   }
 }

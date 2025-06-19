@@ -1,10 +1,12 @@
 import { Injectable, StreamableFile } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { GetFileStatsSchema } from './schema/GetFileStatsSchema'
-import { createReadStream } from 'fs'
+import { createReadStream, stat, statSync } from 'fs'
 import { join } from 'path'
 import { NotFoundError } from 'rxjs'
 import * as mime from 'mime-types'
+import { CreateExcelDto } from './dto/CreateExcelDto'
+import * as ExcelJS from 'exceljs'
 
 const BASE_FILE_URL = `http://${process.env.SERVER_HOSTNAME ?? 'localhost:' + process.env.PORT ?? 3000}/api/v1/commonModule/file`
 
@@ -74,5 +76,60 @@ export class FilesService {
         path: file.path,
       },
     })
+  }
+
+  async createExcelFile({
+    data,
+    columns,
+    fileName,
+  }: CreateExcelDto): Promise<GetFileStatsSchema> {
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet(fileName)
+
+    worksheet.columns = columns
+
+    for (let row of data) {
+      worksheet.addRow(row)
+    }
+
+    const headerRow = worksheet.getRow(1)
+    headerRow.eachCell(
+      (cell) =>
+        (cell.style = {
+          font: { bold: true },
+          alignment: { horizontal: 'center' },
+          border: {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          },
+          fill: {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFD3D3D3' },
+          },
+        }),
+    )
+
+    const generatedFileName = `${Date.now() + '-' + Math.round(Math.random() * 1e9)}`
+    const extension = 'xlsx'
+    const path = join(process.cwd(), `public/${generatedFileName}.${extension}`)
+
+    await workbook.xlsx.writeFile(path)
+
+    const { size } = statSync(path)
+
+    const savedFile = await this.prisma.shared_files.create({
+      data: {
+        name: `${generatedFileName}.${extension}`,
+        original_name: fileName,
+        extension,
+        path,
+        size,
+      },
+    })
+
+    return this.getFileStatsById(savedFile.id)
   }
 }
