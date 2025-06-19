@@ -253,15 +253,15 @@ model shared_files_on_events {
 model users {
   id                       Int                           @id @default(autoincrement())
   email                    String                        @unique
-  id_image_file            Int                           @default(10000)
+  id_image_file            Int                           @default(1)
   password                 String
   id_role                  Int?
   id_department            Int?
   token                    String                        @unique
   birth_date               DateTime?
-  first_name               String?
+  first_name               String?                       @default("Новый")
   id_position              Int?
-  last_name                String?
+  last_name                String?                       @default("Пользователь")
   patronymic               String?
   phone_number             String?
   telegram                 String?                       @unique
@@ -285,6 +285,23 @@ model users {
   feedback_answers         feedback_answers[]
 }
 
+model user_achievements {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  experience  Int
+  image_id    Int
+  image       shared_files @relation(fields: [image_id], references: [id])
+  users       users[]
+}
+
+model user_email_confirm {
+  id         Int      @id @default(autoincrement())
+  email      String
+  code       String
+  created_at DateTime @default(now())
+}
+
 model user_executors_on_events {
   id_executor Int
   id_event    Int
@@ -292,6 +309,23 @@ model user_executors_on_events {
   executor    users  @relation(fields: [id_executor], references: [id])
 
   @@id([id_event, id_executor])
+}
+
+model user_experience {
+  user_id       Int
+  department_id Int
+  experience    Int
+  user          users       @relation(fields: [user_id], references: [id])
+  department    departments @relation(fields: [department_id], references: [id])
+
+  @@id([user_id, department_id])
+}
+
+model user_levels {
+  level      Int     @id @default(autoincrement())
+  name       String
+  experience Int
+  users      users[]
 }
 
 model user_participants_on_events {
@@ -314,33 +348,6 @@ model user_roles {
   id          Int     @id @default(autoincrement())
   name        String
   description String?
-  users       users[]
-}
-
-model user_levels {
-  level      Int     @id @default(autoincrement())
-  name       String
-  experience Int
-  users      users[]
-}
-
-model user_experience {
-  user_id       Int
-  department_id Int
-  experience    Int
-  user          users       @relation(fields: [user_id], references: [id])
-  department    departments @relation(fields: [department_id], references: [id])
-
-  @@id([user_id, department_id])
-}
-
-model user_achievements {
-  id          Int          @id @default(autoincrement())
-  name        String
-  description String
-  experience  Int
-  image_id    Int
-  image       shared_files @relation(fields: [image_id], references: [id])
   users       users[]
 }
 

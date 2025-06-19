@@ -8,12 +8,14 @@ import {
   UseInterceptors,
   UploadedFile,
   Param,
+  Body,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiTags, ApiConsumes, ApiBody, ApiResponse } from '@nestjs/swagger'
 import { FilesService } from './files.service'
 import { GetFileStatsSchema } from './schema/GetFileStatsSchema'
 import { getFileStatsSchemaExample } from './schema/example/getFileStatsSchemaExample'
+import { CreateExcelDto } from './dto/CreateExcelDto'
 
 @ApiTags('commonModule')
 @Controller('commonModule/file')
@@ -48,6 +50,12 @@ export class FilesController {
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
   ): Promise<GetFileStatsSchema> {
-    return await this.filesService.uploadFile(file)
+    await this.filesService.uploadFile(file)
+    return this.filesService.getFileStats({ fileName: file.filename })
+  }
+
+  @Post('excel')
+  async createExcelFile(@Body() excelData: CreateExcelDto) {
+    return this.filesService.createExcelFile(excelData)
   }
 }

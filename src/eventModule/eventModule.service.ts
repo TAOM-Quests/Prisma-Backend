@@ -28,6 +28,8 @@ import { FilesService } from 'src/commonModule/files/files.service'
 import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
 import { CommentsService } from 'src/commonModule/comments/comments.service'
 import { GetCommentsSchema } from 'src/commonModule/comments/schema/GetCommentsSchema'
+import { GetUserProfileSchema } from 'src/userModule/schema/userModule.schema'
+import { UserModuleService } from 'src/userModule/userModule.service'
 
 @Injectable()
 export class EventModuleService {
@@ -36,6 +38,7 @@ export class EventModuleService {
     private filesService: FilesService,
     private gamingService: GamingService,
     private commentsService: CommentsService,
+    private userModuleService: UserModuleService,
   ) {}
 
   async getEvents(
@@ -215,6 +218,18 @@ export class EventModuleService {
       id: tag.id,
       name: tag.name,
     }))
+  }
+
+  async getParticipantsProfiles(eventId): Promise<GetUserProfileSchema[]> {
+    const foundParticipants = await this.prisma.users.findMany({
+      where: { events_where_participant: { some: { id_event: eventId } } },
+    })
+
+    return Promise.all(
+      foundParticipants.map((participant) =>
+        this.userModuleService.getUserProfileById(participant.id),
+      ),
+    )
   }
 
   private async getEventMinimizeWithAdditionalData(
