@@ -45,6 +45,7 @@ export class QuestModuleController {
   @ApiQuery({ name: 'id', type: 'number', required: false })
   @ApiQuery({ name: 'department', type: 'number', required: false })
   @ApiQuery({ name: 'tag', type: 'number', isArray: true, required: false })
+  @ApiQuery({ name: 'group', type: 'number', isArray: true, required: false })
   @ApiQuery({
     name: 'executor',
     type: 'number',
@@ -58,6 +59,7 @@ export class QuestModuleController {
     @Query('id') ids: string | string[],
     @Query('department') departmentsIds: string | string[],
     @Query('tag') tagsIds: string | string[],
+    @Query('group') groupsIds: string | string[],
     @Query('executor') executorsIds: string | string[],
     @Query('isCompleted') isCompleted: boolean,
     @Query('completeBy') completeByUserId: string,
@@ -73,6 +75,11 @@ export class QuestModuleController {
         ? isArray(tagsIds)
           ? tagsIds.map((id) => +id)
           : [+tagsIds]
+        : [],
+      groupsIds: groupsIds
+        ? isArray(groupsIds)
+          ? groupsIds.map((id) => +id)
+          : [+groupsIds]
         : [],
       executorsIds: executorsIds
         ? isArray(executorsIds)
