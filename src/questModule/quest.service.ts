@@ -257,10 +257,6 @@ export class QuestService {
     if (keys.includes('name')) upsertData.name = quest.name
     if (keys.includes('time')) upsertData.time = quest.time
     if (keys.includes('description')) upsertData.description = quest.description
-    if (keys.includes('imageId'))
-      upsertData.image = quest.imageId
-        ? { connect: { id: quest.imageId } }
-        : { disconnect: true }
     if (quest.difficultId) {
       upsertData.difficult = { connect: { id: quest.difficultId } }
     }
@@ -278,6 +274,14 @@ export class QuestService {
 
     upsertQuest.create = Object.assign(upsertQuest.create, upsertData)
     upsertQuest.update = upsertData
+
+    if (keys.includes('imageId'))
+      if (quest.imageId) {
+        upsertQuest.create.image = { connect: { id: quest.imageId } }
+        upsertQuest.update.image = { connect: { id: quest.imageId } }
+      } else {
+        upsertQuest.update.image = { disconnect: true }
+      }
 
     const savedQuest = await this.prisma.quests.upsert(upsertQuest)
 

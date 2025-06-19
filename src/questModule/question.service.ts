@@ -172,26 +172,21 @@ export class QuestionService {
 
     if (keys.includes('text')) upsertData.text = question.text
     if (keys.includes('type')) upsertData.type = question.type
-    if (keys.includes('images')) {
-      const oldImagesIds = (
-        await this.prisma.shared_files.findMany({
-          where: { quest_questions: { some: { id: question.id } } },
-        })
-      ).map((image) => image.id)
-      const newImagesIds = question.images
-        .filter((image) => image)
-        .map((image) => image.id)
-      const diffImagesIds = difference(oldImagesIds, newImagesIds)
 
-      upsertData.images = {
-        connect: question.images
-          .filter((image) => image)
-          .map((image) => ({ id: image.id })),
-        disconnect: diffImagesIds.map((image) => ({ id: image.id })),
-      }
-    }
     upsertQuestion.create = Object.assign(upsertQuestion.create, upsertData)
     upsertQuestion.update = upsertData
+
+    if (keys.includes('images')) {
+      const imagesIds = question.images.map((image) => ({ id: image.id }))
+
+      if (question.id) {
+        upsertQuestion.update.images = { set: imagesIds }
+      } else {
+        upsertQuestion.create.images = {
+          connect: imagesIds,
+        }
+      }
+    }
 
     const savedQuestion =
       await this.prisma.quest_questions.upsert(upsertQuestion)
