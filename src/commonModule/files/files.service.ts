@@ -48,23 +48,27 @@ export class FilesService {
       id: file.id,
       name: file.name,
       size: file.size,
-      extension: fileName.split('.')[fileName.split('.').length - 1],
+      extension: fileName.split('.').pop(),
       originalName: file.original_name,
       url: `${BASE_FILE_URL}?fileName=${file.name}`,
     }
   }
 
   async uploadFile(file: Express.Multer.File): Promise<void> {
-    const extension =
-      file.originalname.split('.')[file.originalname.split('.').length - 1]
-    const originalName = file.originalname
-      .split('.')
-      .filter((_, index) => index !== file.originalname.split('.').length - 1)
-      .join('.')
     const size = file.size
+    const extension = file.originalname.split('.').pop()
+    const originalName = file.originalname.split('.').slice(0, -1).join('.')
 
-    await this.prisma.shared_files.create({
-      data: {
+    await this.prisma.shared_files.upsert({
+      where: { id: 100 },
+      create: {
+        name: file.filename,
+        original_name: originalName,
+        size,
+        extension,
+        path: file.path,
+      },
+      update: {
         name: file.filename,
         original_name: originalName,
         size,
