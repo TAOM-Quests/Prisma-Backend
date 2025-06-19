@@ -26,7 +26,7 @@ export class FilesService {
 
     if (!sharedFile) throw new NotFoundError('File not found')
 
-    const file = createReadStream(join(process.cwd(), sharedFile.path))
+    const file = createReadStream(sharedFile.path)
     const stream = new StreamableFile(file)
     const fileName = encodeURIComponent(
       `${sharedFile.original_name}.${sharedFile.extension}`,
