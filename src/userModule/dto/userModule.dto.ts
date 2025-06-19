@@ -7,11 +7,36 @@ export class GetUsersQuery {
   limit: number
   offset: number
   id?: number
+  email?: string
   roleId?: number
   isAdmin?: boolean
   positionId?: number
   isEmployee?: boolean
   departmentId?: number
+}
+
+export class CreateEmailConfirmCodeDto {
+  @ApiProperty({
+    example: 'test@gmail.com',
+    required: true,
+  })
+  @IsEmail()
+  email: string
+}
+
+export class ConfirmEmailCodeDto {
+  @ApiProperty({
+    example: 'test@gmail.com',
+    required: true,
+  })
+  @IsEmail()
+  email: string
+
+  @ApiProperty({
+    example: '1234',
+    required: true,
+  })
+  code: number
 }
 
 export class UserAuthDto {

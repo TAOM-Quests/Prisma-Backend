@@ -10,6 +10,8 @@ import {
   UpdateUserProfileSchema,
 } from './schema/userModule.schema'
 import {
+  ConfirmEmailCodeDto,
+  CreateEmailConfirmCodeDto,
   GetUsersQuery,
   UpdateNotificationsSettingsDto,
   UpdateProfileDto,
@@ -21,6 +23,10 @@ import { NotFoundError } from 'src/errors/notFound'
 import { BadRequestError } from 'src/errors/badRequest'
 import { Prisma, user_sex } from '@prisma/client'
 import { FilesService } from 'src/commonModule/files/files.service'
+import { sendEmail } from 'src/services/notifier/common/sendEmail'
+import * as moment from 'moment'
+import { readFileSync } from 'fs'
+import * as path from 'path'
 import { NotificationsGateway } from './notifications.gateway'
 
 const USER_SEX = {
@@ -29,6 +35,7 @@ const USER_SEX = {
 }
 
 const ROLE_ADMIN_ID = 1
+const EMAIL_CONFIRM_TIMEOUT = 1000 * 60 * 60 //Минута
 
 @Injectable()
 export class UserModuleService {
@@ -43,6 +50,7 @@ export class UserModuleService {
     const where: Prisma.usersWhereInput = {}
 
     if (getUsers.id) where.id = getUsers.id
+    if (getUsers.email) where.email = getUsers.email
     if (getUsers.roleId) where.id_role = getUsers.roleId
     if (getUsers.positionId) where.id_position = getUsers.positionId
     if (getUsers.departmentId) where.id_department = getUsers.departmentId
@@ -77,6 +85,53 @@ export class UserModuleService {
         return resultUser
       }),
     )
+  }
+
+  async sendConfirmationEmail({
+    email,
+  }: CreateEmailConfirmCodeDto): Promise<void> {
+    const code = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, '0')
+    const letterText = readFileSync(
+      path.join(process.cwd(), 'src/views/email/emailConfirmView.txt'),
+      'utf8',
+    ).replace('%confirmation_code%', code)
+    const letterHtml = readFileSync(
+      path.join(process.cwd(), 'src/views/email/emailConfirmView.html'),
+      'utf8',
+    ).replace('%confirmation_code%', code)
+
+    await this.prisma.user_email_confirm.create({
+      data: {
+        email,
+        code,
+      },
+    })
+
+    await sendEmail({
+      to: email,
+      subject: 'Confirmation code',
+      text: letterText,
+      html: letterHtml,
+    })
+  }
+
+  async confirmEmail({ email, code }: ConfirmEmailCodeDto): Promise<boolean> {
+    const foundCode = await this.prisma.user_email_confirm.findFirst({
+      where: {
+        email,
+        created_at: {
+          gte: moment().subtract(EMAIL_CONFIRM_TIMEOUT).toDate(),
+          lte: moment().toDate(),
+        },
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    })
+
+    return foundCode?.code === code.toString().padStart(4, '0')
   }
 
   async createUser(userAuth: UserAuthDto): Promise<AuthUserSchema> {

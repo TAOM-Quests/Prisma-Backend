@@ -286,6 +286,23 @@ model users {
   user_notifications_settings user_notifications_settings[]
 }
 
+model user_achievements {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  experience  Int
+  image_id    Int
+  image       shared_files @relation(fields: [image_id], references: [id])
+  users       users[]
+}
+
+model user_email_confirm {
+  id         Int      @id @default(autoincrement())
+  email      String
+  code       String
+  created_at DateTime @default(now())
+}
+
 model user_executors_on_events {
   id_executor Int
   id_event    Int
@@ -293,6 +310,41 @@ model user_executors_on_events {
   executor    users  @relation(fields: [id_executor], references: [id])
 
   @@id([id_event, id_executor])
+}
+
+model user_experience {
+  user_id       Int
+  department_id Int
+  experience    Int
+  user          users       @relation(fields: [user_id], references: [id])
+  department    departments @relation(fields: [department_id], references: [id])
+
+  @@id([user_id, department_id])
+}
+
+model user_levels {
+  level      Int     @id @default(autoincrement())
+  name       String
+  experience Int
+  users      users[]
+}
+
+model user_notifications_settings {
+  email    Boolean
+  telegram Boolean
+  type_id  Int
+  user_id  Int
+  user     users                    @relation(fields: [user_id], references: [id])
+  type     user_notifications_types @relation(fields: [type_id], references: [id])
+
+  @@unique([user_id, type_id])
+}
+
+model user_notifications_types {
+  id                          Int                           @id @default(autoincrement())
+  name                        String
+  roles                       Int[]
+  user_notifications_settings user_notifications_settings[]
 }
 
 model user_participants_on_events {
@@ -316,51 +368,6 @@ model user_roles {
   name        String
   description String?
   users       users[]
-}
-
-model user_levels {
-  level      Int     @id @default(autoincrement())
-  name       String
-  experience Int
-  users      users[]
-}
-
-model user_experience {
-  user_id       Int
-  department_id Int
-  experience    Int
-  user          users       @relation(fields: [user_id], references: [id])
-  department    departments @relation(fields: [department_id], references: [id])
-
-  @@id([user_id, department_id])
-}
-
-model user_achievements {
-  id          Int          @id @default(autoincrement())
-  name        String
-  description String
-  experience  Int
-  image_id    Int
-  image       shared_files @relation(fields: [image_id], references: [id])
-  users       users[]
-}
-
-model user_notifications_settings {
-  email    Boolean
-  telegram Boolean
-  type_id  Int
-  user_id  Int
-  user     users                    @relation(fields: [user_id], references: [id])
-  type     user_notifications_types @relation(fields: [type_id], references: [id])
-
-  @@unique([user_id, type_id])
-}
-
-model user_notifications_types {
-  id                          Int                           @id @default(autoincrement())
-  name                        String
-  roles                       Int[]
-  user_notifications_settings user_notifications_settings[]
 }
 
 enum user_sex {
