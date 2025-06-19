@@ -252,14 +252,19 @@ export class QuestService {
     }
     const upsertData: Prisma.questsUpdateInput = {}
 
-    if (quest.name) upsertData.name = quest.name
-    if (quest.time) upsertData.time = quest.time
-    if (quest.description) upsertData.description = quest.description
-    if (quest.imageId) upsertData.image = { connect: { id: quest.imageId } }
+    const keys = Object.keys(quest)
+
+    if (keys.includes('name')) upsertData.name = quest.name
+    if (keys.includes('time')) upsertData.time = quest.time
+    if (keys.includes('description')) upsertData.description = quest.description
+    if (keys.includes('imageId'))
+      upsertData.image = quest.imageId
+        ? { connect: { id: quest.imageId } }
+        : { disconnect: true }
     if (quest.difficultId) {
       upsertData.difficult = { connect: { id: quest.difficultId } }
     }
-    if (quest.group) {
+    if (keys.includes('group')) {
       upsertData.group = {
         connectOrCreate: {
           where: { id: quest.group.id ?? -1 },

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { difference } from 'lodash'
 import { SaveAnswerDto, SaveQuestionDto } from './dto/questModule.dto'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { Prisma } from '@prisma/client'
@@ -167,13 +168,26 @@ export class QuestionService {
     }
     const upsertData: Prisma.quest_questionsUpdateInput = {}
 
-    if (question.text) upsertData.text = question.text
-    if (question.type) upsertData.type = question.type
-    if (question.images) {
+    const keys = Object.keys(question)
+
+    if (keys.includes('text')) upsertData.text = question.text
+    if (keys.includes('type')) upsertData.type = question.type
+    if (keys.includes('images')) {
+      const oldImagesIds = (
+        await this.prisma.shared_files.findMany({
+          where: { quest_questions: { some: { id: question.id } } },
+        })
+      ).map((image) => image.id)
+      const newImagesIds = question.images
+        .filter((image) => image)
+        .map((image) => image.id)
+      const diffImagesIds = difference(oldImagesIds, newImagesIds)
+
       upsertData.images = {
         connect: question.images
           .filter((image) => image)
           .map((image) => ({ id: image.id })),
+        disconnect: diffImagesIds.map((image) => ({ id: image.id })),
       }
     }
     upsertQuestion.create = Object.assign(upsertQuestion.create, upsertData)
