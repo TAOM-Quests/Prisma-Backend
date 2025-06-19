@@ -21,6 +21,7 @@ import { NotFoundError } from 'src/errors/notFound'
 import { BadRequestError } from 'src/errors/badRequest'
 import { Prisma, user_sex } from '@prisma/client'
 import { FilesService } from 'src/commonModule/files/files.service'
+import { NotificationsGateway } from './notifications.gateway'
 
 const USER_SEX = {
   MALE: 'Мужской',
@@ -35,6 +36,7 @@ export class UserModuleService {
     private jwt: JwtService,
     private prisma: PrismaService,
     private filesService: FilesService,
+    private notificationsGateway: NotificationsGateway,
   ) {}
 
   async getUsers(getUsers: GetUsersQuery): Promise<GetUsersSchema[]> {
@@ -283,6 +285,16 @@ export class UserModuleService {
         id,
       },
     })
+
+    if (Object.keys(updateProfile).includes('password')) {
+      this.notificationsGateway.sendNotification({
+        type: 'system',
+        userId: id,
+        name: 'Смена пароля',
+        description: 'Пароль успешно изменен',
+        imageUrl: (await this.filesService.getFileStatsById(9)).url,
+      })
+    }
 
     return this.getUserProfileById(id)
   }
