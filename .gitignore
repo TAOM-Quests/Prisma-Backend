@@ -2,7 +2,8 @@
 /dist
 /node_modules
 /build
-/public
+/public/*
+!/public/default
 
 # Logs
 logs
