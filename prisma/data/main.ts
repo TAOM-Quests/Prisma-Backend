@@ -25,8 +25,8 @@ export const main = async (): Promise<void> => {
   //Данные для геймификации
   await userLevels()
   await userAchievements()
-  await crosswordWords()
   await crosswordDifficulties()
+  await crosswordWords()
 
   //Данные для мероприятий
   await eventTypes()
