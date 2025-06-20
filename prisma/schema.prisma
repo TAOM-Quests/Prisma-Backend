@@ -251,38 +251,39 @@ model shared_files_on_events {
 }
 
 model users {
-  id                       Int                           @id @default(autoincrement())
-  email                    String                        @unique
-  id_image_file            Int                           @default(1)
-  password                 String
-  id_role                  Int?
-  id_department            Int?
-  token                    String                        @unique
-  birth_date               DateTime?
-  first_name               String?                       @default("Новый")
-  id_position              Int?
-  last_name                String?                       @default("Пользователь")
-  patronymic               String?
-  phone_number             String?
-  telegram                 String?                       @unique
-  telegram_chat_id         Int?
-  level_number             Int                           @default(1)
-  experience               Int                           @default(0)
-  sex                      user_sex?
-  complete_quests          complete_quests[]
-  events_where_inspector   events[]
-  events_where_executor    user_executors_on_events[]
-  events_where_participant user_participants_on_events[]
-  department               departments?                  @relation(fields: [id_department], references: [id])
-  image                    shared_files                  @relation(fields: [id_image_file], references: [id])
-  position                 user_positions?               @relation(fields: [id_position], references: [id])
-  role                     user_roles?                   @relation(fields: [id_role], references: [id])
-  level                    user_levels                   @relation(fields: [level_number], references: [level])
-  quests                   quests[]
-  comments                 comments[]
-  user_experience          user_experience[]
-  achievements             user_achievements[]
-  feedback_answers         feedback_answers[]
+  id                          Int                           @id @default(autoincrement())
+  email                       String                        @unique
+  id_image_file               Int                           @default(1)
+  password                    String
+  id_role                     Int?
+  id_department               Int?
+  token                       String                        @unique
+  birth_date                  DateTime?
+  first_name                  String?                       @default("Новый")
+  id_position                 Int?
+  last_name                   String?                       @default("Пользователь")
+  patronymic                  String?
+  phone_number                String?
+  telegram                    String?                       @unique
+  telegram_chat_id            Int?
+  level_number                Int                           @default(1)
+  experience                  Int                           @default(0)
+  sex                         user_sex?
+  complete_quests             complete_quests[]
+  events_where_inspector      events[]
+  events_where_executor       user_executors_on_events[]
+  events_where_participant    user_participants_on_events[]
+  department                  departments?                  @relation(fields: [id_department], references: [id])
+  image                       shared_files                  @relation(fields: [id_image_file], references: [id])
+  position                    user_positions?               @relation(fields: [id_position], references: [id])
+  role                        user_roles?                   @relation(fields: [id_role], references: [id])
+  level                       user_levels                   @relation(fields: [level_number], references: [level])
+  quests                      quests[]
+  comments                    comments[]
+  user_experience             user_experience[]
+  achievements                user_achievements[]
+  feedback_answers            feedback_answers[]
+  user_notifications_settings user_notifications_settings[]
 }
 
 model user_achievements {
@@ -326,6 +327,24 @@ model user_levels {
   name       String
   experience Int
   users      users[]
+}
+
+model user_notifications_settings {
+  email    Boolean
+  telegram Boolean
+  type_id  Int
+  user_id  Int
+  user     users                    @relation(fields: [user_id], references: [id])
+  type     user_notifications_types @relation(fields: [type_id], references: [id])
+
+  @@unique([user_id, type_id])
+}
+
+model user_notifications_types {
+  id                          Int                           @id @default(autoincrement())
+  name                        String
+  roles                       Int[]
+  user_notifications_settings user_notifications_settings[]
 }
 
 model user_participants_on_events {

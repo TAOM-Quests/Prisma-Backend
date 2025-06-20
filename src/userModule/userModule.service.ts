@@ -4,6 +4,7 @@ import {
   AuthUserSchema,
   GetPositionsSchema,
   GetRolesSchema,
+  GetUserNotificationSettingsItemSchema,
   GetUserProfileSchema,
   GetUsersSchema,
   UpdateUserProfileSchema,
@@ -12,6 +13,7 @@ import {
   ConfirmEmailCodeDto,
   CreateEmailConfirmCodeDto,
   GetUsersQuery,
+  UpdateNotificationsSettingsDto,
   UpdateProfileDto,
   UserAuthDto,
 } from './dto/userModule.dto'
@@ -25,6 +27,7 @@ import { sendEmail } from 'src/services/notifier/common/sendEmail'
 import * as moment from 'moment'
 import { readFileSync } from 'fs'
 import * as path from 'path'
+import { NotificationsGateway } from './notifications.gateway'
 
 const USER_SEX = {
   MALE: 'Мужской',
@@ -40,6 +43,7 @@ export class UserModuleService {
     private jwt: JwtService,
     private prisma: PrismaService,
     private filesService: FilesService,
+    private notificationsGateway: NotificationsGateway,
   ) {}
 
   async getUsers(getUsers: GetUsersQuery): Promise<GetUsersSchema[]> {
@@ -133,9 +137,7 @@ export class UserModuleService {
   }
 
   async createUser(userAuth: UserAuthDto): Promise<AuthUserSchema> {
-    const saltRounds = 10
-    const salt = genSaltSync(saltRounds)
-    const hashedPassword = hashSync(userAuth.password, salt)
+    const hashedPassword = this.cryptPassword(userAuth.password)
 
     const token = await this.jwt.signAsync({
       sun: userAuth.email,
@@ -289,6 +291,10 @@ export class UserModuleService {
           isReceived: !!foundAchievements.find((a) => a.id === ach.id),
         })),
       ),
+      notificationsSettings: await this.getNotificationsSettings(
+        foundUser.id,
+        foundUser.id_role,
+      ),
     }
 
     if (isEmployee) {
@@ -333,7 +339,7 @@ export class UserModuleService {
       throw new NotFoundError(`User with id ${id} not found`)
     }
 
-    const updatedUser = await this.prisma.users.update({
+    await this.prisma.users.update({
       data: {
         ...this.requestUpdateProfileToDbFields(updateProfile),
       },
@@ -341,6 +347,16 @@ export class UserModuleService {
         id,
       },
     })
+
+    if (Object.keys(updateProfile).includes('password')) {
+      this.notificationsGateway.sendNotification({
+        type: 'system',
+        userId: id,
+        name: 'Смена пароля',
+        description: 'Пароль успешно изменен',
+        imageUrl: (await this.filesService.getFileStats({ id: 19 })).url,
+      })
+    }
 
     return this.getUserProfileById(id)
   }
@@ -361,6 +377,45 @@ export class UserModuleService {
       id: position.id,
       name: position.name,
     }))
+  }
+
+  async updateNotificationsSettings(
+    userId: number,
+    updateSetting: UpdateNotificationsSettingsDto,
+  ): Promise<GetUserNotificationSettingsItemSchema[]> {
+    const newSettings: Prisma.user_notifications_settingsUpdateInput = {}
+
+    const foundUser = await this.prisma.users.findUnique({
+      where: { id: userId },
+    })
+
+    if (Object.keys(updateSetting).includes('email')) {
+      newSettings.email = updateSetting.email
+    }
+    if (Object.keys(updateSetting).includes('telegram')) {
+      newSettings.telegram = updateSetting.telegram
+    }
+
+    await this.prisma.user_notifications_settings.upsert({
+      where: {
+        user_id_type_id: { user_id: userId, type_id: updateSetting.typeId },
+      },
+      update: newSettings,
+      create: {
+        user_id: userId,
+        type_id: updateSetting.typeId,
+        email: updateSetting.email ?? false,
+        telegram: updateSetting.telegram ?? false,
+      },
+    })
+
+    return this.getNotificationsSettings(userId, foundUser.id_role)
+  }
+
+  private cryptPassword(password: string): string {
+    const saltRounds = 10
+    const salt = genSaltSync(saltRounds)
+    return hashSync(password, salt)
   }
 
   private async setRole(entity, roleId) {
@@ -417,6 +472,9 @@ export class UserModuleService {
     if (updatedFields.includes('telegram')) {
       result.telegram = updateProfile.telegram
     }
+    if (updatedFields.includes('password')) {
+      result.password = this.cryptPassword(updateProfile.password)
+    }
     if (updatedFields.includes('imageId')) {
       result.image = { connect: { id: updateProfile.imageId ?? 1 } }
     }
@@ -443,5 +501,28 @@ export class UserModuleService {
     }
 
     return result
+  }
+
+  private async getNotificationsSettings(
+    userId: number,
+    roleId?: number,
+  ): Promise<GetUserNotificationSettingsItemSchema[]> {
+    const foundTypes = await this.prisma.user_notifications_types.findMany()
+    const foundSettings =
+      await this.prisma.user_notifications_settings.findMany({
+        where: {
+          user_id: userId,
+        },
+      })
+
+    return foundTypes
+      .filter((type) => !type.roles.length || type.roles.includes(roleId))
+      .map((type) => ({
+        name: type.name,
+        typeId: type.id,
+        email: foundSettings.find((s) => s.type_id === type.id)?.email ?? false,
+        telegram:
+          foundSettings.find((s) => s.type_id === type.id)?.telegram ?? false,
+      }))
   }
 }
