@@ -31,6 +31,7 @@ import {
   SaveQuestDto,
 } from './dto/questModule.dto'
 import { isArray } from 'class-validator'
+import { GetUserProfileSchema } from 'src/userModule/schema/userModule.schema'
 
 @ApiTags('questModule')
 @Controller('questModule')
@@ -117,6 +118,13 @@ export class QuestModuleController {
   @Get('/quests/complete/:id')
   async getCompleteQuest(@Param('id') id: string): Promise<GetQuestSchema> {
     return this.questModuleService.getCompleteQuest(+id)
+  }
+
+  @Get('/quests/:id/participants')
+  async getQuestParticipants(
+    @Param('id') id: string,
+  ): Promise<GetUserProfileSchema[]> {
+    return this.questModuleService.getParticipantsProfiles(+id)
   }
 
   @ApiResponse({

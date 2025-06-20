@@ -19,6 +19,8 @@ import {
 import { QuestService } from './quest.service'
 import { QuestionService } from './question.service'
 import { ResultService } from './result.service'
+import { GetUserProfileSchema } from 'src/userModule/schema/userModule.schema'
+import { UserModuleService } from 'src/userModule/userModule.service'
 
 @Injectable()
 export class QuestModuleService {
@@ -27,6 +29,7 @@ export class QuestModuleService {
     private questService: QuestService,
     private resultService: ResultService,
     private questionService: QuestionService,
+    private userModuleService: UserModuleService,
   ) {}
 
   async getQuests(
@@ -53,7 +56,7 @@ export class QuestModuleService {
 
   async getCompleteQuests(
     getQuestsQuery: GetCompleteQuestsMinimizeQuery,
-  ): Promise<GetQuestMinimizeSchema[]> {
+  ): Promise<GetQuestSchema[]> {
     const conditions: Prisma.Sql[] = []
 
     if (getQuestsQuery.completeByUserId) {
@@ -111,6 +114,21 @@ export class QuestModuleService {
 
   async getCompleteQuest(id: number): Promise<GetQuestSchema> {
     return this.questService.getCompleteById(id)
+  }
+
+  async getParticipantsProfiles(questId): Promise<GetUserProfileSchema[]> {
+    const participants = await this.prisma.$queryRaw<{ id: number }[]>`
+        SELECT DISTINCT ON id
+        FROM users
+        JOIN complete_quests ON users.id = complete_quests.id_user
+        WHERE (complete_quests->>'quest_data')::jsonb->>'id' = ${questId}
+      `
+
+    return Promise.all(
+      participants.map((participant) =>
+        this.userModuleService.getUserProfileById(participant.id),
+      ),
+    )
   }
 
   async createQuest(quest: SaveQuestDto): Promise<GetQuestSchema> {
