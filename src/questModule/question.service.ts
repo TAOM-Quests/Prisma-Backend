@@ -41,7 +41,7 @@ export class QuestionService {
       answer: await this.transformAnswer(question.id_answer),
       images: await Promise.all(
         foundImages.map((image) =>
-          this.filesService.getFileStatsById(image.id),
+          this.filesService.getFileStats({ id: image.id }),
         ),
       ),
     }
@@ -87,7 +87,7 @@ export class QuestionService {
         options: singleAnswer.options,
         optionsImages: await Promise.all(
           singleAnswer.images_ids.map(async (id) =>
-            id ? this.filesService.getFileStatsById(id as number) : null,
+            id ? this.filesService.getFileStats({ id: id as number }) : null,
           ),
         ),
         correctAnswer: singleAnswer.correct_answers,
@@ -103,7 +103,7 @@ export class QuestionService {
         options: multipleAnswer.options,
         optionsImages: await Promise.all(
           multipleAnswer.images_ids.map(async (id) =>
-            id ? this.filesService.getFileStatsById(id as number) : null,
+            id ? this.filesService.getFileStats({ id: id as number }) : null,
           ),
         ),
         correctAnswer: multipleAnswer.correct_answers,
@@ -119,7 +119,7 @@ export class QuestionService {
         options: connectionAnswer.options,
         optionsImages: await Promise.all(
           connectionAnswer.images_ids.map(async (id) =>
-            id ? this.filesService.getFileStatsById(id as number) : null,
+            id ? this.filesService.getFileStats({ id: id as number }) : null,
           ),
         ),
         correctAnswer: connectionAnswer.correct_answers,
@@ -135,7 +135,7 @@ export class QuestionService {
         options: boxSortingAnswer.options,
         optionsImages: await Promise.all(
           boxSortingAnswer.images_ids.map(async (id) =>
-            id ? this.filesService.getFileStatsById(id as number) : null,
+            id ? this.filesService.getFileStats({ id: id as number }) : null,
           ),
         ),
         correctAnswer: boxSortingAnswer.correct_answers as {

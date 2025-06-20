@@ -262,28 +262,35 @@ export class QuestService {
     if (quest.difficultId) {
       upsertData.difficult = { connect: { id: quest.difficultId } }
     }
-    if (keys.includes('group')) {
-      upsertData.group = {
-        connectOrCreate: {
-          where: { id: quest.group.id ?? -1 },
-          create: {
-            name: quest.group.name,
-            department: { connect: { id: quest.departmentId } },
-          },
-        },
-      }
-    }
 
     upsertQuest.create = Object.assign(upsertQuest.create, upsertData)
     upsertQuest.update = upsertData
 
-    if (keys.includes('imageId'))
+    if (keys.includes('group')) {
+      if (quest.group) {
+        upsertQuest.create.group = upsertQuest.update.group = {
+          connectOrCreate: {
+            where: { id: quest.group.id ?? -1 },
+            create: {
+              name: quest.group.name,
+              department: { connect: { id: quest.departmentId } },
+            },
+          },
+        }
+      } else {
+        upsertQuest.update.group = { disconnect: true }
+      }
+    }
+    if (keys.includes('imageId')) {
+      console.log('IMAGE', quest.imageId)
+
       if (quest.imageId) {
         upsertQuest.create.image = { connect: { id: quest.imageId } }
         upsertQuest.update.image = { connect: { id: quest.imageId } }
       } else {
         upsertQuest.update.image = { disconnect: true }
       }
+    }
 
     const savedQuest = await this.prisma.quests.upsert(upsertQuest)
 
