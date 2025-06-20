@@ -32,14 +32,29 @@ const sendTomorrowEventsNotifications = async (prisma: PrismaService) => {
     })
 
     for (let participant of participants) {
-      await sendEmail({
-        to: participant.email,
-        subject: 'TQ Event Notification',
-        text: `Event ${event.name} will start in 24 hours`,
-        html: `Event <b>${event.name}</b> will start in 24 hours`,
-      })
+      const participantNotificationsSettings =
+        await prisma.user_notifications_settings.findUnique({
+          where: {
+            user_id_type_id: {
+              user_id: participant.id,
+              type_id: 1,
+            },
+          },
+        })
 
-      if (participant.telegram_chat_id) {
+      if (participantNotificationsSettings.email) {
+        await sendEmail({
+          to: participant.email,
+          subject: 'TQ Event Notification',
+          text: `Event ${event.name} will start in 24 hours`,
+          html: `Event <b>${event.name}</b> will start in 24 hours`,
+        })
+      }
+
+      if (
+        participant.telegram_chat_id &&
+        participantNotificationsSettings.telegram
+      ) {
         await sendTelegram({
           chatId: participant.telegram_chat_id,
           message: `Event ${event.name} will start in 24 hours`,

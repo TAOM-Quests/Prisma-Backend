@@ -7,29 +7,29 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
+  Param,
+  Body,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiTags, ApiConsumes, ApiBody, ApiResponse } from '@nestjs/swagger'
 import { FilesService } from './files.service'
 import { GetFileStatsSchema } from './schema/GetFileStatsSchema'
 import { getFileStatsSchemaExample } from './schema/example/getFileStatsSchemaExample'
+import { CreateExcelDto } from './dto/CreateExcelDto'
 
 @ApiTags('commonModule')
 @Controller('commonModule/file')
 export class FilesController {
   constructor(private filesService: FilesService) {}
 
-  @Get('')
-  async getFile(@Query('fileName') fileName: string): Promise<StreamableFile> {
-    return this.filesService.getFile(fileName)
+  @Get(':id')
+  async getFile(@Param('id') id: string): Promise<StreamableFile> {
+    return this.filesService.getFile({ id: +id })
   }
 
-  @Get('stats')
-  async getFileStats(
-    @Query('fileName') fileName: string,
-    @Req() req: Request,
-  ): Promise<GetFileStatsSchema> {
-    return this.filesService.getFileStats(fileName)
+  @Get(':id/stats')
+  async getFileStats(@Param('id') id: string): Promise<GetFileStatsSchema> {
+    return this.filesService.getFileStats({ id: +id })
   }
 
   @ApiConsumes('multipart/form-data')
@@ -51,6 +51,11 @@ export class FilesController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<GetFileStatsSchema> {
     await this.filesService.uploadFile(file)
-    return this.filesService.getFileStats(file.filename)
+    return this.filesService.getFileStats({ fileName: file.filename })
+  }
+
+  @Post('excel')
+  async createExcelFile(@Body() excelData: CreateExcelDto) {
+    return this.filesService.createExcelFile(excelData)
   }
 }

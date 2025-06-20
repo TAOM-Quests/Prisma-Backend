@@ -11,19 +11,30 @@ const SHARED_FILES: { id: number; name: string }[] = [
   { id: 6, name: 'Achievements_experience.png' },
   { id: 7, name: 'First_event_achievement.png' },
   { id: 8, name: 'First_quest_achievement.png' },
+  { id: 9, name: 'Publicrelations_department.png' },
+  { id: 10, name: 'Informatics_department.png' },
+  { id: 11, name: 'Economics_department.png' },
+  { id: 12, name: 'Management_department.png' },
+  { id: 13, name: 'Design_department.png' },
+  { id: 14, name: 'Logo.png' },
+  { id: 15, name: 'Taom_login.png' },
+  { id: 16, name: 'Banner_event.png' },
+  { id: 17, name: 'System_noty.png' },
 ]
 
 export const sharedFiles = async (): Promise<void> => {
   await prisma.$transaction(async (tx) => {
     for (let file of SHARED_FILES) {
-      const foundFile = await statSync(`${process.cwd()}/public/${file.name}`)
+      const foundFile = await statSync(
+        `${process.cwd()}/public/default/${file.name}`,
+      )
       const fileData: Prisma.shared_filesCreateManyInput = {
         id: file.id,
         name: file.name,
         original_name: file.name,
         size: foundFile.size,
         extension: file.name.split('.')[file.name.split('.').length - 1],
-        path: '/public/' + file.name,
+        path: '/public/default/' + file.name,
       }
 
       await tx.shared_files.upsert({
@@ -33,6 +44,13 @@ export const sharedFiles = async (): Promise<void> => {
       })
     }
 
-    await tx.$executeRaw`ALTER SEQUENCE shared_files_id_seq RESTART WITH 10001;`
+    const maxId = await tx.shared_files.aggregate({
+      _max: { id: true },
+    })
+    const nextId = maxId._max.id ? Math.max(maxId._max.id + 1, 10001) : 10001
+
+    await tx.$executeRawUnsafe(
+      `ALTER SEQUENCE shared_files_id_seq RESTART WITH ${nextId}`,
+    )
   })
 }
