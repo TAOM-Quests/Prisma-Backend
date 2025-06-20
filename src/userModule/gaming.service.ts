@@ -28,9 +28,9 @@ export class GamingService {
     const foundUser = await this.prisma.users.findUnique({
       where: { id: userId },
     })
-    const foundImage = await this.filesService.getFileStats(
-      `${capitalize(experienceSource)}_experience.png`,
-    )
+    const foundImage = await this.filesService.getFileStats({
+      fileName: `${capitalize(experienceSource)}_experience.png`,
+    })
 
     this.notificationsGateway.sendNotification({
       userId,
@@ -85,9 +85,9 @@ export class GamingService {
     const foundAchievement = await this.prisma.user_achievements.findUnique({
       where: { id: achievementId },
     })
-    const foundImage = await this.filesService.getFileStatsById(
-      foundAchievement.image_id,
-    )
+    const foundImage = await this.filesService.getFileStats({
+      id: foundAchievement.image_id,
+    })
 
     if (!userAchievements.find((a) => a.id === achievementId)) {
       await this.prisma.users.update({
@@ -131,7 +131,9 @@ export class GamingService {
       },
     })
 
-    const foundImage = await this.filesService.getFileStats('Level_up.png')
+    const foundImage = await this.filesService.getFileStats({
+      fileName: 'Level_up.png',
+    })
 
     this.notificationsGateway.sendNotification({
       userId,
