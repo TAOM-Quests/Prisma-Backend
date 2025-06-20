@@ -36,9 +36,9 @@ const USER_SEX = {
 }
 
 const ROLE_ADMIN_ID = 1
-const ROLES_INSPECTOR_IDS = [2]
-const ROLES_EMPLOYEE_IDS = [2, 3]
-const ROLES_GAME_MASTER_IDS = [4]
+const ROLES_INSPECTOR_IDS = [1, 2]
+const ROLES_EMPLOYEE_IDS = [1, 2, 3]
+const ROLES_GAME_MASTER_IDS = [1, 4]
 const EMAIL_CONFIRM_TIMEOUT = 1000 * 60 * 60 //Минута
 
 @Injectable()
