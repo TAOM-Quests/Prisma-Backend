@@ -82,10 +82,11 @@ export class QuestModuleController {
         : [],
     }
 
+    if (completeByUserId) getQuery.completeByUserId = +completeByUserId
+
     return isCompleted
       ? this.questModuleService.getCompleteQuests({
           ...getQuery,
-          completeByUserId: +completeByUserId,
         })
       : this.questModuleService.getQuests(getQuery)
   }
