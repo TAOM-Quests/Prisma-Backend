@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { difference } from 'lodash'
 import { SaveAnswerDto, SaveQuestionDto } from './dto/questModule.dto'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { Prisma } from '@prisma/client'
@@ -12,32 +13,47 @@ import {
   QuestAnswer,
 } from 'src/models/questAnswer'
 import { NotFoundError } from 'src/errors/notFound'
+import { FilesService } from 'src/commonModule/files/files.service'
 
 @Injectable()
 export class QuestionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private filesService: FilesService,
+  ) {}
   async getById(id: number): Promise<GetQuestQuestionSchema> {
-    const question = await this.prisma.questions.findUnique({ where: { id } })
+    const question = await this.prisma.quest_questions.findUnique({
+      where: { id },
+    })
 
     if (!question) {
       throw new NotFoundError(`Question with id ${id} not found`)
     }
+
+    const foundImages = await this.prisma.shared_files.findMany({
+      where: { quest_questions: { some: { id: question.id } } },
+    })
 
     return {
       id: question.id,
       text: question.text,
       type: question.type,
       answer: await this.transformAnswer(question.id_answer),
+      images: await Promise.all(
+        foundImages.map((image) =>
+          this.filesService.getFileStatsById(image.id),
+        ),
+      ),
     }
   }
 
   async getByQuestId(questId: number): Promise<GetQuestQuestionSchema[]> {
-    const questions = await this.prisma.questions.findMany({
+    const quest_questions = await this.prisma.quest_questions.findMany({
       where: { quest: { id: questId } },
     })
 
     return await Promise.all(
-      questions.map(async (question) => await this.getById(question.id)),
+      quest_questions.map(async (question) => await this.getById(question.id)),
     )
   }
 
@@ -69,6 +85,11 @@ export class QuestionService {
       questionAnswer = {
         id: answer.id,
         options: singleAnswer.options,
+        optionsImages: await Promise.all(
+          singleAnswer.images_ids.map(async (id) =>
+            id ? this.filesService.getFileStatsById(id as number) : null,
+          ),
+        ),
         correctAnswer: singleAnswer.correct_answers,
       }
     }
@@ -80,6 +101,11 @@ export class QuestionService {
       questionAnswer = {
         id: answer.id,
         options: multipleAnswer.options,
+        optionsImages: await Promise.all(
+          multipleAnswer.images_ids.map(async (id) =>
+            id ? this.filesService.getFileStatsById(id as number) : null,
+          ),
+        ),
         correctAnswer: multipleAnswer.correct_answers,
       }
     }
@@ -91,6 +117,11 @@ export class QuestionService {
       questionAnswer = {
         id: answer.id,
         options: connectionAnswer.options,
+        optionsImages: await Promise.all(
+          connectionAnswer.images_ids.map(async (id) =>
+            id ? this.filesService.getFileStatsById(id as number) : null,
+          ),
+        ),
         correctAnswer: connectionAnswer.correct_answers,
       }
     }
@@ -102,6 +133,11 @@ export class QuestionService {
       questionAnswer = {
         id: answer.id,
         options: boxSortingAnswer.options,
+        optionsImages: await Promise.all(
+          boxSortingAnswer.images_ids.map(async (id) =>
+            id ? this.filesService.getFileStatsById(id as number) : null,
+          ),
+        ),
         correctAnswer: boxSortingAnswer.correct_answers as {
           [key: string]: number[]
         },
@@ -125,20 +161,35 @@ export class QuestionService {
     question: SaveQuestionDto,
     questId?: number,
   ): Promise<GetQuestQuestionSchema> {
-    const upsertQuestion: Prisma.questionsUpsertArgs = {
+    const upsertQuestion: Prisma.quest_questionsUpsertArgs = {
       where: { id: question.id ?? -1 },
       create: { quest: { connect: { id: questId ?? question.questId } } },
       update: {},
     }
-    const upsertData: Prisma.questionsUpdateInput = {}
+    const upsertData: Prisma.quest_questionsUpdateInput = {}
 
-    if (question.text) upsertData.text = question.text
-    if (question.type) upsertData.type = question.type
+    const keys = Object.keys(question)
+
+    if (keys.includes('text')) upsertData.text = question.text
+    if (keys.includes('type')) upsertData.type = question.type
 
     upsertQuestion.create = Object.assign(upsertQuestion.create, upsertData)
     upsertQuestion.update = upsertData
 
-    const savedQuestion = await this.prisma.questions.upsert(upsertQuestion)
+    if (keys.includes('images')) {
+      const imagesIds = question.images.map((image) => ({ id: image.id }))
+
+      if (question.id) {
+        upsertQuestion.update.images = { set: imagesIds }
+      } else {
+        upsertQuestion.create.images = {
+          connect: imagesIds,
+        }
+      }
+    }
+
+    const savedQuestion =
+      await this.prisma.quest_questions.upsert(upsertQuestion)
     await this.upsertAnswer(question.answer, question.type, savedQuestion.id)
 
     return this.getById(savedQuestion.id)
@@ -185,10 +236,12 @@ export class QuestionService {
         options: answer.options,
         answers: { connect: { id: answer.id } },
         correct_answers: answer.correctAnswer as SingleCorrectAnswer,
+        images_ids: answer.optionsImages.map((image) => image?.id ?? null),
       },
       update: {
         options: answer.options,
         correct_answers: answer.correctAnswer as SingleCorrectAnswer,
+        images_ids: answer.optionsImages.map((image) => image?.id ?? null),
       },
     })
   }
@@ -203,10 +256,12 @@ export class QuestionService {
         options: answer.options,
         answers: { connect: { id: answer.id } },
         correct_answers: answer.correctAnswer as MultipleCorrectAnswer,
+        images_ids: answer.optionsImages.map((image) => image?.id ?? null),
       },
       update: {
         options: answer.options,
         correct_answers: answer.correctAnswer as MultipleCorrectAnswer,
+        images_ids: answer.optionsImages.map((image) => image?.id ?? null),
       },
     })
   }
@@ -221,10 +276,12 @@ export class QuestionService {
         options: answer.options,
         answers: { connect: { id: answer.id } },
         correct_answers: answer.correctAnswer as ConnectionCorrectAnswer,
+        images_ids: answer.optionsImages.map((image) => image?.id ?? null),
       },
       update: {
         options: answer.options,
         correct_answers: answer.correctAnswer as ConnectionCorrectAnswer,
+        images_ids: answer.optionsImages.map((image) => image?.id ?? null),
       },
     })
   }
@@ -239,10 +296,12 @@ export class QuestionService {
         options: answer.options,
         answers: { connect: { id: answer.id } },
         correct_answers: answer.correctAnswer as BoxCorrectAnswer,
+        images_ids: answer.optionsImages.map((image) => image?.id ?? null),
       },
       update: {
         options: answer.options,
         correct_answers: answer.correctAnswer as BoxCorrectAnswer,
+        images_ids: answer.optionsImages.map((image) => image?.id ?? null),
       },
     })
   }

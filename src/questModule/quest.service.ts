@@ -133,7 +133,6 @@ export class QuestService {
     const foundCompleteRow = await this.prisma.complete_quests.findUnique({
       where: { id },
     })
-    console.log(foundCompleteRow)
     const foundQuest =
       foundCompleteRow.quest_data as unknown as SaveQuestCompleteDto
 
@@ -158,14 +157,14 @@ export class QuestService {
 
   async update(quest: SaveQuestDto): Promise<GetQuestSchema> {
     const oldQuestQuestionsIds = (
-      await this.prisma.questions.findMany({
+      await this.prisma.quest_questions.findMany({
         where: { quest: { id: quest.id } },
       })
     ).map((q) => q.id)
     const newQuestQuestionsIds = quest.questions
       .filter((q) => q.id)
       .map((q) => q.id)
-    await this.prisma.questions.deleteMany({
+    await this.prisma.quest_questions.deleteMany({
       where: {
         id: {
           in: [
@@ -255,14 +254,15 @@ export class QuestService {
     }
     const upsertData: Prisma.questsUpdateInput = {}
 
-    if (quest.name) upsertData.name = quest.name
-    if (quest.time) upsertData.time = quest.time
-    if (quest.description) upsertData.description = quest.description
-    if (quest.imageId) upsertData.image = { connect: { id: quest.imageId } }
+    const keys = Object.keys(quest)
+
+    if (keys.includes('name')) upsertData.name = quest.name
+    if (keys.includes('time')) upsertData.time = quest.time
+    if (keys.includes('description')) upsertData.description = quest.description
     if (quest.difficultId) {
       upsertData.difficult = { connect: { id: quest.difficultId } }
     }
-    if (quest.group) {
+    if (keys.includes('group')) {
       upsertData.group = {
         connectOrCreate: {
           where: { id: quest.group.id ?? -1 },
@@ -276,6 +276,14 @@ export class QuestService {
 
     upsertQuest.create = Object.assign(upsertQuest.create, upsertData)
     upsertQuest.update = upsertData
+
+    if (keys.includes('imageId'))
+      if (quest.imageId) {
+        upsertQuest.create.image = { connect: { id: quest.imageId } }
+        upsertQuest.update.image = { connect: { id: quest.imageId } }
+      } else {
+        upsertQuest.update.image = { disconnect: true }
+      }
 
     const savedQuest = await this.prisma.quests.upsert(upsertQuest)
 
