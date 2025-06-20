@@ -34,11 +34,13 @@ export const getUserProfileSchemaExample: GetUserProfileSchema = {
     id: 2,
     name: 'President of Academy',
   },
-  role: {
-    id: 0,
-    name: 'Admin',
-    description: 'Director of department',
-  },
+  roles: [
+    {
+      id: 1,
+      name: 'Admin',
+      description: 'Director of department',
+    },
+  ],
   image: {
     id: 1,
     name: 'image.png',

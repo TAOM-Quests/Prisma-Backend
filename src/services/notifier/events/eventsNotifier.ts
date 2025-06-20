@@ -8,6 +8,24 @@ const SEND_INTERVAL = 24 * 60 * 60 * 1000
 // Время отправки уведомления - 8:00
 const SEND_HOUR = 8
 
+export const eventsNotifier = async (prisma: PrismaService) => {
+  const nextSendTime = moment()
+    .set('hour', SEND_HOUR)
+    .set('minute', 0)
+    .set('second', 0)
+
+  if (moment().hour() >= SEND_HOUR) {
+    nextSendTime.add(1, 'day')
+  }
+
+  const timeToNextSend = nextSendTime.diff(moment())
+
+  setTimeout(() => {
+    sendTomorrowEventsNotifications(prisma)
+    setInterval(() => sendTomorrowEventsNotifications(prisma), SEND_INTERVAL)
+  }, timeToNextSend)
+}
+
 const sendTomorrowEventsNotifications = async (prisma: PrismaService) => {
   const tomorrowStart = moment().add(1, 'day').startOf('day').toISOString()
   const tomorrowEnd = moment().add(1, 'day').endOf('day').toISOString()
@@ -62,22 +80,4 @@ const sendTomorrowEventsNotifications = async (prisma: PrismaService) => {
       }
     }
   }
-}
-
-export const eventsNotifier = async (prisma: PrismaService) => {
-  const nextSendTime = moment()
-    .set('hour', SEND_HOUR)
-    .set('minute', 0)
-    .set('second', 0)
-
-  if (moment().hour() >= SEND_HOUR) {
-    nextSendTime.add(1, 'day')
-  }
-
-  const timeToNextSend = nextSendTime.diff(moment())
-
-  setTimeout(() => {
-    sendTomorrowEventsNotifications(prisma)
-    setInterval(() => sendTomorrowEventsNotifications(prisma), SEND_INTERVAL)
-  }, timeToNextSend)
 }
