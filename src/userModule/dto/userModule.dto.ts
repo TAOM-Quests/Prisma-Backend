@@ -126,4 +126,30 @@ export class UpdateProfileDto {
     required: false,
   })
   departmentId: number
+
+  @ApiProperty({
+    example: 'password',
+    required: false,
+  })
+  password: string
+}
+
+export class UpdateNotificationsSettingsDto {
+  @ApiProperty({
+    example: 1,
+    required: true,
+  })
+  typeId: number
+
+  @ApiProperty({
+    example: true,
+    required: false,
+  })
+  email?: boolean
+
+  @ApiProperty({
+    example: true,
+    required: false,
+  })
+  telegram?: boolean
 }

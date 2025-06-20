@@ -56,6 +56,14 @@ export const getUserProfileSchemaExample: GetUserProfileSchema = {
     experienceToNextLevel: 300,
   },
   achievements: [],
+  notificationsSettings: [
+    {
+      name: 'Напоминание о мероприятии за день',
+      typeId: 1,
+      email: true,
+      telegram: false,
+    },
+  ],
 }
 
 export const updateUserProfileSchemaExample: UpdateUserProfileSchema = {
@@ -86,3 +94,12 @@ export const getPositionsSchemaExample: GetPositionsSchema = {
   id: 1,
   name: 'President of Academy',
 }
+
+export const getUserNotificationSettingsItemSchemaExample = [
+  {
+    name: 'Напоминание о мероприятии за день',
+    typeId: 1,
+    email: true,
+    telegram: false,
+  },
+]

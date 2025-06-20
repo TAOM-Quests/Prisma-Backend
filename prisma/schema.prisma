@@ -313,6 +313,7 @@ model users {
   game_wordle_attempts     game_wordle_attempts[]
   user_experience          user_experience[]
   feedback_answers         feedback_answers[]
+  user_notifications_settings user_notifications_settings[]
 }
 
 model user_achievements {
@@ -356,6 +357,24 @@ model user_levels {
   name       String
   experience Int
   users      users[]
+}
+
+model user_notifications_settings {
+  email    Boolean
+  telegram Boolean
+  type_id  Int
+  user_id  Int
+  user     users                    @relation(fields: [user_id], references: [id])
+  type     user_notifications_types @relation(fields: [type_id], references: [id])
+
+  @@unique([user_id, type_id])
+}
+
+model user_notifications_types {
+  id                          Int                           @id @default(autoincrement())
+  name                        String
+  roles                       Int[]
+  user_notifications_settings user_notifications_settings[]
 }
 
 model user_participants_on_events {

@@ -52,6 +52,7 @@ export class GetUserProfileSchema {
     image: GetFileStatsSchema
     isReceived?: boolean
   }[]
+  notificationsSettings: GetUserNotificationSettingsItemSchema[]
 }
 
 export class UpdateUserProfileSchema {
@@ -75,4 +76,11 @@ export class GetRolesSchema {
 export class GetPositionsSchema {
   id: number
   name: string
+}
+
+export class GetUserNotificationSettingsItemSchema {
+  name: string
+  email: boolean
+  typeId: number
+  telegram: boolean
 }
