@@ -3,8 +3,9 @@ import { Prisma, PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 const USER_ROLES: Prisma.user_rolesCreateManyInput[] = [
   { id: 1, name: 'Администратор' },
-  { id: 2, name: 'Инспектор' },
+  { id: 2, name: 'Модератор' },
   { id: 3, name: 'Преподаватель' },
+  { id: 4, name: 'Гейм-дизайнер' },
 ]
 
 export const userRoles = async (): Promise<void> => {
