@@ -47,9 +47,9 @@ export class QuestService {
     if (foundQuest.time) quest.time = foundQuest.time
     if (foundQuest.description) quest.description = foundQuest.description
     if (foundQuest.id_image) {
-      quest.image = await this.filesService.getFileStatsById(
-        foundQuest.id_image,
-      )
+      quest.image = await this.filesService.getFileStats({
+        id: foundQuest.id_image,
+      })
     }
     if (foundQuest.id_group) {
       const group = await this.prisma.quest_groups.findUnique({
@@ -121,7 +121,9 @@ export class QuestService {
     if (foundQuest.difficult) quest.difficult = foundQuest.difficult
     if (foundQuest.description) quest.description = foundQuest.description
     if (foundQuest.imageId) {
-      quest.image = await this.filesService.getFileStatsById(foundQuest.imageId)
+      quest.image = await this.filesService.getFileStats({
+        id: foundQuest.imageId,
+      })
     }
 
     return quest
