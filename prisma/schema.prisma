@@ -20,19 +20,21 @@ model answers {
   connection     answers_connection?  @relation(fields: [id_connection], references: [id])
   box_sorting    answers_box_sorting? @relation(fields: [id_box_sorting], references: [id])
   free           answers_free?        @relation(fields: [id_free], references: [id])
-  questions      questions[]
+  questions      quest_questions[]
 }
 
 model answers_single {
   id              Int       @id @default(autoincrement())
   correct_answers Int
   options         String[]
+  images_ids      Json[]
   answers         answers[]
 }
 
 model answers_multiple {
   id              Int       @id @default(autoincrement())
   options         String[]
+  images_ids      Json[]
   correct_answers Int[]
   answers         answers[]
 }
@@ -40,6 +42,7 @@ model answers_multiple {
 model answers_connection {
   id              Int       @id @default(autoincrement())
   options         String[]
+  images_ids      Json[]
   correct_answers String[]
   answers         answers[]
 }
@@ -47,6 +50,7 @@ model answers_connection {
 model answers_box_sorting {
   id              Int       @id @default(autoincrement())
   options         String[]
+  images_ids      Json[]
   correct_answers Json
   answers         answers[]
 }
@@ -195,7 +199,7 @@ model quests {
   id_image      Int?
   results       quest_results[]
   tags          quest_tags_on_quests[]
-  questions     questions[]
+  questions     quest_questions[]
   department    departments            @relation(fields: [id_department], references: [id])
   difficult     quest_difficulties?    @relation(fields: [id_difficult], references: [id])
   group         quest_groups?          @relation(fields: [id_group], references: [id])
@@ -246,14 +250,15 @@ model quest_tags_on_quests {
   @@id([id_quest, id_tag])
 }
 
-model questions {
-  id        Int      @id @default(autoincrement())
+model quest_questions {
+  id        Int            @id @default(autoincrement())
   text      String?
   type      String?
   id_quest  Int
   id_answer Int?
-  answer    answers? @relation(fields: [id_answer], references: [id])
-  quest     quests   @relation(fields: [id_quest], references: [id], onDelete: Cascade)
+  images    shared_files[]
+  answer    answers?       @relation(fields: [id_answer], references: [id])
+  quest     quests         @relation(fields: [id_quest], references: [id], onDelete: Cascade)
 }
 
 model shared_files {
@@ -269,6 +274,7 @@ model shared_files {
   quests             quests[]
   quest_results      quest_results[]
   user_achievements  user_achievements[]
+  quest_questions    quest_questions[]
 }
 
 model shared_files_on_events {

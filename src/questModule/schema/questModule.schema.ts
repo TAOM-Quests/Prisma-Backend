@@ -26,6 +26,7 @@ export class GetQuestQuestionSchema {
   text: string
   type: string
   answer: QuestAnswer
+  images: GetFileStatsSchema[]
 }
 
 export class GetQuestResultSchema {

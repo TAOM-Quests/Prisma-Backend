@@ -47,6 +47,7 @@ export const getQuestSchemaExample: GetQuestSchema = {
         options: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctAnswer: 1,
       },
+      images: [],
     },
 
     {
@@ -58,6 +59,7 @@ export const getQuestSchemaExample: GetQuestSchema = {
         options: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctAnswer: [1, 2],
       },
+      images: [],
     },
 
     {
@@ -69,6 +71,7 @@ export const getQuestSchemaExample: GetQuestSchema = {
         options: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctAnswer: ['1 - 3', '2 - 4'],
       },
+      images: [],
     },
     // {
     //   id: 4,
@@ -88,6 +91,7 @@ export const getQuestSchemaExample: GetQuestSchema = {
         id: 1,
         correctAnswer: 'FreeAnswer',
       },
+      images: [],
     },
   ],
   results: [
