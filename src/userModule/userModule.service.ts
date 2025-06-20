@@ -321,7 +321,7 @@ export class UserModuleService {
       ),
       notificationsSettings: await this.getNotificationsSettings(
         foundUser.id,
-        foundUser.id_role,
+        foundRoles.map((role) => role.id),
       ),
     }
 
@@ -419,6 +419,9 @@ export class UserModuleService {
     const foundUser = await this.prisma.users.findUnique({
       where: { id: userId },
     })
+    const foundRoles = await this.prisma.user_roles.findMany({
+      where: { users: { some: { id: foundUser.id } } },
+    })
 
     if (Object.keys(updateSetting).includes('email')) {
       newSettings.email = updateSetting.email
@@ -440,7 +443,10 @@ export class UserModuleService {
       },
     })
 
-    return this.getNotificationsSettings(userId, foundUser.id_role)
+    return this.getNotificationsSettings(
+      userId,
+      foundRoles.map((role) => role.id),
+    )
   }
 
   private cryptPassword(password: string): string {
@@ -519,7 +525,7 @@ export class UserModuleService {
 
   private async getNotificationsSettings(
     userId: number,
-    roleId?: number,
+    rolesIds?: number[],
   ): Promise<GetUserNotificationSettingsItemSchema[]> {
     const foundTypes = await this.prisma.user_notifications_types.findMany()
     const foundSettings =
@@ -530,7 +536,11 @@ export class UserModuleService {
       })
 
     return foundTypes
-      .filter((type) => !type.roles.length || type.roles.includes(roleId))
+      .filter(
+        (type) =>
+          !type.roles.length ||
+          type.roles.some((roleId) => rolesIds?.includes(roleId)),
+      )
       .map((type) => ({
         name: type.name,
         typeId: type.id,
