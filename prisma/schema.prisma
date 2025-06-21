@@ -20,19 +20,21 @@ model answers {
   connection     answers_connection?  @relation(fields: [id_connection], references: [id])
   box_sorting    answers_box_sorting? @relation(fields: [id_box_sorting], references: [id])
   free           answers_free?        @relation(fields: [id_free], references: [id])
-  questions      questions[]
+  questions      quest_questions[]
 }
 
 model answers_single {
   id              Int       @id @default(autoincrement())
   correct_answers Int
   options         String[]
+  images_ids      Json[]
   answers         answers[]
 }
 
 model answers_multiple {
   id              Int       @id @default(autoincrement())
   options         String[]
+  images_ids      Json[]
   correct_answers Int[]
   answers         answers[]
 }
@@ -40,6 +42,7 @@ model answers_multiple {
 model answers_connection {
   id              Int       @id @default(autoincrement())
   options         String[]
+  images_ids      Json[]
   correct_answers String[]
   answers         answers[]
 }
@@ -47,6 +50,7 @@ model answers_connection {
 model answers_box_sorting {
   id              Int       @id @default(autoincrement())
   options         String[]
+  images_ids      Json[]
   correct_answers Json
   answers         answers[]
 }
@@ -76,15 +80,18 @@ model complete_quests {
 }
 
 model departments {
-  id              Int               @id @default(autoincrement())
-  name            String
-  quest_groups    quest_groups[]
-  quest_tags      quest_tags[]
-  quests          quests[]
-  users           users[]
-  events          events[]
-  event_tags      event_tags[]
-  user_experience user_experience[]
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  quest_groups         quest_groups[]
+  quest_tags           quest_tags[]
+  quests               quests[]
+  users                users[]
+  events               events[]
+  event_tags           event_tags[]
+  game_wordle_words          game_wordle_words[]
+  game_wordle_answers  game_wordle_answers[]
+  game_wordle_attempts game_wordle_attempts[]
+  user_experience      user_experience[]
 }
 
 model events {
@@ -153,6 +160,33 @@ model feedback_answers {
   form    feedback_forms @relation(fields: [form_id], references: [id])
 }
 
+model game_wordle_words {
+  id            Int         @id @default(autoincrement())
+  word          String
+  department_id Int
+  department    departments @relation(fields: [department_id], references: [id])
+
+  @@unique([word, department_id])
+}
+
+model game_wordle_answers {
+  id            Int         @id @default(autoincrement())
+  word          String
+  day           DateTime    @default(now())
+  department_id Int
+  department    departments @relation(fields: [department_id], references: [id])
+}
+
+model game_wordle_attempts {
+  id            Int         @id @default(autoincrement())
+  word          String
+  day           DateTime    @default(now())
+  user_id       Int
+  department_id Int
+  user          users       @relation(fields: [user_id], references: [id])
+  department    departments @relation(fields: [department_id], references: [id])
+}
+
 model quests {
   id            Int                    @id @default(autoincrement())
   id_department Int
@@ -165,7 +199,7 @@ model quests {
   id_image      Int?
   results       quest_results[]
   tags          quest_tags_on_quests[]
-  questions     questions[]
+  questions     quest_questions[]
   department    departments            @relation(fields: [id_department], references: [id])
   difficult     quest_difficulties?    @relation(fields: [id_difficult], references: [id])
   group         quest_groups?          @relation(fields: [id_group], references: [id])
@@ -216,14 +250,15 @@ model quest_tags_on_quests {
   @@id([id_quest, id_tag])
 }
 
-model questions {
-  id        Int      @id @default(autoincrement())
+model quest_questions {
+  id        Int            @id @default(autoincrement())
   text      String?
   type      String?
   id_quest  Int
   id_answer Int?
-  answer    answers? @relation(fields: [id_answer], references: [id])
-  quest     quests   @relation(fields: [id_quest], references: [id], onDelete: Cascade)
+  images    shared_files[]
+  answer    answers?       @relation(fields: [id_answer], references: [id])
+  quest     quests         @relation(fields: [id_quest], references: [id], onDelete: Cascade)
 }
 
 model shared_files {
@@ -239,6 +274,7 @@ model shared_files {
   quests             quests[]
   quest_results      quest_results[]
   user_achievements  user_achievements[]
+  quest_questions    quest_questions[]
 }
 
 model shared_files_on_events {
@@ -255,13 +291,12 @@ model users {
   email                    String                        @unique
   id_image_file            Int                           @default(1)
   password                 String
-  id_role                  Int?
   id_department            Int?
   token                    String                        @unique
   birth_date               DateTime?
-  first_name               String?
+  first_name               String?                       @default("Новый")
   id_position              Int?
-  last_name                String?
+  last_name                String?                       @default("Пользователь")
   patronymic               String?
   phone_number             String?
   telegram                 String?                       @unique
@@ -271,18 +306,20 @@ model users {
   sex                      user_sex?
   complete_quests          complete_quests[]
   events_where_inspector   events[]
+  roles                    user_roles[]
   events_where_executor    user_executors_on_events[]
   events_where_participant user_participants_on_events[]
   department               departments?                  @relation(fields: [id_department], references: [id])
   image                    shared_files                  @relation(fields: [id_image_file], references: [id])
   position                 user_positions?               @relation(fields: [id_position], references: [id])
-  role                     user_roles?                   @relation(fields: [id_role], references: [id])
   level                    user_levels                   @relation(fields: [level_number], references: [level])
   quests                   quests[]
   comments                 comments[]
-  user_experience          user_experience[]
   achievements             user_achievements[]
+  game_wordle_attempts     game_wordle_attempts[]
+  user_experience          user_experience[]
   feedback_answers         feedback_answers[]
+  user_notifications_settings user_notifications_settings[]
 }
 
 model user_achievements {
@@ -312,13 +349,13 @@ model user_executors_on_events {
 }
 
 model user_experience {
+  id            Int         @id @default(autoincrement())
+  experience    Int
+  source        String
   user_id       Int
   department_id Int
-  experience    Int
   user          users       @relation(fields: [user_id], references: [id])
   department    departments @relation(fields: [department_id], references: [id])
-
-  @@id([user_id, department_id])
 }
 
 model user_levels {
@@ -326,6 +363,24 @@ model user_levels {
   name       String
   experience Int
   users      users[]
+}
+
+model user_notifications_settings {
+  email    Boolean
+  telegram Boolean
+  type_id  Int
+  user_id  Int
+  user     users                    @relation(fields: [user_id], references: [id])
+  type     user_notifications_types @relation(fields: [type_id], references: [id])
+
+  @@unique([user_id, type_id])
+}
+
+model user_notifications_types {
+  id                          Int                           @id @default(autoincrement())
+  name                        String
+  roles                       Int[]
+  user_notifications_settings user_notifications_settings[]
 }
 
 model user_participants_on_events {

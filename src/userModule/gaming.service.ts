@@ -28,9 +28,9 @@ export class GamingService {
     const foundUser = await this.prisma.users.findUnique({
       where: { id: userId },
     })
-    const foundImage = await this.filesService.getFileStats(
-      `${capitalize(experienceSource)}_experience.png`,
-    )
+    const foundImage = await this.filesService.getFileStats({
+      fileName: `${capitalize(experienceSource)}_experience.png`,
+    })
 
     this.notificationsGateway.sendNotification({
       userId,
@@ -41,7 +41,12 @@ export class GamingService {
     })
 
     if (departmentId) {
-      this.addExperienceByDepartment(userId, experience, departmentId)
+      this.addExperienceByDepartment(
+        userId,
+        experience,
+        departmentId,
+        experienceSource,
+      )
     }
 
     let userLevel = foundUser.level_number
@@ -80,9 +85,9 @@ export class GamingService {
     const foundAchievement = await this.prisma.user_achievements.findUnique({
       where: { id: achievementId },
     })
-    const foundImage = await this.filesService.getFileStatsById(
-      foundAchievement.image_id,
-    )
+    const foundImage = await this.filesService.getFileStats({
+      id: foundAchievement.image_id,
+    })
 
     if (!userAchievements.find((a) => a.id === achievementId)) {
       await this.prisma.users.update({
@@ -126,7 +131,9 @@ export class GamingService {
       },
     })
 
-    const foundImage = await this.filesService.getFileStats('Level_up.png')
+    const foundImage = await this.filesService.getFileStats({
+      fileName: 'Level_up.png',
+    })
 
     this.notificationsGateway.sendNotification({
       userId,
@@ -142,14 +149,14 @@ export class GamingService {
     userId: number,
     experience: number,
     departmentId: number,
+    source: ExperienceSource,
   ) {
-    await this.prisma.user_experience.upsert({
-      where: {
-        user_id_department_id: { user_id: userId, department_id: departmentId },
-      },
-      create: { user_id: userId, department_id: departmentId, experience },
-      update: {
-        experience: { increment: experience },
+    await this.prisma.user_experience.create({
+      data: {
+        source,
+        experience,
+        user: { connect: { id: userId } },
+        department: { connect: { id: departmentId } },
       },
     })
   }
