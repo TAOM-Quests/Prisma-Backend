@@ -55,9 +55,9 @@ export class WordleController {
     example: getWordleWordSchemaExample,
     status: 200,
   })
-  @Post('/words/:departmentId')
+  @Post('/words')
   async createWord(
-    @Param('departmentId') departmentId: string,
+    @Query('departmentId') departmentId: string,
     @Body() { word }: SaveWordleWordBody,
   ): Promise<GetWordleWordSchema> {
     return await this.wordleService.createWord(word, +departmentId)
