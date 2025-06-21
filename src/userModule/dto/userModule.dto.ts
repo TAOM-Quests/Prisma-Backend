@@ -153,3 +153,29 @@ export class UpdateNotificationsSettingsDto {
   })
   telegram?: boolean
 }
+
+export class GetUserExperienceQuery {
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  departmentId?: number
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  userId?: number
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  offset?: number
+
+  @ApiProperty({
+    example: 10,
+    required: false,
+  })
+  limit?: number
+}

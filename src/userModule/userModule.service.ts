@@ -4,6 +4,7 @@ import {
   AuthUserSchema,
   GetPositionsSchema,
   GetRolesSchema,
+  GetUserExperienceSchema,
   GetUserNotificationSettingsItemSchema,
   GetUserProfileSchema,
   GetUsersSchema,
@@ -12,6 +13,7 @@ import {
 import {
   ConfirmEmailCodeDto,
   CreateEmailConfirmCodeDto,
+  GetUserExperienceQuery,
   GetUsersQuery,
   UpdateNotificationsSettingsDto,
   UpdateProfileDto,
@@ -29,6 +31,7 @@ import { readFileSync } from 'fs'
 import * as path from 'path'
 import { intersection } from 'lodash'
 import { NotificationsGateway } from './notifications.gateway'
+import { DepartmentsService } from 'src/commonModule/departments/department.service'
 
 const USER_SEX = {
   MALE: 'Мужской',
@@ -47,6 +50,7 @@ export class UserModuleService {
     private jwt: JwtService,
     private prisma: PrismaService,
     private filesService: FilesService,
+    private departmentsService: DepartmentsService,
     private notificationsGateway: NotificationsGateway,
   ) {}
 
@@ -446,6 +450,57 @@ export class UserModuleService {
     return this.getNotificationsSettings(
       userId,
       foundRoles.map((role) => role.id),
+    )
+  }
+
+  async getUserExperience(
+    query: GetUserExperienceQuery,
+  ): Promise<GetUserExperienceSchema[]> {
+    const conditions: Prisma.Sql[] = []
+
+    if (query.userId) conditions.push(Prisma.sql`user_id = ${query.userId}`)
+    if (query.departmentId)
+      conditions.push(Prisma.sql`department_id = ${query.departmentId}`)
+
+    const whereClause =
+      conditions.length > 0
+        ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+        : Prisma.empty
+    const offsetClause = query.offset
+      ? Prisma.sql`OFFSET ${query.offset}`
+      : Prisma.empty
+    const limitClause = query.limit
+      ? Prisma.sql`LIMIT ${query.limit}`
+      : Prisma.empty
+
+    const foundExperience = await this.prisma.$queryRaw<any[]>`
+      SELECT 
+        experience,
+        department_id,
+        user_id,
+        RANK() OVER (ORDER BY experience DESC) AS rank 
+      FROM user_experience
+      ${whereClause}
+      ORDER BY experience DESC
+      ${offsetClause}
+      ${limitClause}
+    `
+
+    const [user] = await this.getUsers({
+      id: query.userId,
+      limit: 1,
+      offset: 0,
+    })
+
+    return await Promise.all(
+      foundExperience.map(async (exp) => ({
+        user,
+        rank: Number(exp.rank),
+        experience: exp.experience,
+        department: await this.departmentsService.getDepartment({
+          id: exp.department_id,
+        }),
+      })),
     )
   }
 
