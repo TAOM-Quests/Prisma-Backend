@@ -54,43 +54,23 @@ export class QuestModuleController {
   @Get('quests')
   async getQuests(
     @Query('name') name: string,
-    @Query('id') ids: string | string[],
-    @Query('tag') tagsIds: string | string[],
+    @Query('id') ids: string,
+    @Query('tag') tagsIds: string,
     @Query('isCompleted') isCompleted: boolean,
-    @Query('group') groupsIds: string | string[],
+    @Query('group') groupsIds: string,
     @Query('completeBy') completeByUserId: string,
-    @Query('executor') executorsIds: string | string[],
-    @Query('difficult') difficultIds: string | string[],
-    @Query('department') departmentsIds: string | string[],
+    @Query('executor') executorsIds: string,
+    @Query('difficult') difficultIds: string,
+    @Query('department') departmentsIds: string,
   ): Promise<GetQuestMinimizeSchema[]> {
     const getQuery: GetCompleteQuestsMinimizeQuery = {
       name,
-      ids: ids ? (isArray(ids) ? ids.map((id) => +id) : [+ids]) : [],
-      departmentsIds: departmentsIds
-        ? isArray(departmentsIds)
-          ? departmentsIds.map((id) => +id)
-          : [+departmentsIds]
-        : [],
-      tagsIds: tagsIds
-        ? isArray(tagsIds)
-          ? tagsIds.map((id) => +id)
-          : [+tagsIds]
-        : [],
-      executorsIds: executorsIds
-        ? isArray(executorsIds)
-          ? executorsIds.map((id) => +id)
-          : [+executorsIds]
-        : [],
-      difficultiesIds: difficultIds
-        ? isArray(difficultIds)
-          ? difficultIds.map((id) => +id)
-          : [+difficultIds]
-        : [],
-      groupsIds: groupsIds
-        ? isArray(groupsIds)
-          ? groupsIds.map((id) => +id)
-          : [+groupsIds]
-        : [],
+      ids: ids?.split(',').map((id) => +id) ?? [],
+      departmentsIds: departmentsIds?.split(',').map((id) => +id) ?? [],
+      tagsIds: tagsIds?.split(',').map((id) => +id) ?? [],
+      executorsIds: executorsIds?.split(',').map((id) => +id) ?? [],
+      difficultiesIds: difficultIds?.split(',').map((id) => +id) ?? [],
+      groupsIds: groupsIds?.split(',').map((id) => +id) ?? [],
     }
 
     return isCompleted
