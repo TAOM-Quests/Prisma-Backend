@@ -7,7 +7,7 @@
 
 */
 -- DropForeignKey
-ALTER TABLE "game_wordle" DROP CONSTRAINT "game_wordle_department_id_fkey";
+ALTER TABLE "game_wordle_words" DROP CONSTRAINT "game_wordle_words_department_id_fkey";
 
 -- DropForeignKey
 ALTER TABLE "game_wordle_answers" DROP CONSTRAINT "game_wordle_answers_department_id_fkey";
@@ -16,7 +16,7 @@ ALTER TABLE "game_wordle_answers" DROP CONSTRAINT "game_wordle_answers_departmen
 ALTER TABLE "game_wordle_attempts" DROP CONSTRAINT "game_wordle_attempts_user_id_fkey";
 
 -- DropTable
-DROP TABLE "game_wordle";
+DROP TABLE "game_wordle_words";
 
 -- DropTable
 DROP TABLE "game_wordle_answers";

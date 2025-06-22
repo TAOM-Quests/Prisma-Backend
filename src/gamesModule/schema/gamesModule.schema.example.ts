@@ -1,4 +1,4 @@
-import { GetWordleWordSchema } from './gamesModule.schema'
+import { GetWordleWordSchema } from './wordle.schema'
 
 export const getWordleWordSchemaExample: GetWordleWordSchema = {
   id: 1,

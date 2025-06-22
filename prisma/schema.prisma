@@ -183,24 +183,30 @@ model event_tags {
 }
 
 model feedback_forms {
-  id               Int                @id @default(autoincrement())
-  name             String
-  description      String
-  entity_name      String
-  entity_id        Int
-  questions        Json[]
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  name        String
+  questions   Json[]
+  entity_id   Int
+  description String
+  entity_name String
+
   feedback_answers feedback_answers[]
 
   @@unique([entity_name, entity_id])
 }
 
 model feedback_answers {
-  id      Int            @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+
   answers String[]
-  user_id Int
+
   form_id Int
-  user    users          @relation(fields: [user_id], references: [id])
+  user_id Int
   form    feedback_forms @relation(fields: [form_id], references: [id])
+  user    users          @relation(fields: [user_id], references: [id])
 }
 
 model game_crossword_words {
@@ -245,11 +251,13 @@ model game_crossword_answers {
 }
 
 model game_wordle_words {
-  id            Int    @id @default(autoincrement())
-  word          String
-  department_id Int
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
 
-  department departments @relation(fields: [department_id], references: [id])
+  word String
+
+  department_id Int
+  department    departments @relation(fields: [department_id], references: [id])
 
   @@unique([word, department_id])
 }
@@ -451,20 +459,25 @@ model users {
 }
 
 model user_achievements {
-  id          Int          @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+
   name        String
   description String
   experience  Int
-  image_id    Int
-  image       shared_files @relation(fields: [image_id], references: [id])
-  users       users[]
+
+  image_id Int
+  image    shared_files @relation(fields: [image_id], references: [id])
+
+  users users[]
 }
 
 model user_email_confirm {
   id         Int      @id @default(autoincrement())
-  email      String
-  code       String
   created_at DateTime @default(now())
+
+  email String
+  code  String
 }
 
 model user_executors_on_events {
@@ -480,9 +493,12 @@ model user_executors_on_events {
 }
 
 model user_experience {
-  id            Int         @id @default(autoincrement())
-  experience    Int
-  source        String
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  experience Int
+  source     String
+
   user_id       Int
   department_id Int
   user          users       @relation(fields: [user_id], references: [id])
@@ -490,27 +506,36 @@ model user_experience {
 }
 
 model user_levels {
-  level      Int     @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  level      Int    @id @default(autoincrement())
   name       String
   experience Int
-  users      users[]
+
+  users users[]
 }
 
 model user_notifications_settings {
+  created_at DateTime @default(now())
+
   email    Boolean
   telegram Boolean
-  type_id  Int
-  user_id  Int
-  user     users                    @relation(fields: [user_id], references: [id])
-  type     user_notifications_types @relation(fields: [type_id], references: [id])
+
+  type_id Int
+  user_id Int
+  user    users                    @relation(fields: [user_id], references: [id])
+  type    user_notifications_types @relation(fields: [type_id], references: [id])
 
   @@unique([user_id, type_id])
 }
 
 model user_notifications_types {
-  id                          Int                           @id @default(autoincrement())
-  name                        String
-  roles                       Int[]
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  name  String
+  roles Int[]
+
   user_notifications_settings user_notifications_settings[]
 }
 
