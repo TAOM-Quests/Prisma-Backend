@@ -1,6 +1,5 @@
 import { GetDepartmentsSchema } from 'src/commonModule/departments/schema/GetDepartmentsSchema'
 import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
-import { Department } from 'src/models/department'
 import { UserPosition } from 'src/models/userPosition'
 import { UserRole } from 'src/models/userRole'
 
@@ -84,4 +83,11 @@ export class GetUserNotificationSettingsItemSchema {
   email: boolean
   typeId: number
   telegram: boolean
+}
+
+export class GetUserExperienceSchema {
+  rank: number
+  experience: number
+  user: GetUsersSchema
+  department: GetDepartmentsSchema
 }

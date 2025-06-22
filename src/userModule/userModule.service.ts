@@ -4,6 +4,7 @@ import {
   AuthUserSchema,
   GetPositionsSchema,
   GetRolesSchema,
+  GetUserExperienceSchema,
   GetUserNotificationSettingsItemSchema,
   GetUserProfileSchema,
   GetUsersSchema,
@@ -12,6 +13,7 @@ import {
 import {
   ConfirmEmailCodeDto,
   CreateEmailConfirmCodeDto,
+  GetUserExperienceQuery,
   GetUsersQuery,
   UpdateNotificationsSettingsDto,
   UpdateProfileDto,
@@ -344,9 +346,9 @@ export class UserModuleService {
         },
       })
 
-      profile.department = await this.departmentsService.getDepartment({id: foundUser.id_department})
-        
-      )
+      profile.department = await this.departmentsService.getDepartment({
+        id: foundUser.id_department,
+      })
 
       profile.position = {
         id: foundPosition.id,
@@ -447,6 +449,70 @@ export class UserModuleService {
     return this.getNotificationsSettings(
       userId,
       foundRoles.map((role) => role.id),
+    )
+  }
+
+  async getUserExperience(
+    query: GetUserExperienceQuery,
+  ): Promise<GetUserExperienceSchema[]> {
+    const conditions: Prisma.Sql[] = []
+
+    if (query.departmentId)
+      conditions.push(Prisma.sql`department_id = ${query.departmentId}`)
+
+    const whereClause =
+      conditions.length > 0
+        ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+        : Prisma.empty
+    const offsetClause = query.offset
+      ? Prisma.sql`OFFSET ${query.offset}`
+      : Prisma.empty
+    const limitClause = query.limit
+      ? Prisma.sql`LIMIT ${query.limit}`
+      : Prisma.empty
+
+    let foundExperience = await this.prisma.$queryRaw<any[]>`
+      WITH  leaderboard as (
+        SELECT 
+          SUM(experience) as experience,
+          department_id,
+          user_id,
+          DENSE_RANK() OVER (ORDER BY SUM(experience) DESC) AS rank 
+        FROM user_experience
+        ${whereClause}
+        GROUP BY user_id, department_id
+      )
+      SELECT *
+      FROM leaderboard
+      ORDER BY experience DESC
+      ${offsetClause}
+      ${limitClause}
+    `
+
+    if (query.userId) {
+      foundExperience = foundExperience.filter(
+        (exp) => exp.user_id === query.userId,
+      )
+    }
+
+    return await Promise.all(
+      foundExperience.map(async (exp) => {
+        const [user] = await this.getUsers({
+          id: exp.user_id,
+          limit: 1,
+          offset: 0,
+        })
+        const department = await this.departmentsService.getDepartment({
+          id: exp.department_id,
+        })
+
+        return {
+          user,
+          department,
+          rank: Number(exp.rank),
+          experience: Number(exp.experience),
+        }
+      }),
     )
   }
 

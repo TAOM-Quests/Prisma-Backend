@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import {
   ConfirmEmailCodeDto,
   CreateEmailConfirmCodeDto,
+  GetUserExperienceQuery,
   GetUsersQuery,
   UpdateNotificationsSettingsDto,
   UpdateProfileDto,
@@ -11,6 +12,7 @@ import {
   AuthUserSchema,
   GetPositionsSchema,
   GetRolesSchema,
+  GetUserExperienceSchema,
   GetUserNotificationSettingsItemSchema,
   GetUserProfileSchema,
   GetUsersSchema,
@@ -165,5 +167,26 @@ export class UserModuleController {
       +id,
       updateSetting,
     )
+  }
+
+  @ApiQuery({ name: 'userId', type: 'number', required: false })
+  @ApiQuery({ name: 'departmentId', type: 'number', required: false })
+  @ApiQuery({ name: 'offset', type: 'number', required: false })
+  @ApiQuery({ name: 'limit', type: 'number', required: false })
+  @Get('experience')
+  async getUserExperience(
+    @Query('userId') userId: string,
+    @Query('departmentId') departmentId: string,
+    @Query('offset') offset: string,
+    @Query('limit') limit: string,
+  ): Promise<GetUserExperienceSchema[]> {
+    const query: GetUserExperienceQuery = {}
+
+    if (userId) query.userId = +userId
+    if (departmentId) query.departmentId = +departmentId
+    if (offset) query.offset = +offset
+    if (limit) query.limit = +limit
+
+    return this.userModuleService.getUserExperience(query)
   }
 }

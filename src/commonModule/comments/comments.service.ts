@@ -43,7 +43,7 @@ export class CommentsService {
         return {
           user,
           text: comment.text,
-          createdAt: comment.createdAt,
+          createdAt: comment.created_at,
         }
       }),
     )

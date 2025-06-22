@@ -6,11 +6,13 @@ import { QuestTag } from 'src/models/questTag'
 import { Employee } from 'src/models/users'
 
 export class GetQuestsMinimizeQuery {
+  name?: string
   ids?: number[]
   tagsIds?: number[]
   groupsIds?: number[]
   executorsIds?: number[]
   departmentsIds?: number[]
+  difficultiesIds?: number[]
 }
 
 export class GetCompleteQuestsMinimizeQuery extends GetQuestsMinimizeQuery {

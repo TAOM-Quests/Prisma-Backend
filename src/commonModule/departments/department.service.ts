@@ -13,11 +13,30 @@ export class DepartmentsService {
   async getDepartments(): Promise<GetDepartmentsSchema[]> {
     const foundDepartments = await this.prisma.departments.findMany()
 
-    return foundDepartments.map((department) => ({
-      id: department.id,
-      name: department.name,
-      description: department.description,
-      image: this.filesService.getFileStats({ id: department.id_image }),
-    }))
+    return await Promise.all(
+      foundDepartments.map(async (department) => ({
+        id: department.id,
+        name: department.name,
+        description: department.description,
+        image: await this.filesService.getFileStats({
+          id: department.id_image,
+        }),
+      })),
+    )
+  }
+
+  async getDepartment({ id }: { id: number }): Promise<GetDepartmentsSchema> {
+    const foundDepartment = await this.prisma.departments.findUnique({
+      where: { id },
+    })
+
+    return {
+      id: foundDepartment.id,
+      name: foundDepartment.name,
+      description: foundDepartment.description,
+      image: await this.filesService.getFileStats({
+        id: foundDepartment.id_image,
+      }),
+    }
   }
 }
