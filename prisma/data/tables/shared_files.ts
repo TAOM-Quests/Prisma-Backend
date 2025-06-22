@@ -20,6 +20,9 @@ const SHARED_FILES: { id: number; name: string }[] = [
   { id: 15, name: 'Taom_login.png' },
   { id: 16, name: 'Banner_event.png' },
   { id: 17, name: 'System_noty.png' },
+  { id: 20, name: 'First_place_medal.png' },
+  { id: 21, name: 'Second_place_medal.png' },
+  { id: 22, name: 'Third_place_medal.png' },
 ]
 
 export const sharedFiles = async (): Promise<void> => {
