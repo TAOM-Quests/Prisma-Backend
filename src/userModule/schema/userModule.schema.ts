@@ -1,3 +1,4 @@
+import { GetDepartmentsSchema } from 'src/commonModule/departments/schema/GetDepartmentsSchema'
 import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
 import { Department } from 'src/models/department'
 import { UserPosition } from 'src/models/userPosition'
@@ -36,8 +37,8 @@ export class GetUserProfileSchema {
   roles?: UserRole[]
   patronymic?: string
   phoneNumber?: string
-  department?: Department
   position?: UserPosition
+  department?: GetDepartmentsSchema
   level: {
     name: string
     number: number

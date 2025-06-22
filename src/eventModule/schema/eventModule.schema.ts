@@ -1,4 +1,5 @@
 import { GetCommentsSchema } from 'src/commonModule/comments/schema/GetCommentsSchema'
+import { GetDepartmentsSchema } from 'src/commonModule/departments/schema/GetDepartmentsSchema'
 import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
 import { Department } from 'src/models/department'
 import { PlaceOffline, PlaceOnline, ScheduleItem } from 'src/models/event'
@@ -11,9 +12,9 @@ export class GetEventMinimizeSchema {
   id: number
   tags: EventTag[]
   status: EventStatus
-  department: Department
   schedule: ScheduleItem[]
   participantsCount: number
+  department: GetDepartmentsSchema
   places: (PlaceOffline | PlaceOnline)[]
   date?: Date
   name?: string

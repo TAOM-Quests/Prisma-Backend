@@ -29,6 +29,7 @@ import { readFileSync } from 'fs'
 import * as path from 'path'
 import { intersection } from 'lodash'
 import { NotificationsGateway } from './notifications.gateway'
+import { DepartmentsService } from 'src/commonModule/departments/department.service'
 
 const USER_SEX = {
   MALE: 'Мужской',
@@ -47,6 +48,7 @@ export class UserModuleService {
     private jwt: JwtService,
     private prisma: PrismaService,
     private filesService: FilesService,
+    private departmentsService: DepartmentsService,
     private notificationsGateway: NotificationsGateway,
   ) {}
 
@@ -342,10 +344,9 @@ export class UserModuleService {
         },
       })
 
-      profile.department = {
-        id: foundDepartment.id,
-        name: foundDepartment.name,
-      }
+      profile.department = await this.departmentsService.getDepartment({id: foundUser.id_department})
+        
+      )
 
       profile.position = {
         id: foundPosition.id,
