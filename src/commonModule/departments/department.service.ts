@@ -14,4 +14,15 @@ export class DepartmentsService {
       name: department.name,
     }))
   }
+
+  async getDepartment({ id }: { id: number }): Promise<GetDepartmentsSchema> {
+    const foundDepartment = await this.prisma.departments.findUnique({
+      where: { id },
+    })
+
+    return {
+      id: foundDepartment.id,
+      name: foundDepartment.name,
+    }
+  }
 }

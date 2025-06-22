@@ -84,3 +84,10 @@ export class GetUserNotificationSettingsItemSchema {
   typeId: number
   telegram: boolean
 }
+
+export class GetUserExperienceSchema {
+  rank: number
+  experience: number
+  user: GetUsersSchema
+  department: Department
+}
