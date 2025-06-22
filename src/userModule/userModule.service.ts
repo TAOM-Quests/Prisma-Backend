@@ -475,32 +475,36 @@ export class UserModuleService {
 
     const foundExperience = await this.prisma.$queryRaw<any[]>`
       SELECT 
-        experience,
+        SUM(experience) as experience,
         department_id,
         user_id,
-        RANK() OVER (ORDER BY experience DESC) AS rank 
+        RANK() OVER (ORDER BY SUM(experience) DESC) AS rank 
       FROM user_experience
       ${whereClause}
+      GROUP BY user_id, department_id
       ORDER BY experience DESC
       ${offsetClause}
       ${limitClause}
     `
 
-    const [user] = await this.getUsers({
-      id: query.userId,
-      limit: 1,
-      offset: 0,
-    })
-
     return await Promise.all(
-      foundExperience.map(async (exp) => ({
-        user,
-        rank: Number(exp.rank),
-        experience: exp.experience,
-        department: await this.departmentsService.getDepartment({
+      foundExperience.map(async (exp) => {
+        const [user] = await this.getUsers({
+          id: exp.user_id,
+          limit: 1,
+          offset: 0,
+        })
+        const department = await this.departmentsService.getDepartment({
           id: exp.department_id,
-        }),
-      })),
+        })
+
+        return {
+          user,
+          department,
+          rank: Number(exp.rank),
+          experience: Number(exp.experience),
+        }
+      }),
     )
   }
 
