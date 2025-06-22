@@ -31,11 +31,12 @@ export class QuestService {
 
     const completedCount = Number(
       (
-        await this.prisma.$queryRaw<{ count: bigint }[]>`
-          SELECT COUNT(*)
-          FROM complete_quests
-          WHERE (quest_data->>'id')::int = ${foundQuest.id}::int
-        `
+        await this.prisma.$queryRaw<{ count: number }[]>`
+        SELECT COUNT(*)
+        FROM users
+        JOIN complete_quests ON users.id = complete_quests.id_user
+        WHERE (complete_quests.quest_data->>'id')::int = ${id}
+      `
       )[0].count,
     )
     const quest: GetQuestMinimizeSchema = {
