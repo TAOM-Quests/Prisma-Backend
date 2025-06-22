@@ -48,7 +48,7 @@ export class EventModuleService {
   ): Promise<GetEventMinimizeSchema[]> {
     const where: Prisma.eventsWhereInput = {}
 
-    if (getEventsParams.status) where.id_status = getEventsParams.status
+    if (getEventsParams.status) where.id_status = { in: getEventsParams.status }
     if (getEventsParams.name) where.name = { contains: getEventsParams.name }
     if (getEventsParams.department)
       where.id_department = getEventsParams.department
@@ -99,26 +99,34 @@ export class EventModuleService {
     id: number,
     event: UpdateEventDto,
   ): Promise<GetEventSchema> {
-    const oldExecutorsIds = (
-      await this.prisma.users.findMany({
-        where: { events_where_executor: { some: { id_event: id } } },
-      })
-    ).map((executor) => executor.id)
-    for (const executorId of [
-      ...difference(oldExecutorsIds ?? [], event.executorsIds ?? []),
-    ]) {
-      await this.removeExecutorFromEvent(id, executorId)
+    const updateKeys = Object.keys(event)
+
+    console.log(event)
+
+    if (updateKeys.includes('executorsIds')) {
+      const oldExecutorsIds = (
+        await this.prisma.users.findMany({
+          where: { events_where_executor: { some: { id_event: id } } },
+        })
+      ).map((executor) => executor.id)
+      for (const executorId of [
+        ...difference(oldExecutorsIds ?? [], event.executorsIds ?? []),
+      ]) {
+        await this.removeExecutorFromEvent(id, executorId)
+      }
     }
 
-    const oldFilesIds = (
-      await this.prisma.shared_files.findMany({
-        where: { events_where_file: { some: { id_event: id } } },
-      })
-    ).map((file) => file.id)
-    for (const fileId of [
-      ...difference(oldFilesIds ?? [], event.filesIds ?? []),
-    ]) {
-      await this.removeFileFromEvent(id, fileId)
+    if (updateKeys.includes('filesIds')) {
+      const oldFilesIds = (
+        await this.prisma.shared_files.findMany({
+          where: { events_where_file: { some: { id_event: id } } },
+        })
+      ).map((file) => file.id)
+      for (const fileId of [
+        ...difference(oldFilesIds ?? [], event.filesIds ?? []),
+      ]) {
+        await this.removeFileFromEvent(id, fileId)
+      }
     }
 
     const foundEvent = await this.prisma.events.findUnique({
