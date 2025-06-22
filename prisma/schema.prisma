@@ -108,6 +108,10 @@ model departments {
   created_at DateTime @default(now())
 
   name String
+  description          String
+  
+  id_image             Int
+  image                shared_files           @relation(fields: [id_image], references: [id])
 
   users                  users[]
   events                 events[]
@@ -403,6 +407,8 @@ model shared_files {
   quest_results      quest_results[]
   user_achievements  user_achievements[]
   quest_questions    quest_questions[]
+
+  departments departments[]
 }
 
 model shared_files_on_events {
@@ -418,37 +424,32 @@ model shared_files_on_events {
 }
 
 model users {
-  id         Int      @id @default(autoincrement())
+  id                          Int                           @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  email            String    @unique
-  id_image_file    Int       @default(1)
-  password         String
-  id_role          Int?
-  id_department    Int?
-  token            String    @unique
-  birth_date       DateTime?
-  first_name       String?   @default("Новый")
-  id_position      Int?
-  last_name        String?   @default("Пользователь")
-  patronymic       String?
-  phone_number     String?
-  telegram         String?   @unique
-  telegram_chat_id Int?
-  level_number     Int       @default(1)
-  experience       Int       @default(0)
+  email                       String                        @unique
+  token                       String                        @unique
+  password                    String
+  experience                  Int                           @default(0)
 
-  sex        user_sex?
-  department departments?    @relation(fields: [id_department], references: [id])
-  image      shared_files    @relation(fields: [id_image_file], references: [id])
-  position   user_positions? @relation(fields: [id_position], references: [id])
-  level      user_levels     @relation(fields: [level_number], references: [level])
+  telegram                    String?                       @unique
+  last_name                   String?                       @default("Пользователь")
+  first_name                  String?                       @default("Новый")
+  birth_date                  DateTime?
+  patronymic                  String?
+  phone_number                String?
+  telegram_chat_id            Int?
 
-  complete_quests             complete_quests[]
-  events_where_inspector      events[]
-  roles                       user_roles[]
-  events_where_executor       user_executors_on_events[]
-  events_where_participant    user_participants_on_events[]
+  level_number                Int                           @default(1)
+  id_image_file               Int                           @default(1)
+  level                       user_levels                   @relation(fields: [level_number], references: [level])
+  image                       shared_files                  @relation(fields: [id_image_file], references: [id])
+
+  id_position                 Int?
+  id_department               Int?
+  position                    user_positions?               @relation(fields: [id_position], references: [id])
+  department                  departments?                  @relation(fields: [id_department], references: [id])
+
   quests                      quests[]
   comments                    comments[]
   achievements                user_achievements[]
@@ -456,6 +457,12 @@ model users {
   user_experience             user_experience[]
   feedback_answers            feedback_answers[]
   user_notifications_settings user_notifications_settings[]
+  sex                         user_sex?
+  complete_quests             complete_quests[]
+  events_where_inspector      events[]
+  roles                       user_roles[]
+  events_where_executor       user_executors_on_events[]
+  events_where_participant    user_participants_on_events[]
 }
 
 model user_achievements {

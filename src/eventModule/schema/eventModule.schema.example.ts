@@ -4,10 +4,18 @@ export const getEventsMinimizeSchemaExample: GetEventMinimizeSchema[] = [
   {
     id: 1,
     name: 'TAOM SKILLS',
-    date: new Date('2025-04-02'),
     department: {
-      id: 1,
+      id: 2,
       name: 'IT',
+      image: {
+        id: 1,
+        name: 'image.png',
+        size: 12345,
+        originalName: 'image.png',
+        extension: 'png',
+        url: 'https://localhost:3000/commonModule/file?fileName=image.png',
+      },
+      description: 'IT department',
     },
     places: [
       {
@@ -64,8 +72,17 @@ export const getEventsMinimizeSchemaExample: GetEventMinimizeSchema[] = [
 export const getEventSchemaExample: GetEventSchema = {
   id: 1,
   department: {
-    id: 1,
+    id: 2,
     name: 'IT',
+    image: {
+      id: 1,
+      name: 'image.png',
+      size: 12345,
+      originalName: 'image.png',
+      extension: 'png',
+      url: 'https://localhost:3000/commonModule/file?fileName=image.png',
+    },
+    description: 'IT department',
   },
   name: 'TAOM SKILLS',
   description: 'TAOM SKILLS description',

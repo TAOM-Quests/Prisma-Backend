@@ -346,10 +346,9 @@ export class UserModuleService {
         },
       })
 
-      profile.department = {
-        id: foundDepartment.id,
-        name: foundDepartment.name,
-      }
+      profile.department = await this.departmentsService.getDepartment({
+        id: foundUser.id_department,
+      })
 
       profile.position = {
         id: foundPosition.id,

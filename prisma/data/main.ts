@@ -16,8 +16,8 @@ const prisma = new PrismaClient()
 
 export const main = async (): Promise<void> => {
   //Общие данные
-  await departments()
   await sharedFiles()
+  await departments()
 
   //Данные для пользователей
   await userRoles()

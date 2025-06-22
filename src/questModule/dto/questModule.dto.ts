@@ -70,6 +70,8 @@ export class PostQuestDto {
 export class GetQuestGroupsQuery {
   @ApiProperty({ example: 1, required: false })
   departmentId?: number
+  offset?: number
+  limit?: number
 }
 
 export class GetQuestTagsQuery {
