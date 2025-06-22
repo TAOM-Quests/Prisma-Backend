@@ -458,7 +458,6 @@ export class UserModuleService {
   ): Promise<GetUserExperienceSchema[]> {
     const conditions: Prisma.Sql[] = []
 
-    if (query.userId) conditions.push(Prisma.sql`user_id = ${query.userId}`)
     if (query.departmentId)
       conditions.push(Prisma.sql`department_id = ${query.departmentId}`)
 
@@ -473,19 +472,29 @@ export class UserModuleService {
       ? Prisma.sql`LIMIT ${query.limit}`
       : Prisma.empty
 
-    const foundExperience = await this.prisma.$queryRaw<any[]>`
-      SELECT 
-        SUM(experience) as experience,
-        department_id,
-        user_id,
-        RANK() OVER (ORDER BY SUM(experience) DESC) AS rank 
-      FROM user_experience
-      ${whereClause}
-      GROUP BY user_id, department_id
+    let foundExperience = await this.prisma.$queryRaw<any[]>`
+      WITH  leaderboard as (
+        SELECT 
+          SUM(experience) as experience,
+          department_id,
+          user_id,
+          RANK() OVER (ORDER BY SUM(experience) DESC) AS rank 
+        FROM user_experience
+        ${whereClause}
+        GROUP BY user_id, department_id
+      )
+      SELECT *
+      FROM leaderboard
       ORDER BY experience DESC
       ${offsetClause}
       ${limitClause}
     `
+
+    if (query.userId) {
+      foundExperience = foundExperience.filter(
+        (exp) => exp.user_id === query.userId,
+      )
+    }
 
     return await Promise.all(
       foundExperience.map(async (exp) => {
