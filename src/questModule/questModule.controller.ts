@@ -10,6 +10,7 @@ import {
 import { QuestModuleService } from './questModule.service'
 import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 import {
+  GetQuestCompleteSchema,
   GetQuestDifficultiesSchema,
   GetQuestGroupsSchema,
   GetQuestMinimizeSchema,
@@ -117,7 +118,9 @@ export class QuestModuleController {
     example: getQuestSchemaExample,
   })
   @Get('/quests/complete/:id')
-  async getCompleteQuest(@Param('id') id: string): Promise<GetQuestSchema> {
+  async getCompleteQuest(
+    @Param('id') id: string,
+  ): Promise<GetQuestCompleteSchema> {
     return this.questModuleService.getCompleteQuest(+id)
   }
 

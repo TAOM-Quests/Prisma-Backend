@@ -1,6 +1,7 @@
 import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
 import { QuestAnswer } from 'src/models/questAnswer'
 import { Employee } from 'src/models/users'
+import { GetUsersSchema } from 'src/userModule/schema/userModule.schema'
 
 export class GetQuestMinimizeSchema {
   id: number
@@ -19,6 +20,11 @@ export class GetQuestSchema extends GetQuestMinimizeSchema {
   executor: Employee
   results?: GetQuestResultSchema[]
   questions?: GetQuestQuestionSchema[]
+}
+
+export class GetQuestCompleteSchema extends GetQuestSchema {
+  date: Date
+  user: GetUsersSchema
 }
 
 export class GetQuestQuestionSchema {

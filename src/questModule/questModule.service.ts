@@ -10,6 +10,7 @@ import {
 } from './dto/questModule.dto'
 import { Prisma } from '@prisma/client'
 import {
+  GetQuestCompleteSchema,
   GetQuestDifficultiesSchema,
   GetQuestGroupsSchema,
   GetQuestMinimizeSchema,
@@ -117,7 +118,7 @@ export class QuestModuleService {
     return quest
   }
 
-  async getCompleteQuest(id: number): Promise<GetQuestSchema> {
+  async getCompleteQuest(id: number): Promise<GetQuestCompleteSchema> {
     return this.questService.getCompleteById(id)
   }
 

@@ -3,6 +3,7 @@ import { SaveQuestCompleteDto, SaveQuestDto } from './dto/questModule.dto'
 import { Prisma } from '@prisma/client'
 import { PrismaService } from 'src/prisma/prisma.service'
 import {
+  GetQuestCompleteSchema,
   GetQuestMinimizeSchema,
   GetQuestSchema,
 } from './schema/questModule.schema'
@@ -10,6 +11,7 @@ import { NotFoundError } from 'src/errors/notFound'
 import { difference } from 'lodash'
 import { GamingService } from 'src/userModule/gaming.service'
 import { FilesService } from 'src/commonModule/files/files.service'
+import { UserModuleService } from 'src/userModule/userModule.service'
 
 @Injectable()
 export class QuestService {
@@ -17,6 +19,7 @@ export class QuestService {
     private prisma: PrismaService,
     private filesService: FilesService,
     private gamingService: GamingService,
+    private usersService: UserModuleService,
   ) {}
 
   async getMinimizeById(id: number): Promise<GetQuestMinimizeSchema> {
@@ -129,15 +132,22 @@ export class QuestService {
     return quest
   }
 
-  async getCompleteById(id: number): Promise<GetQuestSchema> {
+  async getCompleteById(id: number): Promise<GetQuestCompleteSchema> {
     const foundCompleteRow = await this.prisma.complete_quests.findUnique({
       where: { id },
     })
     const foundQuest =
       foundCompleteRow.quest_data as unknown as SaveQuestCompleteDto
+    const [user] = await this.usersService.getUsers({
+      id: foundCompleteRow.id_user,
+      limit: 1,
+      offset: 0,
+    })
 
-    const quest: GetQuestSchema = {
+    const quest: GetQuestCompleteSchema = {
       ...(await this.getMinimizeCompleteById(id)),
+      user,
+      date: foundCompleteRow.created_at,
       executor: foundQuest.executor,
       questions: foundQuest.questions,
       results: [
