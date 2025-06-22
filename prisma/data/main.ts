@@ -8,6 +8,7 @@ import { departments } from './tables/departments'
 import { userLevels } from './tables/user_levels'
 import { userAchievements } from './tables/user_achievements'
 import { questDifficulties } from './tables/quest_difficulties'
+import { notificationsTypes } from './tables/user_notifiactions_types'
 
 const prisma = new PrismaClient()
 
@@ -19,6 +20,7 @@ export const main = async (): Promise<void> => {
   //Данные для пользователей
   await userRoles()
   await userPositions()
+  await notificationsTypes()
 
   //Данные для геймификации
   await userLevels()
