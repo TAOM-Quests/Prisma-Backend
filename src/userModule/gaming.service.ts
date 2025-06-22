@@ -4,7 +4,12 @@ import { NotificationsGateway } from './notifications.gateway'
 import { capitalize } from 'lodash'
 import { FilesService } from 'src/commonModule/files/files.service'
 
-type ExperienceSource = 'quests' | 'events' | 'games' | 'achievements'
+type ExperienceSource =
+  | 'quests'
+  | 'events'
+  | 'games_wordle'
+  | 'games_crossword'
+  | 'achievements'
 
 export const ACHIEVEMENTS_MAP = {
   FIRST_EVENT_REGISTER: 1,
