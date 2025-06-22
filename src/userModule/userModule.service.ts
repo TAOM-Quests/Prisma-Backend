@@ -478,7 +478,7 @@ export class UserModuleService {
           SUM(experience) as experience,
           department_id,
           user_id,
-          RANK() OVER (ORDER BY SUM(experience) DESC) AS rank 
+          DENSE_RANK() OVER (ORDER BY SUM(experience) DESC) AS rank 
         FROM user_experience
         ${whereClause}
         GROUP BY user_id, department_id
