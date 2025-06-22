@@ -109,16 +109,18 @@ model departments {
 
   name                 String
 
-  quest_groups         quest_groups[]
-  quest_tags           quest_tags[]
-  quests               quests[]
   users                users[]
   events               events[]
+  quests               quests[]
   event_tags           event_tags[]
+  quest_tags           quest_tags[]
+  quest_groups         quest_groups[]
+  user_experience      user_experience[]
   game_wordle_words          game_wordle_words[]
   game_wordle_answers  game_wordle_answers[]
   game_wordle_attempts game_wordle_attempts[]
-  user_experience      user_experience[]
+  game_crossword_words game_crossword_words[]
+  game_crossword_answers game_crossword_answers[]
 }
 
 model events {
@@ -207,11 +209,11 @@ model game_crossword_words {
 
   question      String
   word          String
-  id_difficulty Int
-  department_id Int
 
-  difficulty game_crossword_difficulties @relation(fields: [id_difficulty], references: [id])
+  department_id Int
+  id_difficulty Int
   department departments                 @relation(fields: [department_id], references: [id])
+  difficulty game_crossword_difficulties @relation(fields: [id_difficulty], references: [id])
 }
 
 model game_crossword_difficulties {
@@ -235,11 +237,11 @@ model game_crossword_answers {
   x             Int
   y             Int
   direction     String
-  difficulty_id Int
-  department_id Int
 
-  difficulty game_crossword_difficulties @relation(fields: [difficulty_id], references: [id])
+  department_id Int
+  difficulty_id Int
   department departments                 @relation(fields: [department_id], references: [id])
+  difficulty game_crossword_difficulties @relation(fields: [difficulty_id], references: [id])
 }
 
 model game_wordle_words {
