@@ -10,6 +10,7 @@ import { userAchievements } from './tables/user_achievements'
 import { questDifficulties } from './tables/quest_difficulties'
 import { crosswordWords } from './tables/game_crossword_words'
 import { crosswordDifficulties } from './tables/game_crossword_difficulties'
+import { notificationsTypes } from './tables/user_notifiactions_types'
 
 const prisma = new PrismaClient()
 
@@ -21,6 +22,7 @@ export const main = async (): Promise<void> => {
   //Данные для пользователей
   await userRoles()
   await userPositions()
+  await notificationsTypes()
 
   //Данные для геймификации
   await userLevels()

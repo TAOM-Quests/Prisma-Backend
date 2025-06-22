@@ -21,21 +21,24 @@ import { EventType } from 'src/models/eventType'
 import { EventStatus } from 'src/models/eventStatus'
 import { Department } from 'src/models/department'
 import { NotFoundError } from 'src/errors/notFound'
-import { CommonModuleService } from 'src/commonModule/commonModule.service'
-import {
-  GetCommentsSchema,
-  GetFileStatsSchema,
-} from 'src/commonModule/schema/commonModule.schema'
 import { difference } from 'lodash'
 import { EventTag } from 'src/models/eventTag'
 import { GamingService } from 'src/userModule/gaming.service'
+import { FilesService } from 'src/commonModule/files/files.service'
+import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
+import { CommentsService } from 'src/commonModule/comments/comments.service'
+import { GetCommentsSchema } from 'src/commonModule/comments/schema/GetCommentsSchema'
+import { GetUserProfileSchema } from 'src/userModule/schema/userModule.schema'
+import { UserModuleService } from 'src/userModule/userModule.service'
 
 @Injectable()
 export class EventModuleService {
   constructor(
     private prisma: PrismaService,
+    private filesService: FilesService,
     private gamingService: GamingService,
-    private commonModuleService: CommonModuleService,
+    private commentsService: CommentsService,
+    private userModuleService: UserModuleService,
   ) {}
 
   async getEvents(
@@ -217,6 +220,18 @@ export class EventModuleService {
     }))
   }
 
+  async getParticipantsProfiles(eventId): Promise<GetUserProfileSchema[]> {
+    const foundParticipants = await this.prisma.users.findMany({
+      where: { events_where_participant: { some: { id_event: eventId } } },
+    })
+
+    return Promise.all(
+      foundParticipants.map((participant) =>
+        this.userModuleService.getUserProfileById(participant.id),
+      ),
+    )
+  }
+
   private async getEventMinimizeWithAdditionalData(
     event,
   ): Promise<GetEventMinimizeSchema> {
@@ -349,7 +364,7 @@ export class EventModuleService {
       where: { id: event.id_image_file },
     })
 
-    return await this.commonModuleService.getFileStats(foundFile.name)
+    return await this.filesService.getFileStats({ id: foundFile.id })
   }
 
   private async getFiles(event): Promise<GetFileStatsSchema[]> {
@@ -359,7 +374,7 @@ export class EventModuleService {
 
     return Promise.all(
       files.map(
-        async (file) => await this.commonModuleService.getFileStats(file.name),
+        async (file) => await this.filesService.getFileStats({ id: file.id }),
       ),
     )
   }
@@ -376,7 +391,7 @@ export class EventModuleService {
   }
 
   private async getInspectorComments(event): Promise<GetCommentsSchema[]> {
-    return this.commonModuleService.getComments({
+    return this.commentsService.getComments({
       entityName: 'events',
       entityId: event.id,
     })

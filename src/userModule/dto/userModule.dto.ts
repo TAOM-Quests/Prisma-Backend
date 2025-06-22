@@ -4,11 +4,39 @@ import { IsEmail } from 'class-validator'
 type USER_SEX = 'Мужской' | 'Женский'
 
 export class GetUsersQuery {
+  limit: number
+  offset: number
   id?: number
-  roleId?: number
+  email?: string
   isAdmin?: boolean
   positionId?: number
+  rolesIds?: number[]
   isEmployee?: boolean
+  departmentId?: number
+}
+
+export class CreateEmailConfirmCodeDto {
+  @ApiProperty({
+    example: 'test@gmail.com',
+    required: true,
+  })
+  @IsEmail()
+  email: string
+}
+
+export class ConfirmEmailCodeDto {
+  @ApiProperty({
+    example: 'test@gmail.com',
+    required: true,
+  })
+  @IsEmail()
+  email: string
+
+  @ApiProperty({
+    example: '1234',
+    required: true,
+  })
+  code: number
 }
 
 export class UserAuthDto {
@@ -80,4 +108,48 @@ export class UpdateProfileDto {
     required: false,
   })
   imageId: number
+
+  @ApiProperty({
+    example: [1, 2],
+    required: false,
+  })
+  rolesIds: number[]
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  positionId: number
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  departmentId: number
+
+  @ApiProperty({
+    example: 'password',
+    required: false,
+  })
+  password: string
+}
+
+export class UpdateNotificationsSettingsDto {
+  @ApiProperty({
+    example: 1,
+    required: true,
+  })
+  typeId: number
+
+  @ApiProperty({
+    example: true,
+    required: false,
+  })
+  email?: boolean
+
+  @ApiProperty({
+    example: true,
+    required: false,
+  })
+  telegram?: boolean
 }

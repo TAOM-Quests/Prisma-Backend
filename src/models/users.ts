@@ -1,4 +1,4 @@
-import { GetFileStatsSchema } from 'src/commonModule/schema/commonModule.schema'
+import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
 
 export interface User {
   id: number

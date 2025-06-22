@@ -7,13 +7,16 @@ import {
   Post,
   Query,
 } from '@nestjs/common'
-import { ApiQuery } from '@nestjs/swagger'
+import { ApiProperty, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { WordleService } from './wordle.service'
 import {
   GetWordleUserAttemptSchema,
   GetWordleWordSchema,
 } from './schema/wordle.schema'
+import { getWordleWordSchemaExample } from './schema/gamesModule.schema.example'
+import { SaveWordleWordBody, SaveWordleWordDto } from './dto/gamesModule.dto'
 
+@ApiTags('wordle')
 @Controller('games/wordle')
 export class WordleController {
   constructor(private wordleService: WordleService) {}
@@ -47,18 +50,28 @@ export class WordleController {
     return await this.wordleService.getWordByDepartment(+departmentId)
   }
 
-  @Post('/words/:departmentId')
+  @ApiResponse({
+    type: GetWordleWordSchema,
+    example: getWordleWordSchemaExample,
+    status: 200,
+  })
+  @Post('/words')
   async createWord(
-    @Param('departmentId') departmentId: string,
-    @Body('word') word: string,
+    @Query('departmentId') departmentId: string,
+    @Body() { word }: SaveWordleWordBody,
   ): Promise<GetWordleWordSchema> {
     return await this.wordleService.createWord(word, +departmentId)
   }
 
+  @ApiResponse({
+    type: GetWordleWordSchema,
+    example: getWordleWordSchemaExample,
+    status: 200,
+  })
   @Post('/words/:id')
   async updateWord(
     @Param('id') id: string,
-    @Body('word') word: string,
+    @Body() { word }: SaveWordleWordBody,
   ): Promise<GetWordleWordSchema> {
     return await this.wordleService.updateWord(word, +id)
   }

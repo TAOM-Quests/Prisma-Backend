@@ -17,14 +17,13 @@ model answers {
   id_connection  Int?
   id_box_sorting Int?
   id_free        Int?
+  single         answers_single?      @relation(fields: [id_single], references: [id])
+  multiple       answers_multiple?    @relation(fields: [id_multiple], references: [id])
+  connection     answers_connection?  @relation(fields: [id_connection], references: [id])
+  box_sorting    answers_box_sorting? @relation(fields: [id_box_sorting], references: [id])
+  free           answers_free?        @relation(fields: [id_free], references: [id])
 
-  single      answers_single?      @relation(fields: [id_single], references: [id])
-  multiple    answers_multiple?    @relation(fields: [id_multiple], references: [id])
-  connection  answers_connection?  @relation(fields: [id_connection], references: [id])
-  box_sorting answers_box_sorting? @relation(fields: [id_box_sorting], references: [id])
-  free        answers_free?        @relation(fields: [id_free], references: [id])
-
-  questions questions[]
+  questions      quest_questions[]
 }
 
 model answers_single {
@@ -33,8 +32,9 @@ model answers_single {
 
   correct_answers Int
   options         String[]
+  images_ids      Json[]
 
-  answers answers[]
+  answers         answers[]
 }
 
 model answers_multiple {
@@ -42,6 +42,7 @@ model answers_multiple {
   created_at DateTime @default(now())
 
   options         String[]
+  images_ids      Json[]
   correct_answers Int[]
 
   answers answers[]
@@ -52,6 +53,7 @@ model answers_connection {
   created_at DateTime @default(now())
 
   options         String[]
+  images_ids      Json[]
   correct_answers String[]
 
   answers answers[]
@@ -62,6 +64,7 @@ model answers_box_sorting {
   created_at DateTime @default(now())
 
   options         String[]
+  images_ids      Json[]
   correct_answers Json
 
   answers answers[]
@@ -101,22 +104,21 @@ model complete_quests {
 }
 
 model departments {
-  id         Int      @id @default(autoincrement())
+  id                   Int                    @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  name String
+  name                 String
 
-  quest_groups           quest_groups[]
-  quest_tags             quest_tags[]
-  quests                 quests[]
-  users                  users[]
-  events                 events[]
-  event_tags             event_tags[]
-  game_wordle_words            game_wordle_words[]
-  game_wordle_answers    game_wordle_answers[]
-  user_experience        user_experience[]
-  game_crossword_words   game_crossword_words[]
-  game_crossword_answers game_crossword_answers[]
+  quest_groups         quest_groups[]
+  quest_tags           quest_tags[]
+  quests               quests[]
+  users                users[]
+  events               events[]
+  event_tags           event_tags[]
+  game_wordle_words          game_wordle_words[]
+  game_wordle_answers  game_wordle_answers[]
+  game_wordle_attempts game_wordle_attempts[]
+  user_experience      user_experience[]
 }
 
 model events {
@@ -178,6 +180,27 @@ model event_tags {
   events events[]
 }
 
+model feedback_forms {
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String
+  entity_name      String
+  entity_id        Int
+  questions        Json[]
+  feedback_answers feedback_answers[]
+
+  @@unique([entity_name, entity_id])
+}
+
+model feedback_answers {
+  id      Int            @id @default(autoincrement())
+  answers String[]
+  user_id Int
+  form_id Int
+  user    users          @relation(fields: [user_id], references: [id])
+  form    feedback_forms @relation(fields: [form_id], references: [id])
+}
+
 model game_crossword_words {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
@@ -220,13 +243,13 @@ model game_crossword_answers {
 }
 
 model game_wordle_words {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-
+  id            Int         @id @default(autoincrement())
   word          String
   department_id Int
 
   department departments @relation(fields: [department_id], references: [id])
+
+  @@unique([word, department_id])
 }
 
 model game_wordle_answers {
@@ -241,38 +264,41 @@ model game_wordle_answers {
 }
 
 model game_wordle_attempts {
-  id         Int      @id @default(autoincrement())
+  id               Int         @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  word    String
-  day     DateTime @default(now())
-  user_id Int
+  word          String
+  day           DateTime    @default(now())
+  user_id       Int
+  department_id Int
 
-  user users @relation(fields: [user_id], references: [id])
+  user       users    @relation(fields: [user_id], references: [id])
+  department    departments @relation(fields: [department_id], references: [id])
 }
 
 model quests {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  id_department Int
   name          String?
   time          String?
   description   String?
-  id_group      Int?
+
   id_executor   Int
-  id_difficult  Int?
+  id_department Int
+  executor      users                  @relation(fields: [id_executor], references: [id])
+  department    departments            @relation(fields: [id_department], references: [id])
+
+  id_group      Int?
   id_image      Int?
+  id_difficult  Int?
+  group         quest_groups?          @relation(fields: [id_group], references: [id])
+  image         shared_files?          @relation(fields: [id_image], references: [id])
+  difficult     quest_difficulties?    @relation(fields: [id_difficult], references: [id])
 
-  department departments         @relation(fields: [id_department], references: [id])
-  difficult  quest_difficulties? @relation(fields: [id_difficult], references: [id])
-  group      quest_groups?       @relation(fields: [id_group], references: [id])
-  executor   users               @relation(fields: [id_executor], references: [id])
-  image      shared_files?       @relation(fields: [id_image], references: [id])
-
-  results   quest_results[]
-  tags      quest_tags_on_quests[]
-  questions questions[]
+  results       quest_results[]
+  tags          quest_tags_on_quests[]
+  questions     quest_questions[]
 }
 
 model quest_difficulties {
@@ -335,17 +361,19 @@ model quest_tags_on_quests {
   @@id([id_quest, id_tag])
 }
 
-model questions {
-  id         Int      @id @default(autoincrement())
+model quest_questions {
+  id         Int            @id @default(autoincrement())
   created_at DateTime @default(now())
 
   text      String?
   type      String?
-  id_quest  Int
-  id_answer Int?
 
-  answer answers? @relation(fields: [id_answer], references: [id])
-  quest  quests   @relation(fields: [id_quest], references: [id], onDelete: Cascade)
+  id_quest  Int
+  quest  quests         @relation(fields: [id_quest], references: [id], onDelete: Cascade)
+
+  id_answer Int?
+  answer answers?       @relation(fields: [id_answer], references: [id])
+  images    shared_files[]
 }
 
 model shared_files {
@@ -364,6 +392,7 @@ model shared_files {
   quests             quests[]
   quest_results      quest_results[]
   user_achievements  user_achievements[]
+  quest_questions    quest_questions[]
 }
 
 model shared_files_on_events {
@@ -389,9 +418,9 @@ model users {
   id_department    Int?
   token            String    @unique
   birth_date       DateTime?
-  first_name       String?
+  first_name       String? @default("Новый")
   id_position      Int?
-  last_name        String?
+  last_name        String? @default("Пользователь")
   patronymic       String?
   phone_number     String?
   telegram         String?   @unique
@@ -403,11 +432,11 @@ model users {
   department departments?    @relation(fields: [id_department], references: [id])
   image      shared_files    @relation(fields: [id_image_file], references: [id])
   position   user_positions? @relation(fields: [id_position], references: [id])
-  role       user_roles?     @relation(fields: [id_role], references: [id])
   level      user_levels     @relation(fields: [level_number], references: [level])
 
   complete_quests          complete_quests[]
   events_where_inspector   events[]
+  roles                    user_roles[]
   events_where_executor    user_executors_on_events[]
   events_where_participant user_participants_on_events[]
   quests                   quests[]
@@ -415,6 +444,25 @@ model users {
   achievements             user_achievements[]
   game_wordle_attempts     game_wordle_attempts[]
   user_experience          user_experience[]
+  feedback_answers         feedback_answers[]
+  user_notifications_settings user_notifications_settings[]
+}
+
+model user_achievements {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  experience  Int
+  image_id    Int
+  image       shared_files @relation(fields: [image_id], references: [id])
+  users       users[]
+}
+
+model user_email_confirm {
+  id         Int      @id @default(autoincrement())
+  email      String
+  code       String
+  created_at DateTime @default(now())
 }
 
 model user_executors_on_events {
@@ -427,6 +475,41 @@ model user_executors_on_events {
   executor users  @relation(fields: [id_executor], references: [id])
 
   @@id([id_event, id_executor])
+}
+
+model user_experience {
+  id            Int         @id @default(autoincrement())
+  experience    Int
+  source        String
+  user_id       Int
+  department_id Int
+  user          users       @relation(fields: [user_id], references: [id])
+  department    departments @relation(fields: [department_id], references: [id])
+}
+
+model user_levels {
+  level      Int     @id @default(autoincrement())
+  name       String
+  experience Int
+  users      users[]
+}
+
+model user_notifications_settings {
+  email    Boolean
+  telegram Boolean
+  type_id  Int
+  user_id  Int
+  user     users                    @relation(fields: [user_id], references: [id])
+  type     user_notifications_types @relation(fields: [type_id], references: [id])
+
+  @@unique([user_id, type_id])
+}
+
+model user_notifications_types {
+  id                          Int                           @id @default(autoincrement())
+  name                        String
+  roles                       Int[]
+  user_notifications_settings user_notifications_settings[]
 }
 
 model user_participants_on_events {
@@ -459,43 +542,6 @@ model user_roles {
   description String?
 
   users users[]
-}
-
-model user_levels {
-  level      Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-
-  name       String
-  experience Int
-
-  users users[]
-}
-
-model user_achievements {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-
-  name        String
-  description String
-  experience  Int
-  image_id    Int
-
-  image shared_files @relation(fields: [image_id], references: [id])
-
-  users users[]
-}
-
-model user_experience {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-
-  experience    Int
-  source        String
-  user_id       Int
-  department_id Int
-
-  user       users       @relation(fields: [user_id], references: [id])
-  department departments @relation(fields: [department_id], references: [id])
 }
 
 enum user_sex {

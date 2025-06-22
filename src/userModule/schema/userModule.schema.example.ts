@@ -1,4 +1,6 @@
 import {
+  GetPositionsSchema,
+  GetRolesSchema,
   GetUserProfileSchema,
   UpdateUserProfileSchema,
 } from './userModule.schema'
@@ -32,11 +34,13 @@ export const getUserProfileSchemaExample: GetUserProfileSchema = {
     id: 2,
     name: 'President of Academy',
   },
-  role: {
-    id: 0,
-    name: 'Admin',
-    description: 'Director of department',
-  },
+  roles: [
+    {
+      id: 1,
+      name: 'Admin',
+      description: 'Director of department',
+    },
+  ],
   image: {
     id: 1,
     name: 'image.png',
@@ -52,6 +56,14 @@ export const getUserProfileSchemaExample: GetUserProfileSchema = {
     experienceToNextLevel: 300,
   },
   achievements: [],
+  notificationsSettings: [
+    {
+      name: 'Напоминание о мероприятии за день',
+      typeId: 1,
+      email: true,
+      telegram: false,
+    },
+  ],
 }
 
 export const updateUserProfileSchemaExample: UpdateUserProfileSchema = {
@@ -72,3 +84,22 @@ export const updateUserProfileSchemaExample: UpdateUserProfileSchema = {
     url: 'https://localhost:3000/commonModule/file?fileName=image.png',
   },
 }
+
+export const getRolesSchemaExample: GetRolesSchema = {
+  id: 1,
+  name: 'Admin',
+}
+
+export const getPositionsSchemaExample: GetPositionsSchema = {
+  id: 1,
+  name: 'President of Academy',
+}
+
+export const getUserNotificationSettingsItemSchemaExample = [
+  {
+    name: 'Напоминание о мероприятии за день',
+    typeId: 1,
+    email: true,
+    telegram: false,
+  },
+]

@@ -2,15 +2,15 @@ import { Injectable } from '@nestjs/common'
 import { NotFoundError } from 'src/errors/notFound'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { GetQuestResultSchema } from './schema/questModule.schema'
-import { CommonModuleService } from 'src/commonModule/commonModule.service'
 import { SaveResultDto } from './dto/questModule.dto'
 import { Prisma } from '@prisma/client'
+import { FilesService } from 'src/commonModule/files/files.service'
 
 @Injectable()
 export class ResultService {
   constructor(
     private prisma: PrismaService,
-    private commonModuleService: CommonModuleService,
+    private filesService: FilesService,
   ) {}
 
   async getByQuestId(questId: number): Promise<GetQuestResultSchema[]> {
@@ -40,9 +40,9 @@ export class ResultService {
     }
 
     if (foundResult.id_image) {
-      result.image = await this.commonModuleService.getFileStatsById(
-        foundResult.id_image,
-      )
+      result.image = await this.filesService.getFileStats({
+        id: foundResult.id_image,
+      })
     }
 
     return result

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import * as moment from 'moment'
 import { PrismaService } from 'src/prisma/prisma.service'
 import {
@@ -29,6 +29,7 @@ export class WordleService {
     const attempts = await this.prisma.game_wordle_attempts.findMany({
       where: {
         user: { id: userId },
+        department: { id: departmentId },
         day: {
           gte: day.toDate(),
           lte: day.add(1, 'day').toDate(),
@@ -64,7 +65,11 @@ export class WordleService {
     const attemptResult = await this.checkAttempt(todayWord, attempt)
 
     await this.prisma.game_wordle_attempts.create({
-      data: { user: { connect: { id: userId } }, word: attempt },
+      data: {
+        word: attempt,
+        user: { connect: { id: userId } },
+        department: { connect: { id: departmentId } },
+      },
     })
 
     if (
@@ -175,6 +180,14 @@ export class WordleService {
     departmentId,
     id,
   }: SaveWordleWordDto): Promise<GetWordleWordSchema> {
+    const isWordExist = await this.prisma.game_wordle_words.findFirst({
+      where: { word: upperCase(word), department_id: departmentId ?? -1 },
+    })
+
+    if (departmentId && isWordExist) {
+      throw new BadRequestException('Word already exists')
+    }
+
     const savedWord = await this.prisma.game_wordle_words.upsert({
       where: { id: id ?? -1 },
       create: { word, department: { connect: { id: departmentId ?? -1 } } },
