@@ -23,7 +23,7 @@ model answers {
   box_sorting    answers_box_sorting? @relation(fields: [id_box_sorting], references: [id])
   free           answers_free?        @relation(fields: [id_free], references: [id])
 
-  questions      quest_questions[]
+  questions quest_questions[]
 }
 
 model answers_single {
@@ -34,7 +34,7 @@ model answers_single {
   options         String[]
   images_ids      Json[]
 
-  answers         answers[]
+  answers answers[]
 }
 
 model answers_multiple {
@@ -104,22 +104,22 @@ model complete_quests {
 }
 
 model departments {
-  id                   Int                    @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  name                 String
+  name String
 
-  users                users[]
-  events               events[]
-  quests               quests[]
-  event_tags           event_tags[]
-  quest_tags           quest_tags[]
-  quest_groups         quest_groups[]
-  user_experience      user_experience[]
-  game_wordle_words          game_wordle_words[]
-  game_wordle_answers  game_wordle_answers[]
-  game_wordle_attempts game_wordle_attempts[]
-  game_crossword_words game_crossword_words[]
+  users                  users[]
+  events                 events[]
+  quests                 quests[]
+  event_tags             event_tags[]
+  quest_tags             quest_tags[]
+  quest_groups           quest_groups[]
+  user_experience        user_experience[]
+  game_wordle_words      game_wordle_words[]
+  game_wordle_answers    game_wordle_answers[]
+  game_wordle_attempts   game_wordle_attempts[]
+  game_crossword_words   game_crossword_words[]
   game_crossword_answers game_crossword_answers[]
 }
 
@@ -207,13 +207,13 @@ model game_crossword_words {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  question      String
-  word          String
+  question String
+  word     String
 
   department_id Int
   id_difficulty Int
-  department departments                 @relation(fields: [department_id], references: [id])
-  difficulty game_crossword_difficulties @relation(fields: [id_difficulty], references: [id])
+  department    departments                 @relation(fields: [department_id], references: [id])
+  difficulty    game_crossword_difficulties @relation(fields: [id_difficulty], references: [id])
 }
 
 model game_crossword_difficulties {
@@ -231,21 +231,21 @@ model game_crossword_answers {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  day           DateTime @default(now())
-  word          String
-  question      String
-  x             Int
-  y             Int
-  direction     String
+  day       DateTime @default(now())
+  word      String
+  question  String
+  x         Int
+  y         Int
+  direction String
 
   department_id Int
   difficulty_id Int
-  department departments                 @relation(fields: [department_id], references: [id])
-  difficulty game_crossword_difficulties @relation(fields: [difficulty_id], references: [id])
+  department    departments                 @relation(fields: [department_id], references: [id])
+  difficulty    game_crossword_difficulties @relation(fields: [difficulty_id], references: [id])
 }
 
 model game_wordle_words {
-  id            Int         @id @default(autoincrement())
+  id            Int    @id @default(autoincrement())
   word          String
   department_id Int
 
@@ -266,41 +266,41 @@ model game_wordle_answers {
 }
 
 model game_wordle_attempts {
-  id               Int         @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
   word          String
-  day           DateTime    @default(now())
+  day           DateTime @default(now())
   user_id       Int
   department_id Int
 
-  user       users    @relation(fields: [user_id], references: [id])
-  department    departments @relation(fields: [department_id], references: [id])
+  user       users       @relation(fields: [user_id], references: [id])
+  department departments @relation(fields: [department_id], references: [id])
 }
 
 model quests {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  name          String?
-  time          String?
-  description   String?
+  name        String?
+  time        String?
+  description String?
 
   id_executor   Int
   id_department Int
-  executor      users                  @relation(fields: [id_executor], references: [id])
-  department    departments            @relation(fields: [id_department], references: [id])
+  executor      users       @relation(fields: [id_executor], references: [id])
+  department    departments @relation(fields: [id_department], references: [id])
 
-  id_group      Int?
-  id_image      Int?
-  id_difficult  Int?
-  group         quest_groups?          @relation(fields: [id_group], references: [id])
-  image         shared_files?          @relation(fields: [id_image], references: [id])
-  difficult     quest_difficulties?    @relation(fields: [id_difficult], references: [id])
+  id_group     Int?
+  id_image     Int?
+  id_difficult Int?
+  group        quest_groups?       @relation(fields: [id_group], references: [id])
+  image        shared_files?       @relation(fields: [id_image], references: [id])
+  difficult    quest_difficulties? @relation(fields: [id_difficult], references: [id])
 
-  results       quest_results[]
-  tags          quest_tags_on_quests[]
-  questions     quest_questions[]
+  results   quest_results[]
+  tags      quest_tags_on_quests[]
+  questions quest_questions[]
 }
 
 model quest_difficulties {
@@ -364,17 +364,17 @@ model quest_tags_on_quests {
 }
 
 model quest_questions {
-  id         Int            @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  text      String?
-  type      String?
+  text String?
+  type String?
 
-  id_quest  Int
-  quest  quests         @relation(fields: [id_quest], references: [id], onDelete: Cascade)
+  id_quest Int
+  quest    quests @relation(fields: [id_quest], references: [id], onDelete: Cascade)
 
   id_answer Int?
-  answer answers?       @relation(fields: [id_answer], references: [id])
+  answer    answers?       @relation(fields: [id_answer], references: [id])
   images    shared_files[]
 }
 
@@ -420,9 +420,9 @@ model users {
   id_department    Int?
   token            String    @unique
   birth_date       DateTime?
-  first_name       String? @default("Новый")
+  first_name       String?   @default("Новый")
   id_position      Int?
-  last_name        String? @default("Пользователь")
+  last_name        String?   @default("Пользователь")
   patronymic       String?
   phone_number     String?
   telegram         String?   @unique
@@ -436,17 +436,17 @@ model users {
   position   user_positions? @relation(fields: [id_position], references: [id])
   level      user_levels     @relation(fields: [level_number], references: [level])
 
-  complete_quests          complete_quests[]
-  events_where_inspector   events[]
-  roles                    user_roles[]
-  events_where_executor    user_executors_on_events[]
-  events_where_participant user_participants_on_events[]
-  quests                   quests[]
-  comments                 comments[]
-  achievements             user_achievements[]
-  game_wordle_attempts     game_wordle_attempts[]
-  user_experience          user_experience[]
-  feedback_answers         feedback_answers[]
+  complete_quests             complete_quests[]
+  events_where_inspector      events[]
+  roles                       user_roles[]
+  events_where_executor       user_executors_on_events[]
+  events_where_participant    user_participants_on_events[]
+  quests                      quests[]
+  comments                    comments[]
+  achievements                user_achievements[]
+  game_wordle_attempts        game_wordle_attempts[]
+  user_experience             user_experience[]
+  feedback_answers            feedback_answers[]
   user_notifications_settings user_notifications_settings[]
 }
 

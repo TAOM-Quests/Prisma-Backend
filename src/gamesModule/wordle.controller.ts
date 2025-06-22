@@ -14,8 +14,7 @@ import {
   GetWordleWordSchema,
 } from './schema/wordle.schema'
 import { getWordleWordSchemaExample } from './schema/gamesModule.schema.example'
-import { SaveWordleWordBody, SaveWordleWordDto } from './dto/gamesModule.dto'
-
+import { SaveWordleWordBody } from './dto/wordle.dto'
 @ApiTags('wordle')
 @Controller('games/wordle')
 export class WordleController {
