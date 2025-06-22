@@ -41,7 +41,12 @@ export class GamingService {
     })
 
     if (departmentId) {
-      this.addExperienceByDepartment(userId, experience, departmentId)
+      this.addExperienceByDepartment(
+        userId,
+        experience,
+        departmentId,
+        experienceSource,
+      )
     }
 
     let userLevel = foundUser.level_number
@@ -144,14 +149,14 @@ export class GamingService {
     userId: number,
     experience: number,
     departmentId: number,
+    source: ExperienceSource,
   ) {
-    await this.prisma.user_experience.upsert({
-      where: {
-        user_id_department_id: { user_id: userId, department_id: departmentId },
-      },
-      create: { user_id: userId, department_id: departmentId, experience },
-      update: {
-        experience: { increment: experience },
+    await this.prisma.user_experience.create({
+      data: {
+        source,
+        experience,
+        user: { connect: { id: userId } },
+        department: { connect: { id: departmentId } },
       },
     })
   }

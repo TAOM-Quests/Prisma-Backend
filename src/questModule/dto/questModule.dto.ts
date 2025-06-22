@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
+import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
 import { CorrectAnswer } from 'src/models/questAnswer'
 import { QuestDifficult } from 'src/models/questDifficult'
 import { QuestTag } from 'src/models/questTag'
@@ -97,11 +98,13 @@ export class SaveQuestionDto {
   answer: SaveAnswerDto
   id?: number
   text?: string
+  images?: GetFileStatsSchema[]
 }
 
 export class SaveAnswerDto {
   id?: number
   options?: string[]
+  optionsImages?: (GetFileStatsSchema | null)[]
   correctAnswer?: CorrectAnswer
 }
 
@@ -132,8 +135,8 @@ export class SaveQuestionCompleteDto {
   id: number
   text: string
   type: string
+  images: GetFileStatsSchema[]
   answer: SaveAnswerCompleteDto
-  imageId?: number
 }
 
 export class SaveAnswerCompleteDto {
@@ -141,6 +144,7 @@ export class SaveAnswerCompleteDto {
   isCorrect: boolean
   userAnswer: CorrectAnswer
   options?: string[]
+  optionsImagesIds?: number[]
 }
 
 export class SaveResultCompleteDto {

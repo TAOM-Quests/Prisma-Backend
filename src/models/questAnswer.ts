@@ -1,6 +1,9 @@
+import { GetFileStatsSchema } from 'src/commonModule/files/schema/GetFileStatsSchema'
+
 export interface QuestAnswer {
   id: number
   options?: string[]
+  optionsImages?: GetFileStatsSchema[]
   correctAnswer?: CorrectAnswer
 }
 

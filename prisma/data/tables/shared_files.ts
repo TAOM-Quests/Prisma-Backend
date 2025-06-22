@@ -19,6 +19,7 @@ const SHARED_FILES: { id: number; name: string }[] = [
   { id: 14, name: 'Logo.png' },
   { id: 15, name: 'Taom_login.png' },
   { id: 16, name: 'Banner_event.png' },
+  { id: 17, name: 'System_noty.png' },
 ]
 
 export const sharedFiles = async (): Promise<void> => {
@@ -43,6 +44,13 @@ export const sharedFiles = async (): Promise<void> => {
       })
     }
 
-    await tx.$executeRaw`ALTER SEQUENCE shared_files_id_seq RESTART WITH 10001;`
+    const maxId = await tx.shared_files.aggregate({
+      _max: { id: true },
+    })
+    const nextId = maxId._max.id ? Math.max(maxId._max.id + 1, 10001) : 10001
+
+    await tx.$executeRawUnsafe(
+      `ALTER SEQUENCE shared_files_id_seq RESTART WITH ${nextId}`,
+    )
   })
 }

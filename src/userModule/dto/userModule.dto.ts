@@ -8,9 +8,9 @@ export class GetUsersQuery {
   offset: number
   id?: number
   email?: string
-  roleId?: number
   isAdmin?: boolean
   positionId?: number
+  rolesIds?: number[]
   isEmployee?: boolean
   departmentId?: number
 }
@@ -110,10 +110,10 @@ export class UpdateProfileDto {
   imageId: number
 
   @ApiProperty({
-    example: 1,
+    example: [1, 2],
     required: false,
   })
-  roleId: number
+  rolesIds: number[]
 
   @ApiProperty({
     example: 1,
@@ -126,4 +126,30 @@ export class UpdateProfileDto {
     required: false,
   })
   departmentId: number
+
+  @ApiProperty({
+    example: 'password',
+    required: false,
+  })
+  password: string
+}
+
+export class UpdateNotificationsSettingsDto {
+  @ApiProperty({
+    example: 1,
+    required: true,
+  })
+  typeId: number
+
+  @ApiProperty({
+    example: true,
+    required: false,
+  })
+  email?: boolean
+
+  @ApiProperty({
+    example: true,
+    required: false,
+  })
+  telegram?: boolean
 }

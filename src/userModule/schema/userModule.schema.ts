@@ -16,10 +16,12 @@ export class AuthUserSchema {
   token: string
   image: GetFileStatsSchema
   name?: string
-  roleId?: number
   isAdmin?: boolean
+  rolesIds?: number[]
   isEmployee?: boolean
   departmentId?: number
+  isInspector?: boolean
+  isGameMaster?: boolean
 }
 
 export class GetUserProfileSchema {
@@ -27,11 +29,11 @@ export class GetUserProfileSchema {
   email: string
   image: GetFileStatsSchema
   sex?: string
-  role?: UserRole
   birthDate?: Date
   lastName?: string
   telegram?: string
   firstName?: string
+  roles?: UserRole[]
   patronymic?: string
   phoneNumber?: string
   department?: Department
@@ -50,6 +52,7 @@ export class GetUserProfileSchema {
     image: GetFileStatsSchema
     isReceived?: boolean
   }[]
+  notificationsSettings: GetUserNotificationSettingsItemSchema[]
 }
 
 export class UpdateUserProfileSchema {
@@ -73,4 +76,11 @@ export class GetRolesSchema {
 export class GetPositionsSchema {
   id: number
   name: string
+}
+
+export class GetUserNotificationSettingsItemSchema {
+  name: string
+  email: boolean
+  typeId: number
+  telegram: boolean
 }

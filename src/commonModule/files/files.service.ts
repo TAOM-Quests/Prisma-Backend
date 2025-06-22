@@ -70,14 +70,14 @@ export class FilesService {
         original_name: originalName,
         size,
         extension,
-        path: file.path,
+        path: `/public/${file.filename}`,
       },
       update: {
         name: file.filename,
         original_name: originalName,
         size,
         extension,
-        path: file.path,
+        path: `/public/${file.filename}`,
       },
     })
 
