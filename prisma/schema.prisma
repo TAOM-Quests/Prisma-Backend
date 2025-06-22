@@ -107,11 +107,11 @@ model departments {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  name String
-  description          String
-  
-  id_image             Int
-  image                shared_files           @relation(fields: [id_image], references: [id])
+  name        String
+  description String
+
+  id_image Int
+  image    shared_files @relation(fields: [id_image], references: [id])
 
   users                  users[]
   events                 events[]
@@ -154,7 +154,6 @@ model events {
   event_tags         event_tags[]
   participants       user_participants_on_events[]
   inspector_comments comments[]
-
 }
 
 model event_statuses {
@@ -346,11 +345,11 @@ model quest_results {
   min_points  Int
   description String
 
-  id_quest    Int
-  quest quests        @relation(fields: [id_quest], references: [id], onDelete: Cascade)
+  id_quest Int
+  quest    quests @relation(fields: [id_quest], references: [id], onDelete: Cascade)
 
-  id_image    Int?
-  image shared_files? @relation(fields: [id_image], references: [id])
+  id_image Int?
+  image    shared_files? @relation(fields: [id_image], references: [id])
 }
 
 model quest_tags {
@@ -402,11 +401,11 @@ model shared_files {
   size          Int
   path          String
 
-  users              users[]
-  quests             quests[]
-  quest_results      quest_results[]
-  quest_questions    quest_questions[]
-  user_achievements  user_achievements[]
+  users             users[]
+  quests            quests[]
+  quest_results     quest_results[]
+  quest_questions   quest_questions[]
+  user_achievements user_achievements[]
 
   departments departments[]
 
@@ -428,31 +427,31 @@ model shared_files_on_events {
 }
 
 model users {
-  id                          Int                           @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  email                       String                        @unique
-  token                       String                        @unique
-  password                    String
-  experience                  Int                           @default(0)
+  email      String @unique
+  token      String @unique
+  password   String
+  experience Int    @default(0)
 
-  telegram                    String?                       @unique
-  last_name                   String?                       @default("Пользователь")
-  first_name                  String?                       @default("Новый")
-  birth_date                  DateTime?
-  patronymic                  String?
-  phone_number                String?
-  telegram_chat_id            Int?
+  telegram         String?   @unique
+  last_name        String?   @default("Пользователь")
+  first_name       String?   @default("Новый")
+  birth_date       DateTime?
+  patronymic       String?
+  phone_number     String?
+  telegram_chat_id Int?
 
-  level_number                Int                           @default(1)
-  id_image_file               Int                           @default(1)
-  level                       user_levels                   @relation(fields: [level_number], references: [level])
-  image                       shared_files                  @relation(fields: [id_image_file], references: [id])
+  level_number  Int          @default(1)
+  id_image_file Int          @default(1)
+  level         user_levels  @relation(fields: [level_number], references: [level])
+  image         shared_files @relation(fields: [id_image_file], references: [id])
 
-  id_position                 Int?
-  id_department               Int?
-  position                    user_positions?               @relation(fields: [id_position], references: [id])
-  department                  departments?                  @relation(fields: [id_department], references: [id])
+  id_position   Int?
+  id_department Int?
+  position      user_positions? @relation(fields: [id_position], references: [id])
+  department    departments?    @relation(fields: [id_department], references: [id])
 
   quests                      quests[]
   comments                    comments[]
