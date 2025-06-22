@@ -10,6 +10,7 @@ import {
 import { QuestModuleService } from './questModule.service'
 import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 import {
+  GetQuestCompleteSchema,
   GetQuestDifficultiesSchema,
   GetQuestGroupsSchema,
   GetQuestMinimizeSchema,
@@ -31,6 +32,7 @@ import {
   SaveQuestDto,
 } from './dto/questModule.dto'
 import { isArray } from 'class-validator'
+import { GetUserProfileSchema } from 'src/userModule/schema/userModule.schema'
 
 @ApiTags('questModule')
 @Controller('questModule')
@@ -82,10 +84,11 @@ export class QuestModuleController {
       groupsIds: groupsIds?.split(',').map((id) => +id) ?? [],
     }
 
+    if (completeByUserId) getQuery.completeByUserId = +completeByUserId
+
     return isCompleted
       ? this.questModuleService.getCompleteQuests({
           ...getQuery,
-          completeByUserId: +completeByUserId,
         })
       : this.questModuleService.getQuests(getQuery)
   }
@@ -116,8 +119,17 @@ export class QuestModuleController {
     example: getQuestSchemaExample,
   })
   @Get('/quests/complete/:id')
-  async getCompleteQuest(@Param('id') id: string): Promise<GetQuestSchema> {
+  async getCompleteQuest(
+    @Param('id') id: string,
+  ): Promise<GetQuestCompleteSchema> {
     return this.questModuleService.getCompleteQuest(+id)
+  }
+
+  @Get('/quests/:id/participants')
+  async getQuestParticipants(
+    @Param('id') id: string,
+  ): Promise<GetUserProfileSchema[]> {
+    return this.questModuleService.getParticipantsProfiles(+id)
   }
 
   @ApiResponse({

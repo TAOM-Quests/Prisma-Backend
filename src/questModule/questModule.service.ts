@@ -10,6 +10,7 @@ import {
 } from './dto/questModule.dto'
 import { Prisma } from '@prisma/client'
 import {
+  GetQuestCompleteSchema,
   GetQuestDifficultiesSchema,
   GetQuestGroupsSchema,
   GetQuestMinimizeSchema,
@@ -19,6 +20,8 @@ import {
 import { QuestService } from './quest.service'
 import { QuestionService } from './question.service'
 import { ResultService } from './result.service'
+import { GetUserProfileSchema } from 'src/userModule/schema/userModule.schema'
+import { UserModuleService } from 'src/userModule/userModule.service'
 
 @Injectable()
 export class QuestModuleService {
@@ -27,6 +30,7 @@ export class QuestModuleService {
     private questService: QuestService,
     private resultService: ResultService,
     private questionService: QuestionService,
+    private userModuleService: UserModuleService,
   ) {}
 
   async getQuests(
@@ -60,7 +64,7 @@ export class QuestModuleService {
 
   async getCompleteQuests(
     getQuestsQuery: GetCompleteQuestsMinimizeQuery,
-  ): Promise<GetQuestMinimizeSchema[]> {
+  ): Promise<GetQuestSchema[]> {
     const conditions: Prisma.Sql[] = []
 
     if (getQuestsQuery.completeByUserId) {
@@ -70,7 +74,7 @@ export class QuestModuleService {
     }
     if (getQuestsQuery.ids.length) {
       conditions.push(
-        Prisma.sql`(quest_data->>'id') = ANY (${Prisma.join(getQuestsQuery.ids)})`,
+        Prisma.sql`(quest_data->>'id') = ANY(ARRAY[${Prisma.join(getQuestsQuery.ids)}]::text[])`,
       )
     }
     if (getQuestsQuery.tagsIds.length)
@@ -95,6 +99,11 @@ export class QuestModuleService {
       conditions.length > 0
         ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
         : Prisma.empty
+
+    console.log('getQuestsQuery', getQuestsQuery)
+    console.log('conditions', conditions)
+    console.log('WHERE', whereClause)
+
     const foundQuests = await this.prisma.$queryRaw<{ id: number }[]>`
         SELECT id
         FROM complete_quests
@@ -116,8 +125,23 @@ export class QuestModuleService {
     return quest
   }
 
-  async getCompleteQuest(id: number): Promise<GetQuestSchema> {
+  async getCompleteQuest(id: number): Promise<GetQuestCompleteSchema> {
     return this.questService.getCompleteById(id)
+  }
+
+  async getParticipantsProfiles(questId): Promise<GetUserProfileSchema[]> {
+    const participants = await this.prisma.$queryRaw<{ id: number }[]>`
+        SELECT DISTINCT ON (users.id) users.id
+        FROM users
+        JOIN complete_quests ON users.id = complete_quests.id_user
+        WHERE (complete_quests.quest_data->>'id')::int = ${questId}
+      `
+
+    return Promise.all(
+      participants.map((participant) =>
+        this.userModuleService.getUserProfileById(participant.id),
+      ),
+    )
   }
 
   async createQuest(quest: SaveQuestDto): Promise<GetQuestSchema> {

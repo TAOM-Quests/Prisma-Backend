@@ -107,11 +107,11 @@ model departments {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  name String
-  description          String
-  
-  id_image             Int
-  image                shared_files           @relation(fields: [id_image], references: [id])
+  name        String
+  description String
+
+  id_image Int
+  image    shared_files @relation(fields: [id_image], references: [id])
 
   users                  users[]
   events                 events[]
@@ -149,11 +149,11 @@ model events {
   image      shared_files?  @relation(fields: [id_image_file], references: [id])
   inspector  users?         @relation(fields: [id_inspector], references: [id])
 
-  inspector_comments comments[]
   files              shared_files_on_events[]
   executors          user_executors_on_events[]
+  event_tags         event_tags[]
   participants       user_participants_on_events[]
-  tags               event_tags[]
+  inspector_comments comments[]
 }
 
 model event_statuses {
@@ -342,13 +342,14 @@ model quest_results {
   created_at DateTime @default(now())
 
   name        String
-  description String
   min_points  Int
-  id_image    Int?
-  id_quest    Int
+  description String
 
-  quest quests        @relation(fields: [id_quest], references: [id], onDelete: Cascade)
-  image shared_files? @relation(fields: [id_image], references: [id])
+  id_quest Int
+  quest    quests @relation(fields: [id_quest], references: [id], onDelete: Cascade)
+
+  id_image Int?
+  image    shared_files? @relation(fields: [id_image], references: [id])
 }
 
 model quest_tags {
@@ -400,15 +401,17 @@ model shared_files {
   size          Int
   path          String
 
-  users              users[]
-  events_where_image events[]
-  events_where_file  shared_files_on_events[]
-  quests             quests[]
-  quest_results      quest_results[]
-  user_achievements  user_achievements[]
-  quest_questions    quest_questions[]
+  users             users[]
+  quests            quests[]
+  quest_results     quest_results[]
+  quest_questions   quest_questions[]
+  user_achievements user_achievements[]
 
   departments departments[]
+
+  events events[]
+
+  shared_files_on_events shared_files_on_events[]
 }
 
 model shared_files_on_events {
@@ -424,31 +427,31 @@ model shared_files_on_events {
 }
 
 model users {
-  id                          Int                           @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
 
-  email                       String                        @unique
-  token                       String                        @unique
-  password                    String
-  experience                  Int                           @default(0)
+  email      String @unique
+  token      String @unique
+  password   String
+  experience Int    @default(0)
 
-  telegram                    String?                       @unique
-  last_name                   String?                       @default("Пользователь")
-  first_name                  String?                       @default("Новый")
-  birth_date                  DateTime?
-  patronymic                  String?
-  phone_number                String?
-  telegram_chat_id            Int?
+  telegram         String?   @unique
+  last_name        String?   @default("Пользователь")
+  first_name       String?   @default("Новый")
+  birth_date       DateTime?
+  patronymic       String?
+  phone_number     String?
+  telegram_chat_id Int?
 
-  level_number                Int                           @default(1)
-  id_image_file               Int                           @default(1)
-  level                       user_levels                   @relation(fields: [level_number], references: [level])
-  image                       shared_files                  @relation(fields: [id_image_file], references: [id])
+  level_number  Int          @default(1)
+  id_image_file Int          @default(1)
+  level         user_levels  @relation(fields: [level_number], references: [level])
+  image         shared_files @relation(fields: [id_image_file], references: [id])
 
-  id_position                 Int?
-  id_department               Int?
-  position                    user_positions?               @relation(fields: [id_position], references: [id])
-  department                  departments?                  @relation(fields: [id_department], references: [id])
+  id_position   Int?
+  id_department Int?
+  position      user_positions? @relation(fields: [id_position], references: [id])
+  department    departments?    @relation(fields: [id_department], references: [id])
 
   quests                      quests[]
   comments                    comments[]
@@ -470,8 +473,8 @@ model user_achievements {
   created_at DateTime @default(now())
 
   name        String
-  description String
   experience  Int
+  description String
 
   image_id Int
   image    shared_files @relation(fields: [image_id], references: [id])

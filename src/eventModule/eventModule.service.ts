@@ -119,7 +119,7 @@ export class EventModuleService {
     if (updateKeys.includes('filesIds')) {
       const oldFilesIds = (
         await this.prisma.shared_files.findMany({
-          where: { events_where_file: { some: { id_event: id } } },
+          where: { events: { some: { id } } },
         })
       ).map((file) => file.id)
       for (const fileId of [
@@ -160,7 +160,7 @@ export class EventModuleService {
 
     const filesIds = (
       await this.prisma.shared_files.findMany({
-        where: { events_where_file: { some: { id_event: id } } },
+        where: { events: { some: { id } } },
       })
     ).map((file) => file.id)
     for (let fileId of filesIds ?? []) {
@@ -374,7 +374,7 @@ export class EventModuleService {
 
   private async getFiles(event): Promise<GetFileStatsSchema[]> {
     const files = await this.prisma.shared_files.findMany({
-      where: { events_where_file: { some: { id_event: event.id } } },
+      where: { events: { some: { id: event.id } } },
     })
 
     return Promise.all(

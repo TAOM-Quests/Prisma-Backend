@@ -3,6 +3,7 @@ import { SaveQuestCompleteDto, SaveQuestDto } from './dto/questModule.dto'
 import { Prisma } from '@prisma/client'
 import { PrismaService } from 'src/prisma/prisma.service'
 import {
+  GetQuestCompleteSchema,
   GetQuestMinimizeSchema,
   GetQuestSchema,
 } from './schema/questModule.schema'
@@ -10,6 +11,7 @@ import { NotFoundError } from 'src/errors/notFound'
 import { difference } from 'lodash'
 import { GamingService } from 'src/userModule/gaming.service'
 import { FilesService } from 'src/commonModule/files/files.service'
+import { UserModuleService } from 'src/userModule/userModule.service'
 
 const EXPERIENCE_SOURCE = 'quests'
 
@@ -19,6 +21,7 @@ export class QuestService {
     private prisma: PrismaService,
     private filesService: FilesService,
     private gamingService: GamingService,
+    private usersService: UserModuleService,
   ) {}
 
   async getMinimizeById(id: number): Promise<GetQuestMinimizeSchema> {
@@ -30,11 +33,12 @@ export class QuestService {
 
     const completedCount = Number(
       (
-        await this.prisma.$queryRaw<{ count: bigint }[]>`
-          SELECT COUNT(*)
-          FROM complete_quests
-          WHERE (quest_data->>'id')::int = ${foundQuest.id}::int
-        `
+        await this.prisma.$queryRaw<{ count: number }[]>`
+        SELECT COUNT(*)
+        FROM users
+        JOIN complete_quests ON users.id = complete_quests.id_user
+        WHERE (complete_quests.quest_data->>'id')::int = ${id}
+      `
       )[0].count,
     )
     const quest: GetQuestMinimizeSchema = {
@@ -131,15 +135,22 @@ export class QuestService {
     return quest
   }
 
-  async getCompleteById(id: number): Promise<GetQuestSchema> {
+  async getCompleteById(id: number): Promise<GetQuestCompleteSchema> {
     const foundCompleteRow = await this.prisma.complete_quests.findUnique({
       where: { id },
     })
     const foundQuest =
       foundCompleteRow.quest_data as unknown as SaveQuestCompleteDto
+    const [user] = await this.usersService.getUsers({
+      id: foundCompleteRow.id_user,
+      limit: 1,
+      offset: 0,
+    })
 
-    const quest: GetQuestSchema = {
+    const quest: GetQuestCompleteSchema = {
       ...(await this.getMinimizeCompleteById(id)),
+      user,
+      date: foundCompleteRow.created_at,
       executor: foundQuest.executor,
       questions: foundQuest.questions,
       results: [
