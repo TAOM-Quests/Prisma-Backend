@@ -12,10 +12,9 @@ import { WordleService } from './wordle.service'
 import {
   GetWordleUserAttemptSchema,
   GetWordleWordSchema,
-} from './schema/gamesModule.schema'
+} from './schema/wordle.schema'
 import { getWordleWordSchemaExample } from './schema/gamesModule.schema.example'
-import { SaveWordleWordBody, SaveWordleWordDto } from './dto/gamesModule.dto'
-
+import { SaveWordleWordBody } from './dto/wordle.dto'
 @ApiTags('wordle')
 @Controller('games/wordle')
 export class WordleController {
@@ -55,9 +54,9 @@ export class WordleController {
     example: getWordleWordSchemaExample,
     status: 200,
   })
-  @Post('/words/:departmentId')
+  @Post('/words')
   async createWord(
-    @Param('departmentId') departmentId: string,
+    @Query('departmentId') departmentId: string,
     @Body() { word }: SaveWordleWordBody,
   ): Promise<GetWordleWordSchema> {
     return await this.wordleService.createWord(word, +departmentId)

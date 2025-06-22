@@ -1,9 +1,10 @@
 import * as moment from 'moment'
 import { wordleWarp } from './wordle/wordleWarp'
+import { crosswordWarp } from './crossword/crosswordWarp'
 
 // Обновляем игры каждый 24 часа
 const WARP_INTERVAL = 24 * 60 * 60 * 1000
-// Время обновления игры - 00:00
+// Время обновления игр - 00:00
 const WARP_HOUR = 0
 
 export const gamesWarp = () => {
@@ -26,4 +27,5 @@ export const gamesWarp = () => {
 
 const warp = () => {
   wordleWarp()
+  crosswordWarp()
 }
