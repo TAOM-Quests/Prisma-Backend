@@ -149,10 +149,12 @@ model events {
   image      shared_files?  @relation(fields: [id_image_file], references: [id])
   inspector  users?         @relation(fields: [id_inspector], references: [id])
 
-  inspector_comments comments[]
   files              shared_files_on_events[]
   executors          user_executors_on_events[]
+  event_tags         event_tags[]
   participants       user_participants_on_events[]
+  inspector_comments comments[]
+
 }
 
 model event_statuses {
@@ -343,11 +345,11 @@ model quest_results {
   name        String
   min_points  Int
   description String
-  min_points  Int
-  id_image    Int?
-  id_quest    Int
 
+  id_quest    Int
   quest quests        @relation(fields: [id_quest], references: [id], onDelete: Cascade)
+
+  id_image    Int?
   image shared_files? @relation(fields: [id_image], references: [id])
 }
 
@@ -405,9 +407,12 @@ model shared_files {
   quest_results      quest_results[]
   quest_questions    quest_questions[]
   user_achievements  user_achievements[]
-  quest_questions    quest_questions[]
 
   departments departments[]
+
+  events events[]
+
+  shared_files_on_events shared_files_on_events[]
 }
 
 model shared_files_on_events {
@@ -471,7 +476,6 @@ model user_achievements {
   name        String
   experience  Int
   description String
-  experience  Int
 
   image_id Int
   image    shared_files @relation(fields: [image_id], references: [id])
@@ -517,7 +521,6 @@ model user_levels {
 
   level      Int    @id @default(autoincrement())
   name       String
-  level      Int    @id @default(autoincrement())
   experience Int
 
   users users[]
