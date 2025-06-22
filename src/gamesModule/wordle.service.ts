@@ -4,14 +4,14 @@ import { PrismaService } from 'src/prisma/prisma.service'
 import {
   GetWordleUserAttemptSchema,
   GetWordleWordSchema,
-} from './schema/gamesModule.schema'
+} from './schema/wordle.schema'
 import { GamingService } from 'src/userModule/gaming.service'
 import { NotFoundError } from 'src/errors/notFound'
 import { upperCase } from 'lodash'
-import { SaveWordleWordDto } from './dto/gamesModule.dto'
+import { SaveWordleWordDto } from './dto/wordle.dto'
 
-const EXPERIENCE_SOURCE = 'games'
 const EXPERIENCE_CORRECT_ANSWER = 100
+const EXPERIENCE_SOURCE = 'games_wordle'
 
 @Injectable()
 export class WordleService {

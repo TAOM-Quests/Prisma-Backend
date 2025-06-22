@@ -6,10 +6,13 @@ import { QuestTag } from 'src/models/questTag'
 import { Employee } from 'src/models/users'
 
 export class GetQuestsMinimizeQuery {
+  name?: string
   ids?: number[]
   tagsIds?: number[]
+  groupsIds?: number[]
   executorsIds?: number[]
   departmentsIds?: number[]
+  difficultiesIds?: number[]
 }
 
 export class GetCompleteQuestsMinimizeQuery extends GetQuestsMinimizeQuery {
@@ -67,6 +70,8 @@ export class PostQuestDto {
 export class GetQuestGroupsQuery {
   @ApiProperty({ example: 1, required: false })
   departmentId?: number
+  offset?: number
+  limit?: number
 }
 
 export class GetQuestTagsQuery {

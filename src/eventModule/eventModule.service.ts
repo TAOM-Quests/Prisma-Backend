@@ -19,7 +19,6 @@ import { Prisma } from '@prisma/client'
 import { Executor, Inspector, Participant } from 'src/models/users'
 import { EventType } from 'src/models/eventType'
 import { EventStatus } from 'src/models/eventStatus'
-import { Department } from 'src/models/department'
 import { NotFoundError } from 'src/errors/notFound'
 import { difference } from 'lodash'
 import { EventTag } from 'src/models/eventTag'
@@ -30,6 +29,8 @@ import { CommentsService } from 'src/commonModule/comments/comments.service'
 import { GetCommentsSchema } from 'src/commonModule/comments/schema/GetCommentsSchema'
 import { GetUserProfileSchema } from 'src/userModule/schema/userModule.schema'
 import { UserModuleService } from 'src/userModule/userModule.service'
+import { GetDepartmentsSchema } from 'src/commonModule/departments/schema/GetDepartmentsSchema'
+import { DepartmentsService } from 'src/commonModule/departments/department.service'
 
 @Injectable()
 export class EventModuleService {
@@ -39,6 +40,7 @@ export class EventModuleService {
     private gamingService: GamingService,
     private commentsService: CommentsService,
     private userModuleService: UserModuleService,
+    private departmentsService: DepartmentsService,
   ) {}
 
   async getEvents(
@@ -46,7 +48,7 @@ export class EventModuleService {
   ): Promise<GetEventMinimizeSchema[]> {
     const where: Prisma.eventsWhereInput = {}
 
-    if (getEventsParams.status) where.id_status = getEventsParams.status
+    if (getEventsParams.status) where.id_status = { in: getEventsParams.status }
     if (getEventsParams.name) where.name = { contains: getEventsParams.name }
     if (getEventsParams.department)
       where.id_department = getEventsParams.department
@@ -97,26 +99,34 @@ export class EventModuleService {
     id: number,
     event: UpdateEventDto,
   ): Promise<GetEventSchema> {
-    const oldExecutorsIds = (
-      await this.prisma.users.findMany({
-        where: { events_where_executor: { some: { id_event: id } } },
-      })
-    ).map((executor) => executor.id)
-    for (const executorId of [
-      ...difference(oldExecutorsIds ?? [], event.executorsIds ?? []),
-    ]) {
-      await this.removeExecutorFromEvent(id, executorId)
+    const updateKeys = Object.keys(event)
+
+    console.log(event)
+
+    if (updateKeys.includes('executorsIds')) {
+      const oldExecutorsIds = (
+        await this.prisma.users.findMany({
+          where: { events_where_executor: { some: { id_event: id } } },
+        })
+      ).map((executor) => executor.id)
+      for (const executorId of [
+        ...difference(oldExecutorsIds ?? [], event.executorsIds ?? []),
+      ]) {
+        await this.removeExecutorFromEvent(id, executorId)
+      }
     }
 
-    const oldFilesIds = (
-      await this.prisma.shared_files.findMany({
-        where: { events_where_file: { some: { id_event: id } } },
-      })
-    ).map((file) => file.id)
-    for (const fileId of [
-      ...difference(oldFilesIds ?? [], event.filesIds ?? []),
-    ]) {
-      await this.removeFileFromEvent(id, fileId)
+    if (updateKeys.includes('filesIds')) {
+      const oldFilesIds = (
+        await this.prisma.shared_files.findMany({
+          where: { events_where_file: { some: { id_event: id } } },
+        })
+      ).map((file) => file.id)
+      for (const fileId of [
+        ...difference(oldFilesIds ?? [], event.filesIds ?? []),
+      ]) {
+        await this.removeFileFromEvent(id, fileId)
+      }
     }
 
     const foundEvent = await this.prisma.events.findUnique({
@@ -348,15 +358,10 @@ export class EventModuleService {
     }
   }
 
-  private async getDepartment(event): Promise<Department> {
-    const foundDepartment = await this.prisma.departments.findUnique({
-      where: { id: event.id_department },
+  private async getDepartment(event): Promise<GetDepartmentsSchema> {
+    return await this.departmentsService.getDepartment({
+      id: event.id_department,
     })
-
-    return {
-      id: foundDepartment.id,
-      name: foundDepartment.name,
-    }
   }
 
   private async getImage(event): Promise<GetFileStatsSchema> {

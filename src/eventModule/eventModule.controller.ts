@@ -51,7 +51,7 @@ export class EventModuleController {
   @ApiQuery({ name: 'executor', type: 'number', required: false })
   @ApiQuery({ name: 'limit', type: 'number', required: false })
   @ApiQuery({ name: 'offset', type: 'number', required: false })
-  @ApiQuery({ name: 'status', type: 'number', required: false })
+  @ApiQuery({ name: 'status', type: 'number', isArray: true, required: false })
   @Get('/events')
   async getEvents(@Query() getEventsParams): Promise<GetEventMinimizeSchema[]> {
     const params: GetEventsMinimizeQuery = {
@@ -65,7 +65,7 @@ export class EventModuleController {
       executor: +getEventsParams.executor,
       participant: +getEventsParams.participant,
       type: +getEventsParams.type,
-      status: +getEventsParams.status,
+      status: getEventsParams.status?.split(',').map((id) => +id),
     }
 
     return this.eventModuleService.getEvents(params)

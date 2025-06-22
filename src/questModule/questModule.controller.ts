@@ -45,8 +45,15 @@ export class QuestModuleController {
     example: getQuestSchemaMinimizeExample,
   })
   @ApiQuery({ name: 'id', type: 'number', required: false })
+  @ApiQuery({ name: 'tag', type: 'number', required: false })
+  @ApiQuery({ name: 'name', type: 'string', required: false })
+  @ApiQuery({ name: 'group', type: 'number', required: false })
+  @ApiQuery({ name: 'executor', type: 'number', required: false })
+  @ApiQuery({ name: 'difficult', type: 'number', required: false })
+  @ApiQuery({ name: 'completeBy', type: 'number', required: false })
   @ApiQuery({ name: 'department', type: 'number', required: false })
   @ApiQuery({ name: 'tag', type: 'number', isArray: true, required: false })
+  @ApiQuery({ name: 'group', type: 'number', isArray: true, required: false })
   @ApiQuery({
     name: 'executor',
     type: 'number',
@@ -57,30 +64,24 @@ export class QuestModuleController {
   @ApiQuery({ name: 'completeBy', type: 'number', required: false })
   @Get('quests')
   async getQuests(
-    @Query('id') ids: string | string[],
-    @Query('department') departmentsIds: string | string[],
-    @Query('tag') tagsIds: string | string[],
-    @Query('executor') executorsIds: string | string[],
+    @Query('name') name: string,
+    @Query('id') ids: string,
+    @Query('tag') tagsIds: string,
     @Query('isCompleted') isCompleted: boolean,
+    @Query('group') groupsIds: string,
     @Query('completeBy') completeByUserId: string,
+    @Query('executor') executorsIds: string,
+    @Query('difficult') difficultIds: string,
+    @Query('department') departmentsIds: string,
   ): Promise<GetQuestMinimizeSchema[]> {
     const getQuery: GetCompleteQuestsMinimizeQuery = {
-      ids: ids ? (isArray(ids) ? ids.map((id) => +id) : [+ids]) : [],
-      departmentsIds: departmentsIds
-        ? isArray(departmentsIds)
-          ? departmentsIds.map((id) => +id)
-          : [+departmentsIds]
-        : [],
-      tagsIds: tagsIds
-        ? isArray(tagsIds)
-          ? tagsIds.map((id) => +id)
-          : [+tagsIds]
-        : [],
-      executorsIds: executorsIds
-        ? isArray(executorsIds)
-          ? executorsIds.map((id) => +id)
-          : [+executorsIds]
-        : [],
+      name,
+      ids: ids?.split(',').map((id) => +id) ?? [],
+      departmentsIds: departmentsIds?.split(',').map((id) => +id) ?? [],
+      tagsIds: tagsIds?.split(',').map((id) => +id) ?? [],
+      executorsIds: executorsIds?.split(',').map((id) => +id) ?? [],
+      difficultiesIds: difficultIds?.split(',').map((id) => +id) ?? [],
+      groupsIds: groupsIds?.split(',').map((id) => +id) ?? [],
     }
 
     if (completeByUserId) getQuery.completeByUserId = +completeByUserId
@@ -174,6 +175,8 @@ export class QuestModuleController {
     example: getQuestGroupsSchemaExample,
   })
   @ApiQuery({ name: 'departmentId', type: 'number', required: false })
+  @ApiQuery({ name: 'offset', type: 'number', required: false })
+  @ApiQuery({ name: 'limit', type: 'number', required: false })
   @Get('/groups')
   async getGroups(
     @Query('departmentId') departmentId: string,
@@ -183,6 +186,8 @@ export class QuestModuleController {
     if (departmentId) {
       getQuestGroups.departmentId = +departmentId
     }
+    if (getQuestGroups.offset) getQuestGroups.offset = +getQuestGroups.offset
+    if (getQuestGroups.limit) getQuestGroups.limit = +getQuestGroups.limit
 
     return this.questModuleService.getGroups(getQuestGroups)
   }
